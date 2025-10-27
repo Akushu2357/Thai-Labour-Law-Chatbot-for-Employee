@@ -32,7 +32,6 @@ CREATE TABLE acts (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,                    -- ชื่อพระราชบัญญัติ
     preface TEXT,                           -- คำเกริ่นก่อนเข้าสู่มาตรา
-    metadata JSONB,                         -- เช่น {"year":2560,"gazette":"ราชกิจจานุเบกษา"}
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -44,22 +43,59 @@ CREATE TABLE act_tags (
     PRIMARY KEY (act_id, tag_id)
 );
 
+-- ===========================
+-- ตาราง บรรพ (Book)
+-- ===========================
+CREATE TABLE act_books (
+    id SERIAL PRIMARY KEY,
+    act_id INT REFERENCES acts(id) ON DELETE CASCADE,
+    book_number INT,
+    book_title TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===========================
+-- ตาราง ลักษณะ (Group)
+-- ===========================
+CREATE TABLE act_groups (
+    id SERIAL PRIMARY KEY,
+    act_id INT REFERENCES acts(id) ON DELETE CASCADE,
+    book_id INT REFERENCES act_books(id) ON DELETE SET NULL,
+    group_number INT,
+    group_title TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===========================
+-- ตาราง หมวด (Super Section)
+-- ===========================
+CREATE TABLE act_super_sections (
+    id SERIAL PRIMARY KEY,
+    act_id INT REFERENCES acts(id) ON DELETE CASCADE,
+    group_id INT REFERENCES act_groups(id) ON DELETE SET NULL,
+    super_number INT,
+    super_title TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- ===================================
 -- ตาราง มาตราในพระราชบัญญัติ (Act Sections)
 -- ===================================
 CREATE TABLE act_sections (
     id SERIAL PRIMARY KEY,
     act_id INT REFERENCES acts(id) ON DELETE CASCADE,
-    ref_number INT,              -- อ้างอิงภายนอก [1] พรบ.คุ้มครองแรงงานฉบับที่ 7
-    section_number INT,            -- มาตรา
-    sub_section TEXT, -- มาตราย่อยเลขไทยโบราณหรือทับ (ถ้ามี) เช่น ทวิ, ตรี, /1, /2
+    book_id INT REFERENCES act_books(id) ON DELETE SET NULL,
+    group_id INT REFERENCES act_groups(id) ON DELETE SET NULL,
+    super_id INT REFERENCES act_super_sections(id) ON DELETE SET NULL,
+    section_number INT,                     -- มาตรา
+    sub_section TEXT,                       -- มาตราย่อยเลขไทยโบราณหรือทับ (ถ้ามี) เช่น ทวิ, ตรี, /1, /2
     paragraph_number INT,                   -- วรรค (ถ้ามี)
-    item_number INT,                        -- ลำดับย่อย (ถ้ามี)
+    item_order TEXT,                        -- ลำดับย่อย (ถ้ามี)
     text_original TEXT,                     -- ข้อความต้นฉบับ
     text_preprocessed TEXT,                 -- หลัง preprocessing
-    embedding VECTOR(1024),                  -- สำหรับ semantic search
-    cross_ref JSON,                               -- อ้างอิงถึงมาตราอื่นๆ เช่น {10: {"section_number":5, "paragraph_number":2, "item_number":1}}
-    external_citations JSON,                  -- อ้างอิงภายนอก เช่น {10: {"reference_number":1}}
+    embedding VECTOR(1024),                 -- สำหรับ semantic search
+    cross_references JSON,                  -- อ้างอิงถึงมาตราอื่นๆ เช่น {10: {"section_number":5, "paragraph_number":2, "item_order":1}}
+    external_citations JSON,                -- อ้างอิงภายนอก เช่น {10: {"citations":1}}
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -68,6 +104,15 @@ CREATE INDEX idx_act_sections_embedding
 ON act_sections 
 USING ivfflat (embedding vector_l2_ops)
 WITH (lists = 100);
+
+CREATE TABLE citations (                    -- อ้างอิงแก้ไขของพระราชบัญญัติ
+    act_id INT REFERENCES acts(id) ON DELETE CASCADE,
+    reference_number INT,                   -- หมายเลขอ้างอิง
+    citation_text TEXT,                     -- ข้อความอ้างอิง
+    imported_at TIMESTAMP DEFAULT NOW(),
+    PRIMARY KEY (act_id, reference_number)
+);
+
 
 -- ตารางเชื่อมระหว่าง act_sections และ tags
 CREATE TABLE act_section_tags (
@@ -84,9 +129,8 @@ CREATE TABLE judgments (
     title TEXT NOT NULL,                    -- ชื่อคดี
     case_number TEXT,                       -- หมายเลขคำพิพากษา
     summary TEXT,                           -- สรุปคดี
-    summary_embedding VECTOR(1024),          -- vector ของ summary
+    summary_embedding VECTOR(1024),         -- vector ของ summary
     detail TEXT,                            -- รายละเอียดเต็ม
-    metadata JSONB,                         -- เช่น {"court":"ศาลฎีกา","year":2565}
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
