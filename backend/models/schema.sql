@@ -50,13 +50,16 @@ CREATE TABLE act_tags (
 CREATE TABLE act_sections (
     id SERIAL PRIMARY KEY,
     act_id INT REFERENCES acts(id) ON DELETE CASCADE,
-    section_number INT NOT NULL,            -- มาตรา
+    ref_number INT,              -- อ้างอิงภายนอก [1] พรบ.คุ้มครองแรงงานฉบับที่ 7
+    section_number INT,            -- มาตรา
+    sub_section TEXT, -- มาตราย่อยเลขไทยโบราณหรือทับ (ถ้ามี) เช่น ทวิ, ตรี, /1, /2
     paragraph_number INT,                   -- วรรค (ถ้ามี)
     item_number INT,                        -- ลำดับย่อย (ถ้ามี)
     text_original TEXT,                     -- ข้อความต้นฉบับ
     text_preprocessed TEXT,                 -- หลัง preprocessing
     embedding VECTOR(1024),                  -- สำหรับ semantic search
-    ref JSON,                               -- อ้างอิงถึงมาตราอื่นๆ เช่น {10: {"section_number":5, "paragraph_number":2, "item_number":1}}
+    cross_ref JSON,                               -- อ้างอิงถึงมาตราอื่นๆ เช่น {10: {"section_number":5, "paragraph_number":2, "item_number":1}}
+    external_citations JSON,                  -- อ้างอิงภายนอก เช่น {10: {"reference_number":1}}
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

@@ -18,10 +18,10 @@ supabase: Client = create_client(url, key)
 print("Supabase client created.")
 
 
-model = BGEM3FlagModel('BAAI/bge-m3', # model embeddig size 768
+model = BGEM3FlagModel('BAAI/bge-m3', # model embeddig size 1024
                        use_fp16=True) # Setting use_fp16 to True speeds up computation with a slight performance degradation
 
-for file in glob.glob("backend/models/preprocess*.txt"):
+for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
     print(file)
     with open(file, "r", encoding="utf-8", errors="ignore") as f:
         act = f.read()
@@ -58,9 +58,12 @@ for file in glob.glob("backend/models/preprocess*.txt"):
         print(f"Inserting {key}...")
         section_number = key[1:key.find(",", 1)]
         paragraph_number = key[key.find("P")+1:key.find(",", key.find("P"))] if ",P" in key else None
-        item_number = key[key.find("N")+1:key.find(",", key.find("N"))] if key.find(",N", key.find(",P"), key.find(",R")) != -1 else None
-        if ",R:{" in key: # R:{17:"S16,P5,N1",25:"S16,P5,N4"}
-            ref_str = key[key.find("R:{")+3:-1] 
+        item_number = key[key.find("N")+1:key.find(",", key.find("N"))] if key.find(",N", key.find(",P"), key.find(",I")) != -1 else None
+        ref_number = key[key.find(",R")+2:] if ",R" in key else None
+        text_preprocessed = value
+        if ",I:{" in key: # I:{17:"S16,P5,N1",25:"S16,P5,N4"}
+            index_split = key.find("I:{")
+            ref_str = key[index_split+3:key.find("}", index_split)]
             # Split on commas that are not inside quotes, e.g.:
             # 17:"S16,P5,N1",25:"S16,P5,N4" -> ['17:"S16,P5,N1"','25:"S16,P5,N4"']
             ref_parts = []
@@ -83,36 +86,67 @@ for file in glob.glob("backend/models/preprocess*.txt"):
                     escape = False
             if current:
                 ref_parts.append(current.strip())
-            ref = {}
-            text_embedding = value
+            cross_ref = {}
             for part in reversed(ref_parts):
                 idx, ref_key = part.split(":")
                 ref_section_number = ref_key[2:ref_key.find(",", 1)]
                 ref_paragraph_number = ref_key[ref_key.find("P")+1:ref_key.find(",", ref_key.find("P"))] if ",P" in ref_key else None
                 ref_item_number = ref_key[ref_key.find("N")+1:-1] if ",N" in ref_key else None
-                ref[int(idx)] = {
+                if ref_paragraph_number == '0':
+                    cross_ref = {}
+                    continue
+                cross_ref[int(idx)] = {
                     "section_number": int(ref_section_number),
                     "paragraph_number": int(ref_paragraph_number) if ref_paragraph_number else None,
                     "item_number": int(ref_item_number) if ref_item_number else None
                 }
                 print("act_dict:", act_dict)
-                text_embedding = text_embedding.replace(text_embedding[int(idx):text_embedding.find(")", int(idx))+1], "\"" + act_dict[ref_key[1:-1]] + "\"")
-            print("Text for embedding:", text_embedding)
-        else:
-            continue
+                text_preprocessed = text_preprocessed.replace(text_preprocessed[int(idx):text_preprocessed.find(")", int(idx))+1], "\"" + act_dict[ref_key[1:-1]] + "\"")
+            print("Text for embedding:", text_preprocessed)
+        if ",X:{" in key: # X:{34:"R12", 78:"R15"}
+            index_split = key.find("X:{")
+            ref_str = key[index_split+3:key.find("}", index_split)]
+            ref_parts = []
+            current = ""
+            in_quotes = False
+            escape = False
+            for ch in ref_str:
+                if ch == '"' and not escape:
+                    in_quotes = not in_quotes
+                    current += ch
+                elif ch == ',' and not in_quotes:
+                    ref_parts.append(current.strip())
+                    current = ""
+                else:
+                    current += ch
+                if ch == "\\" and not escape:
+                    escape = True
+                else:
+                    escape = False
+            if current:
+                ref_parts.append(current.strip())
+            external_citations = {}
+            for part in ref_parts:
+                idx, ref_key = part.split(":")
+                refnum = int(ref_key[2:-1])
+                external_citations[int(idx)] = {
+                    "reference_number": refnum
+                }
         try:
             response_act_section = (
                 supabase.table("act_sections")
                 .insert([
                     {
                         "act_id": response_act.data[0]['id'],
-                        "section_number": int(section_number),
+                        "ref_number": int(ref_number) if ref_number else None,
+                        "section_number": int(section_number) if int(section_number) > 0 else None,
                         "paragraph_number": int(paragraph_number) if paragraph_number else None,
                         "item_number": int(item_number) if item_number else None,
                         "text_original": value,
-                        "text_preprocessed": value,
-                        "ref": ref if ",R:{" in key else {},
-                        "embedding": model.encode(text_embedding, batch_size=1)['dense_vecs'].tolist()
+                        "text_preprocessed": text_preprocessed,
+                        "cross_ref": cross_ref if ",I:{" in key else {},
+                        "external_citations": external_citations if ",X:{" in key else {},
+                        "embedding": model.encode(text_preprocessed, batch_size=1)['dense_vecs'].tolist()
                     },
                 ])
                 .execute()

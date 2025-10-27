@@ -4,10 +4,11 @@ Library    Collections
 Library    OperatingSystem
 
 *** Variables ***
-@{URLS}    https://searchlaw.ocs.go.th/council-of-state/#/public/doc/eFhxaEtwRW1DWWlkZkowUlluTHUzQT09    https://searchlaw.ocs.go.th/council-of-state/#/public/doc/OFl5b0Q5Q3cybnFmL1NTYlRqbHZaUT09
+@{URLS}    https://searchlaw.ocs.go.th/council-of-state/#/public/doc/WGl0RzNRbzlyUzNZT2Vxd0U4NUtadz09    https://searchlaw.ocs.go.th/council-of-state/#/public/doc/VWxmNWlNYmk3QVVCek4xanliSThFZz09    https://searchlaw.ocs.go.th/council-of-state/#/public/doc/SWxpV2NWRzZCK29xZ3VvWTYxWGNhQT09    https://searchlaw.ocs.go.th/council-of-state/#/public/doc/alJWY29wVXFRUUo0WkF2MTEwSndpQT09
 
 *** Test Cases ***
 Extract Law Articles
+    ${TARGET}=   Evaluate    next(iter(__import__('glob').glob('**/backend/models/act', recursive=True)), '../backend/models/act')
     FOR    ${url}    IN    @{URLS}
         Open Browser    ${url}    Chrome
         Sleep    1s
@@ -24,9 +25,9 @@ Extract Law Articles
             FOR    ${p}    IN RANGE    1    ${paraphrases} + 1
                 ${text}=    Get Text    //div[@class="in-a4"]/div[${block}]/p[${p}]
                 Append To List    ${section}    ${text}
-                Append To File    act_${act_name}.txt    ${text}\n
+                Append To File    ${TARGET}/act_${act_name}.txt    ${text}\n
             END
-            Append To File    act_${act_name}.txt    ---------------------\n
+            Append To File    ${TARGET}/act_${act_name}.txt    ---------------------\n
             Log    Article: ${act_name}
             Log    Texts: ${section}
         END
