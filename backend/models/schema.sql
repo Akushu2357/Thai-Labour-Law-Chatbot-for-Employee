@@ -95,7 +95,7 @@ CREATE TABLE act_sections (
     text_preprocessed TEXT,                 -- หลัง preprocessing
     embedding VECTOR(1024),                 -- สำหรับ semantic search
     cross_references JSON,                  -- อ้างอิงถึงมาตราอื่นๆ เช่น {10: {"section_number":5, "paragraph_number":2, "item_order":1}}
-    external_citations JSON,                -- อ้างอิงภายนอก เช่น {10: {"citations":1}}
+    external_citations JSON,                -- อ้างอิงภายนอก เช่น {10: {"citation":1}}
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

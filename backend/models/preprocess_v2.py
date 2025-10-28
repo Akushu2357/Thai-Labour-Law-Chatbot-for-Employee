@@ -4,8 +4,13 @@ import glob
 thai_to_arabic = str.maketrans("๑๒๓๔๕๖๗๘๙๐","1234567890")
 thai_number_words = r"(หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ|สิบเอ็ด|สิบสอง)"
 ordinal_suffixes = r"(ทวิ|ตรี|จัตวา|เบญจ|ฉ|สัปต|อัฏฐ|นพ|ทศ)"
+thai_word_map = {
+                    "หนึ่ง": 1, "สอง": 2, "สาม": 3, "สี่": 4, "ห้า": 5,
+                    "หก": 6, "เจ็ด": 7, "แปด": 8, "เก้า": 9,
+                    "สิบ": 10, "สิบเอ็ด": 11, "สิบสอง": 12
+                }
 
-file_names = glob.glob("*/backend/models/act/act_*2533.txt")
+file_names = glob.glob("*/backend/models/act/act_*.txt")
 
 def clean_text(text):
     text = text.translate(thai_to_arabic)
@@ -32,7 +37,7 @@ def find_references_in_text(text, key):
 
     refs = {}
     for pat in patterns:
-        for m in re.finditer(pat, text):
+        for m in re.finditer(pat, text[1:]):
             pos = m.start()
             match = m.group(0).strip()
             # avoid duplicates at same position
@@ -40,19 +45,71 @@ def find_references_in_text(text, key):
                 # escape any double-quotes inside match
                 safe = match.replace('"', '\\"')
                 refs[pos] = safe
+                
+    def extract_reference_details(ref_text):
+        details = {}
+        details["original_text"] = ref_text
+        # check for section reference
+        m = re.match(r"มาตรา\s+(\d+)(?:/(\d+))?(?:\s*({}))?".format(ordinal_suffixes), ref_text)
+        if m:
+            details["section_number"] = int(m.group(1))
+            if m.group(2):
+                details["sub_section"] = m.group(2)
+            if m.group(3):
+                details["ordinal_suffix"] = m.group(3)
+            # check for วรรค
+            m_w = re.search(r"วรรค\s*(\d+|{})".format(thai_number_words), ref_text)
+            if m_w:
+                details["paragraph_number"] = m_w.group(1)
+            return details
+        # check for หมวด reference
+        m = re.match(r"หมวด\s+(\d+)", ref_text)
+        if m:
+            details["super_section"] = int(m.group(1))
+            return details
+        # check for parenthesized item reference
+        m = re.match(r"\((\d+)\)", ref_text)
+        if m:
+            details["item_order"] = int(m.group(1))
+            return details
+        # check for วรรค reference
+        m = re.match(r"วรรค\s*(\d+|{})".format(thai_number_words), ref_text)
+        if m:
+            val = m.group(1)
+            # convert any Thai digits to arabic digits, then handle number words
+            val = val.translate(thai_to_arabic)
+            if re.fullmatch(r'\d+', val):
+                details["paragraph_number"] = int(val)
+            else:
+                details["paragraph_number"] = thai_word_map.get(val, val)
+            return details
+        return None
 
     if refs:
-        items = ",".join(f'{pos}:"{refs[pos]}"' for pos in sorted(refs.keys()))
+        items = ""
+        for pos in sorted(refs.keys()):
+            ref_details = extract_reference_details(refs[pos])
+            items += f"{pos}:{ref_details},"
         key += f"\"references\":{{{items}}},"
     return key
 
 def find_citations_in_text(text, key):
-    m = re.match(r'\w+\[(\d+)\]', text) # Match citations in text like ข้อความ[1]
+    m = re.search(r'\[\d+\]', text[1:]) # Match citations in text like ข้อความ[1]
     if m:
-        citation = m.group(0)
-        key += "\"citation\":{" + f"{m.start()}:\"{citation}\"" + "},"
-    # remove citation from text
-    act[i] = re.sub(r'\[\d+\]', '', text)
+        key += "\"citations\":{"
+    else:
+        return key
+    while True:
+        if m:
+            citation = m.group(0)
+            key += f"{m.start()+1}:{{\"citation\":{citation[1:-1]}}},"
+            # remove citation from text
+            text = text[0] + re.sub(r'\[\d+\]', '', text[1:])
+        else:
+            key += "},"
+            break
+        m = re.search(r'\[\d+\]', text[1:]) # Match citations in text like ข้อความ[1]
+    act[i] = text
     return key
 
 def parse_book_key(text, key):
@@ -94,16 +151,34 @@ def parse_section_key(text, key):
     m = re.match(rf"มาตรา\s+([0-9]+)(?:/([0-9]+))?(?:\s*{ordinal_suffixes})?", text)
     section = m.group(1)
     sub_section = m.group(2) if m.group(2) else m.group(3) if m.group(3) else None
-    key += f"\"book\":{i_book},\"group\":{i_group},\"super_section\":{i_super},\"section\":{section}," + (f"\"sub_section\":\"{sub_section}\"" if sub_section else "")
+    key += f"\"book\":{i_book},\"group\":{i_group},\"super_section\":{i_super},\"section\":{section}," + (f"\"sub_section\":\"{sub_section}\"," if sub_section else "")
     current_part = f"\"book\":{i_book},\"group\":{i_group},\"super_section\":{i_super},\"section\":{section}," + (f"\"sub_section\":\"{sub_section}\"," if sub_section else "")
     return key
 
 def parse_item_key(text, key):
     global current_part
-    m = re.match(r'^\(\s*([ก-ฮ\d]+)\s*\)', text)
+    m = re.match(r'^\(\s*([ก-ฮ/\d]+)\s*\)', text)
     item = m.group(1)
-    key += current_part + f"\"item\":{item},"
+    key += current_part + f"\"item\":\"{item}\","
     return key
+
+def parse_citation_key(text, key):
+    m = re.match(r'^\[(\d+)\]', text)
+    if not m:
+        return key
+    citation = m.group(1)
+    key = f"{{\"citation\":{citation}"
+    return key
+
+def connect_paragraphs(key, i):
+    key += "};" + act[i] + r"\n"
+    while act[i+1] != "---------------------":
+        i+=1
+        act[i] = clean_text(act[i])
+        key += act[i] + r"\n"
+    results.append(key[:-2] + "\n")
+    i+=1
+    return key, i
 
 for file_name in file_names:
     print(f"Processing {file_name}...")
@@ -122,6 +197,7 @@ for file_name in file_names:
         else:
             act[i] = clean_text(act[i])
             key = "{"
+            # print(f"Processing line {i}: {act[i]}")
             if act[i].startswith("มาตรา"):
                 key = parse_section_key(act[i], key)
             elif act[i].startswith("("):
@@ -129,10 +205,22 @@ for file_name in file_names:
                 key = parse_item_key(act[i], key)
             elif act[i].startswith("หมวด"):
                 key = parse_super_section_key(act[i], key)
+                key, i = connect_paragraphs(key, i)
+                continue
             elif act[i].startswith("ลักษณะ"):
                 key = parse_group_key(act[i], key)
+                key, i = connect_paragraphs(key, i)
+                continue
             elif act[i].startswith("บรรพ"):
                 key = parse_book_key(act[i], key)
+                key, i = connect_paragraphs(key, i)
+                continue
+            elif act[i].startswith("["):
+                key = parse_citation_key(act[i], key)
+                key += "};"
+                results.append(key + act[i] + "\n")
+                i+=1
+                continue
             elif current_part is None:
                 # Other introductory lines
                 key = parse_intro_key(key)
