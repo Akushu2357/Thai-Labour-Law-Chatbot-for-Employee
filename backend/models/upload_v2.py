@@ -50,6 +50,36 @@ def get_sturctured_params(text):
                     # Raise a clearer error for debugging
                     raise ValueError(f"Failed to parse params: {param_str_clean}") from e
 
+def text_with_cross_references(text: str, self_params: dict, references: dict[int,dict]) -> str:
+    if not references:
+        return text
+    
+    for ref_num, ref_data in sorted(references.items(), key=lambda x: int(x[0]), reverse=True):
+        if ref_data.get('book'):
+            ref = f"{{\'book\': {ref_data['book']}}}"
+        elif ref_data.get('group'):
+            ref = f"\'group\': {ref_data['group']}}}"
+        elif ref_data.get('super_section'):
+            ref = f"\'super_section\': {ref_data['super_section']}}}"
+        else:
+            ref = f"\'section\': {ref_data['section_number']}" if ref_data.get('section_number') is not None else f"\'section\': {self_params.get('section')}"
+            ref += f", \'sub_section\': \'{ref_data['sub_section']}\'" if ref_data.get('sub_section') is not None else ''
+            ref += f", \'paragraph\': {ref_data.get('paragraph', 1)}"
+            ref += f", \'item\': \'{ref_data.get('item', '')}\'" if ref_data.get('item') is not None else ''
+        text_cross = next((k for k in act_dict.keys() if k.find(ref) != -1), None)
+        referenced_text = act_dict.get(text_cross) if text_cross else None
+        if not referenced_text:
+            print("*"*20)
+            print(f"\'section\': {ref_data['section_number']}," if ref_data.get('section_number') is not None else f"\'section\': {self_params.get('section')}")
+            print(f"Processing cross-references for text: {text} with references: {references}")
+            print(f"Self params: {self_params}")
+            print(f"Found cross-reference key: {text_cross} for ref: {ref}")
+            print(f"Referenced text: {referenced_text}")
+        if referenced_text:
+            text = text.replace(ref_data.get('original_text'), f"\"{referenced_text}\"").replace(r"\n", " ")
+    # print(f"Processed text: {text}")
+    return text
+
 for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
     print(file)
     with open(file, "r", encoding="utf-8", errors="ignore") as f:
@@ -94,9 +124,17 @@ for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
         params, text = line.split(";", 1)
         params_dict = get_sturctured_params(line)
         act_dict[str(params_dict)] = text
+    while i < len(act):
+        line = act[i]
+        params, text = line.split(";", 1)
+        params_dict = get_sturctured_params(line)
         print(f"Inserting {params_dict}...")
         try:
             if params_dict.get("paragraph"):
+                if params_dict.get("references"):
+                    text_processed = text_with_cross_references(text, params_dict, params_dict.get("references"))
+                else:
+                    text_processed = text
                 response_act_sections = supabase.table("act_sections").insert([
                     {
                         "act_id": response_act.data[0]['id'],
@@ -108,8 +146,8 @@ for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
                         "paragraph_number": params_dict.get("paragraph"),
                         "item_order": params_dict.get("item"),
                         "text_original": text,
-                        "text_preprocessed": text,
-                        "embedding": model.encode(text, batch_size=1)['dense_vecs'].tolist(),
+                        "text_processed": text_processed,
+                        "embedding": model.encode(text_processed, batch_size=1)['dense_vecs'].tolist(),
                         "cross_references": params_dict.get("references", {}),
                         "external_citations": params_dict.get("citation", {}),
                     },
@@ -144,15 +182,21 @@ for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
                 response_citation = supabase.table("citations").insert([
                     {
                         "act_id": response_act.data[0]['id'],
-                        "ref_number": params_dict.get("citation"),
-                        "text_original": text,
+                        "reference_number": params_dict.get("citation"),
+                        "citation_text": text,
                     },
                 ]).execute()
             else:
                 print(f"Unknown params: {params_dict}")
         except Exception as exception:
-            print("Exception:", exception)
+            print("Exception:", str(exception)[:200])  # print only first 200 chars
+            if "'code': 520," in str(exception):
+                print("Rate limit exceeded. Waiting for 3 minutes before retrying...")
+                i-=1  # retry this line
+                time.sleep(180)  # wait longer before retrying
             print("Text:", text)
             print("Params:", params_dict)
-            break
-    time.sleep(120)  # brief pause between files to avoid overwhelming the database
+        print()
+        i+=1
+    print(f"Finished uploading {file}. sleeping for 60 seconds...")
+    time.sleep(60)  # brief pause between files to avoid overwhelming the database

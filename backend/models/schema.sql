@@ -92,7 +92,7 @@ CREATE TABLE act_sections (
     paragraph_number INT,                   -- วรรค (ถ้ามี)
     item_order TEXT,                        -- ลำดับย่อย (ถ้ามี)
     text_original TEXT,                     -- ข้อความต้นฉบับ
-    text_preprocessed TEXT,                 -- หลัง preprocessing
+    text_processed TEXT,                    -- หลัง preprocessing + การแทนที่อ้างอิง
     embedding VECTOR(1024),                 -- สำหรับ semantic search
     cross_references JSON,                  -- อ้างอิงถึงมาตราอื่นๆ เช่น {10: {"section_number":5, "paragraph_number":2, "item_order":1}}
     external_citations JSON,                -- อ้างอิงภายนอก เช่น {10: {"citation":1}}
