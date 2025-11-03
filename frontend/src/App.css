@@ -1,38 +1,121 @@
-.App {
+.navbar-container {
+  background-color: #000000;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.menu-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100svh;
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #373737;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 10px;
+  align-items: center;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.close-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.menu-list {
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  gap: 30px;
+  text-align: center;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.menu-block-item {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-end;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.menu-item {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 20px;
+  display: grid;
+  grid-template-columns: 10fr 1fr;
+  border: 2px solid #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  width: 260px;
+}
+
+.menu-item p {
+  margin: 0;
+  text-align: center;
+  font-size: 18px;
+}
+
+.menu-item:hover {
+  background-color: #373737;
+}
+
+.menu-subitem svg {
+  position: relative;
+  top: 0px;
+  left: 0px;
+}
+
+.menu-subitem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: flex-end;
+}
+
+.menu-subitem {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+.menu-subitem svg {
+  position: absolute;
+  left: -40px;
+  top: -20px;
+}
+
+.menu-subitem p {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 18px;
+  right: 0px;
+  border: 2px solid #ffffff;
+  border-radius: 10px;
+  width: 230px;
+  max-height: 60px;
+  overflow: hidden;
 }
