@@ -1,0 +1,201 @@
+.navbar-container {
+  background-color: #000000;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.menu-btn span {
+  color: #ffffff;
+}
+
+.menu-panel {
+  position: fixed;
+  inset: 0; /* top/right/bottom/left */
+  width: 100%;
+  height: 100vh; /* use vh for broader compatibility */
+  background-color: #000000;
+  color: #ffffff;
+  /* subtle slide-in */
+  animation: slideIn 220ms ease-out forwards;
+}
+
+.menu-panel.closing {
+  animation: slideOut 220ms ease-in forwards;
+}
+
+.span.brand {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #373737;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* reset button visuals for menu items so they look like divs but are keyboard-focusable */
+button.menu-item,
+button.menu-btn,
+button.close-btn {
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 3px solid rgba(255,255,255,0.18);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.menu-list {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  text-align: center;
+  align-items: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-block-item {
+  display: flex;
+  flex-direction: column;
+  /* gap: 20px; */
+  align-items: flex-end;
+}
+
+.menu-item {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 20px;
+  display: grid;
+  grid-template-columns: 10fr 1fr;
+  border: 2px solid #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 260px;
+  align-items: center;
+  justify-items: center;
+  transition: background-color 160ms ease, transform 120ms ease;
+}
+
+.menu-item p {
+  margin: 0;
+  text-align: center;
+  font-size: 18px;
+}
+
+.menu-item:hover {
+  background-color: #373737;
+}
+
+button.menu-item:active {
+  transform: translateY(1px);
+}
+
+.menu-subitem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: flex-end;
+}
+
+.menu-subitem {
+  position: relative;
+  display: flex;
+  max-width: 230px;
+  max-height: 60px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+.menu-subitem svg {
+  position: relative;
+  top: -10px;
+}
+
+.menu-subitem p {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 18px;
+  margin: 0px;
+  right: 0px;
+  border: 2px solid #ffffff;
+  border-radius: 10px;
+  max-height: 60px;
+  max-width: 210px;
+  text-overflow: ellipsis;
+}
+
+/* Desktop vs Mobile responsive rules
+   - Default: mobile UI (navbar-container, menu-panel) shown, desktop hidden
+   - On wider screens (>=768px): hide mobile UI and show desktop navbar
+*/
+
+.desktop-navbar {
+  display: none; /* hidden by default (mobile first) */
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  background: #000000;
+  padding: 10px 16px;
+  color: #ffffff;
+  width: 20%;
+  max-width: 300px;
+  height: 80vh;
+  position: fixed;
+  top: 10vh;
+  left: 16px;
+  border-radius: 12px;
+}
+
+@media (min-width: 768px) {
+  /* hide mobile controls */
+  .navbar-container { display: none; }
+  .menu-panel { display: none; }
+
+  /* show desktop nav */
+  .desktop-navbar { display: block; }
+
+  /* optionally adjust desktop menu item visuals */
+  .desktop-menu-item p { margin: 0; font-size: 16px; }
+}
+
+/* slide-in animation used by .menu-panel */
+@keyframes slideIn {
+  from { transform: translateX(-8%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* slide-out animation used by .menu-panel */
+@keyframes slideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-8%); opacity: 0; }
+}
