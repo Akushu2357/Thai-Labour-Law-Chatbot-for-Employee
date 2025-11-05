@@ -54,13 +54,13 @@ function NavBar() {
 
   const subitemLineStyle = (
     <svg width="20" height="40" viewBox="0 0 20 40" fill="none" aria-hidden>
-      <line x1={0} y1={40} x2={20} y2={40} stroke="#d1d5db" strokeWidth={4}></line>
-      <line x1={0} y1={0} x2={0} y2={40} stroke="#d1d5db" strokeWidth={6}></line>
+      <line x1={0} y1={40} x2={20} y2={40} stroke="#909090" strokeWidth={4}></line>
+      <line x1={0} y1={0} x2={0} y2={40} stroke="#909090" strokeWidth={6}></line>
     </svg>
   );
 
   return (
-    <nav className="navbar">
+    <>
       {/* Mobile navbar */}
       <div className='navbar-container'>
         <button className='menu-btn' onClick={handleMenuClick} aria-label="Open menu">
@@ -196,7 +196,7 @@ function NavBar() {
             </div>
           </nav>
       </nav>
-    </nav>
+    </>
   );
 }
 
