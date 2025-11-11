@@ -10,7 +10,7 @@ thai_word_map = {
                     "สิบ": 10, "สิบเอ็ด": 11, "สิบสอง": 12
                 }
 
-file_names = glob.glob("*/backend/models/act/act_*.txt")
+file_names = glob.glob("../*/backend/database/input_process/act/act_*.txt")
 
 def clean_text(text):
     text = text.translate(thai_to_arabic)

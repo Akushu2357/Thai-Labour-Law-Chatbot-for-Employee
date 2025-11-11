@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import json
 import re
 import ast
+from openai import OpenAI
 
 # Load .env from project root (two levels up from backend/models/upload.py)
 env_path = Path(__file__).resolve().parents[2] / ".env"
@@ -23,6 +24,13 @@ print("Supabase client created.")
 
 model = BGEM3FlagModel('BAAI/bge-m3', # model embeddig size 1024
                        use_fp16=True) # Setting use_fp16 to True speeds up computation with a slight performance degradation
+
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    base_url="https://api.opentyphoon.ai/v1"
+)
+tags = supabase.table("tags").select("id, name").execute().data
+tags = {tag['name']: tag['id'] for tag in tags}
 
 def get_sturctured_params(text):
     param_str = text.split(";", 1)[0]
@@ -80,7 +88,7 @@ def text_with_cross_references(text: str, self_params: dict, references: dict[in
     # print(f"Processed text: {text}")
     return text
 
-for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
+for file in glob.glob("../*/backend/database/input_process/preprocess/preprocess_*.txt"):
     print(file)
     with open(file, "r", encoding="utf-8", errors="ignore") as f:
         act = f.read()
@@ -124,6 +132,7 @@ for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
         params, text = line.split(";", 1)
         params_dict = get_sturctured_params(line)
         act_dict[str(params_dict)] = text
+    act_tags = {}
     while i < len(act):
         line = act[i]
         params, text = line.split(";", 1)
@@ -152,6 +161,38 @@ for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
                         "external_citations": params_dict.get("citation", {}),
                     },
                 ]).execute()
+                prompt = f"""
+                วิเคราะห์ข้อความต่อไปนี้ว่าเกี่ยวข้องกับ tag ใดบ้างจากรายการด้านล่าง
+                ข้อความ: "{text_processed}"
+                tag ที่มี: {", ".join(tags)}
+
+                ตอบในรูปแบบ JSON เท่านั้น เช่น:
+                {{"relevant_tags": ["...", "..."]}}
+                """
+                messages = [
+                    {"role": "system", "content": "คุณเป็นโมเดลวิเคราะห์ข้อความภาษาไทย ที่เชี่ยวชาญด้านกฎหมายแรงงานไทย"},
+                    {"role": "user", "content": prompt}
+                ]
+
+                response_tags = client.chat.completions.create(
+                    model="typhoon-v2.1-12b-instruct",
+                    messages=messages,
+                    temperature=0,
+                    max_tokens=512
+                )
+                list_tags = response_tags.choices[0].message.content
+                relevant_tags = json.loads(list_tags[list_tags.index("{"):list_tags.index("}") + 1]).get("relevant_tags", [])
+                for tag_name in relevant_tags:
+                    tag_id = tags.get(tag_name)
+                    print(f"Tag name: {tag_name}, Tag ID: {tag_id}")
+                    if tag_id:
+                        act_tags[tag_name] = tag_id
+                        supabase.table("act_section_tags").insert([
+                            {
+                                "act_section_id": response_act_sections.data[0]['id'],
+                                "tag_id": tag_id
+                            },
+                        ]).execute()
             elif params_dict.get("super_section"):
                 response_act_super_sections = supabase.table("act_super_sections").insert([
                     {
@@ -196,7 +237,16 @@ for file in glob.glob("*/backend/models/preprocess/preprocess_*.txt"):
                 time.sleep(180)  # wait longer before retrying
             print("Text:", text)
             print("Params:", params_dict)
-        print()
         i+=1
+    print(f"Finished inserting sections for {file}. Now linking act tags...")
+    print(f"Act tags to link: {act_tags}")
+    time.sleep(45)
+    for tag_name, tag_id in act_tags.items():
+        supabase.table("act_tags").insert([
+            {
+                "act_id": response_act.data[0]['id'],
+                "tag_id": tag_id
+            },
+        ]).execute()
     print(f"Finished uploading {file}. sleeping for 60 seconds...")
     time.sleep(60)  # brief pause between files to avoid overwhelming the database

@@ -8,7 +8,7 @@ Library    OperatingSystem
 
 *** Test Cases ***
 Extract Law Articles
-    ${TARGET}=   Evaluate    next(iter(__import__('glob').glob('**/backend/models/act', recursive=True)), '../backend/models/act')
+    ${TARGET}=   Evaluate    next(iter(__import__('glob').glob('**/backend/database/input_process/act', recursive=True)), '../backend/database/input_process/act')
     FOR    ${url}    IN    @{URLS}
         Open Browser    ${url}    Chrome
         Sleep    1s
