@@ -1,37 +1,123 @@
 from fastapi import APIRouter, Depends
-from database.schema import ActSection
-from services.services_act_sections import get_section_by_id, get_sections_by_act_id, get_section_by_act_and_section_number, get_sections_by_act_and_keyword, get_sections_by_book_id, get_sections_by_group_id, get_sections_by_super_section_id, get_supabase_client
+# from database.schema import ActSection
+from services.services_act import *
 
-router = APIRouter(prefix="/sections", tags=["act_sections"])
-
-@router.get("/by/section_id/{section_id}", response_model=ActSection)
-def read_section(section_id: int):
-    section = get_section_by_id(section_id)
-    if section:
-        return section
-    return {"message": "Section not found"}
-
-@router.get("/by/section_id/{section_id}", response_model=ActSection)
-def read_section(section_id: int):
-    section = get_section_by_id(section_id)
-    if section:
-        return section
-    return {"message": "Section not found"}
+router = APIRouter(prefix="/acts", tags=["acts"])
 
 @router.get("/by/act_id/{act_id}")
-def read_sections_by_act_id(act_id: int):
-    sections = get_sections_by_act_id(act_id)
-    if sections:
-        return sections
-    return {"message": "No sections found for this act"}
+def read_act_by_id(act_id: int):
+    act = get_act_by_id(act_id)
+    if act:
+        return act
+    return {"message": "Act not found"}
 
-@router.get("/by/act_id/{act_id}/section_number/{section_number}")
-def read_section_by_act_and_section_number(act_id: int, section_number: str):
-    section = get_section_by_act_and_section_number(act_id, section_number)
-    if section:
-        return section
-    return {"message": "Section not found with the given act ID and section number"}
+@router.get("/")
+def read_all_acts():
+    acts = get_all_acts()
+    if acts:
+        return acts
+    return {"message": "No acts found"}
 
-@router.get("/test")
-def test_function():
-    return {"message": "Test function executed successfully."}
+@router.get("/by/act_name/{act_name}")
+def read_act_by_name(act_name: str):
+    act = get_act_by_name(act_name)
+    if act:
+        return act
+    return {"message": "Act not found with the given name"}
+
+@router.get("/search/{keyword}")
+def search_acts(keyword: str):
+    acts = search_acts_by_keyword(keyword)
+    if acts:
+        return acts
+    return {"message": "No acts found matching the keyword"}
+
+@router.get("/books/by/act_id/{act_id}")
+def read_act_books(act_id: int):
+    books = get_act_books(act_id)
+    if books:
+        return books
+    return {"message": "No books found for this act"}
+
+@router.get("/books/by/book_id/{book_id}")
+def read_act_book_by_id(book_id: int):
+    book = get_act_book_by_id(book_id)
+    if book:
+        return book
+    return {"message": "Book not found"}
+
+@router.get("/books/by/act_id/{act_id}/book_number/{book_number}")
+def read_act_book_by_act_and_book_number(act_id: int, book_number: str):
+    book = get_act_book_by_act_and_book_number(act_id, book_number)
+    if book:
+        return book
+    return {"message": "Book not found with the given act ID and book number"}
+
+@router.get("/books/search/{keyword}")
+def search_books(keyword: str):
+    books = search_books_by_keyword(keyword)
+    if books:
+        return books
+    return {"message": "No books found matching the keyword"}
+
+@router.get("/groups/by/book_id/{book_id}")
+def read_act_groups(book_id: int):
+    groups = get_act_groups(book_id)
+    if groups:
+        return groups
+    return {"message": "No groups found for this book"}
+
+@router.get("/groups/by/group_id/{group_id}")
+def read_act_group_by_id(group_id: int):
+    group = get_act_group_by_id(group_id)
+    if group:
+        return group
+    return {"message": "Group not found"}
+
+@router.get("/groups/by/act_id/{act_id}/group_number/{group_number}")
+def read_act_group_by_act_and_group_number(act_id: int, group_number: str):
+    group = get_act_group_by_act_and_group_number(act_id, group_number)
+    if group:
+        return group
+    return {"message": "Group not found with the given act ID and group number"}
+
+@router.get("/groups/search/{keyword}")
+def search_groups(keyword: str):
+    groups = search_groups_by_keyword(keyword)
+    if groups:
+        return groups
+    return {"message": "No groups found matching the keyword"}
+
+@router.get("/super_sections/by/act_id/{act_id}")
+def read_act_super_sections_by_act_id(act_id: int):
+    super_sections = get_act_super_sections_by_act_id(act_id)
+    if super_sections:
+        return super_sections
+    return {"message": "No super sections found for this act"}
+
+@router.get("/super_sections/by/group_id/{group_id}")
+def read_act_super_sections(group_id: int):
+    super_sections = get_act_super_sections_by_group_id(group_id)
+    if super_sections:
+        return super_sections
+    return {"message": "No super sections found for this group"}
+
+@router.get("/super_sections/by/super_section_id/{super_section_id}")
+def read_act_super_section_by_id(super_section_id: int):
+    super_section = get_act_super_section_by_id(super_section_id)
+    if super_section:
+        return super_section
+    return {"message": "Super section not found"}
+
+@router.get("/super_sections/by/act_id/{act_id}/super_section_number/{super_section_number}")
+def read_act_super_section_by_act_and_super_section_number(act_id: int, super_section_number: str):
+    super_section = get_act_super_section_by_act_and_super_section_number(act_id, super_section_number)
+    if super_section:
+        return super_section
+    return {"message": "Super section not found with the given act ID and super section number"}
+
+def search_act_super_sections(keyword: str):
+    super_sections = search_groups_by_keyword(keyword)
+    if super_sections:
+        return super_sections
+    return {"message": "No super sections found matching the keyword"}

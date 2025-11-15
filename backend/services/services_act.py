@@ -78,7 +78,13 @@ def search_groups_by_keyword(keyword: str):
         return groups
     return {"message": "No groups found matching the keyword"}
 
-def get_act_super_sections(group_id: int):
+def get_act_super_sections_by_act_id(act_id: int):
+    super_sections = get_supabase_client().table("act_super_sections").select("*").eq("act_id", act_id).execute()
+    if super_sections:
+        return super_sections
+    return {"message": "No super sections found for this act"}
+
+def get_act_super_sections_by_group_id(group_id: int):
     super_sections = get_supabase_client().table("act_super_sections").select("*").eq("group_id", group_id).execute()
     if super_sections:
         return super_sections
@@ -89,12 +95,6 @@ def get_act_super_section_by_id(super_section_id: int):
     if super_section:
         return super_section
     return {"message": "Super section not found"}
-
-def get_act_super_sections_by_group_id(group_id: int):
-    super_sections = get_supabase_client().table("act_super_sections").select("*").eq("group_id", group_id).execute()
-    if super_sections:
-        return super_sections
-    return {"message": "No super sections found for this group"}
 
 def get_act_super_section_by_act_and_super_section_number(act_id: int, super_section_number: str):
     super_section = get_supabase_client().table("act_super_sections").select("*").eq("act_id", act_id).eq("super_section_number", super_section_number).single().execute()
