@@ -7,8 +7,8 @@ import {
 } from "react-router-dom";
 import './index.css';
 import App from './App';
-import NavBar from './NavBar';
-import PageLibrary from './PageLibrary';
+import NavBar from './components/navBar';
+import PageLibrary from './pages/pageLibrary';
 // import reportWebVitals from './reportWebVitals';
 
 const Layout = () => {
