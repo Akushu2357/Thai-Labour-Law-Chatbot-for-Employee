@@ -18,30 +18,37 @@ def get_all_acts():
                 "tag_id"
             ).eq("act_id", acts[idx]["id"]).execute().data
             acts[idx]["tags"] = [at["tag_id"] for at in act_tags]
+            acts[idx]["key"] = "books"  # For frontend tree structure
         return acts
     return {"message": "No acts found"}
 
 def get_books_by_act(act_id: int):
     books = get_supabase_client().table("act_books").select(
-        "id, act_id, book_number, book_title"
+        "id, act_id, book_number, title:book_title"
     ).eq("act_id", act_id).execute().data
     if books:
+        for idx in range(len(books)):
+            books[idx]["key"] = "groups"  # For frontend tree structure
         return books
     return {"message": "No books found for the given act_id"}
 
 def get_groups_by_book(book_id: int):
     groups = get_supabase_client().table("act_groups").select(
-        "id, act_id, book_id, group_number, group_title"
+        "id, act_id, book_id, group_number, title:group_title"
     ).eq("book_id", book_id).execute().data
     if groups:
+        for idx in range(len(groups)):
+            groups[idx]["key"] = "super_sections"  # For frontend tree structure
         return groups
     return {"message": "No groups found for the given book_id"}
 
 def get_super_sections_by_group(group_id: int):
     super_sections = get_supabase_client().table("act_super_sections").select(
-        "id, act_id, group_id, super_number, super_title"
+        "id, act_id, group_id, super_number, title:super_title"
     ).eq("group_id", group_id).execute().data
     if super_sections:
+        for idx in range(len(super_sections)):
+            super_sections[idx]["key"] = "sections"  # For frontend tree structure
         return super_sections
     return {"message": "No super sections found for the given group_id"}
 
@@ -49,7 +56,7 @@ def get_sections_by_super_section(super_section_id: int):
     sections = get_supabase_client().table("act_sections").select(
         "id, act_id, book_id, group_id, super_id, \
         section_number, sub_section, paragraph_number, item_order, \
-        text_original, cross_references, external_citations"
+        title:text_original, cross_references, external_citations"
     ).eq("super_id", super_section_id).order("id").execute().data
     if sections:
         for idx in range(len(sections)):
@@ -57,5 +64,6 @@ def get_sections_by_super_section(super_section_id: int):
                 "tag_id"
             ).eq("act_section_id", sections[idx]["id"]).execute().data
             sections[idx]["citations"] = [c["tag_id"] for c in citations]
+            sections[idx]["key"] = f"section"  # For frontend tree structure
         return sections
     return {"message": "No sections found for the given super_section_id"}

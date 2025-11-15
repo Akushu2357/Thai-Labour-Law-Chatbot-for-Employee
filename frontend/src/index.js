@@ -9,6 +9,7 @@ import './index.css';
 import App from './App';
 import NavBar from './components/navBar';
 import PageLibrary from './pages/pageLibrary';
+import Acts from './components/acts';
 // import reportWebVitals from './reportWebVitals';
 
 const Layout = () => {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
         path: "/library",
         element: <PageLibrary />,
       },
+      {
+        path: "/act/:actId",
+        element: <Acts />,
+      }
     ],
   },
 ]);
