@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import httpService from '../services/httpService';
-import './PageLibrary.css';
+import './pageLibrary.css';
 
 function PageLibrary() {
     const [searchTerm, setSearchTerm] = useState("");
