@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import './navbar.css';
+import { useNavigate } from 'react-router-dom';
+import './NavBar.css';
 
 function NavBar() {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [indexFocus, setIndexFocus] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -45,6 +47,11 @@ function NavBar() {
     }
   };
 
+  const handleClick = (to) => {
+    navigate(to);
+    closeMenu();
+  }
+
   const handleKeyToggle = (index, e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -78,7 +85,7 @@ function NavBar() {
                 arrow_back
               </span>
             </button>
-            <span className="brand" aria-hidden>icon</span>
+            <span className="brand" aria-hidden onClick={() => handleClick('/')}>icon</span>
           </div>
 
           <nav className='menu-list' aria-label="Menu list">
@@ -94,7 +101,7 @@ function NavBar() {
             <div className='menu-block-item'>
               <button
                 className="menu-item"
-                onClick={() => handleFocusClick(1)}
+                onClick={() => handleClick('/library')}
                 onKeyDown={(e) => handleKeyToggle(1, e)}
                 aria-expanded={indexFocus === 1}
                 aria-controls="library-panel"
@@ -140,7 +147,7 @@ function NavBar() {
 
       {/* Desktop navbar */}
       <nav className="desktop-navbar" aria-label="Primary">
-        <span className="brand" aria-hidden>icon</span>
+        <span className="brand" aria-hidden onClick={() => handleClick('/')}>icon</span>
         <nav className='menu-list' aria-label="Menu list">
             <div className="menu-block-item">
               <button className="menu-item" onClick={() => { /* new conversation action placeholder */ }}>
@@ -154,7 +161,7 @@ function NavBar() {
             <div className='menu-block-item'>
               <button
                 className="menu-item"
-                onClick={() => handleFocusClick(1)}
+                onClick={() => handleClick('/library')}
                 onKeyDown={(e) => handleKeyToggle(1, e)}
                 aria-expanded={indexFocus === 1}
                 aria-controls="library-panel"

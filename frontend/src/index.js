@@ -1,20 +1,48 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+} from "react-router-dom";
 import './index.css';
 import App from './App';
-import NavBar from './navbar';
+import NavBar from './NavBar';
+import PageLibrary from './PageLibrary';
 // import reportWebVitals from './reportWebVitals';
+
+const Layout = () => {
+  return (
+    <>
+      <NavBar />
+      <main className="menu-content">
+        <Outlet />
+      </main>
+    </>
+  );
+}
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      {
+        path: "/",
+        element: <App />,
+      },
+      {
+        path: "/library",
+        element: <PageLibrary />,
+      },
+    ],
+  },
+]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
-const navbar = ReactDOM.createRoot(document.getElementById('navbar'));
-navbar.render(
-  <React.StrictMode>
-    <NavBar />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 

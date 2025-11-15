@@ -169,8 +169,8 @@ button.menu-item:active {
   background: #000000;
   padding: 10px 16px;
   color: #ffffff;
-  width: 20%;
-  max-width: 300px;
+  width: 18%;
+  max-width: 250px;
   height: 80vh;
   position: fixed;
   top: 48px;
@@ -191,7 +191,7 @@ button.menu-item:active {
 
   /* reserve left gutter for desktop nav so main content sits to the right */
   .menu-content {
-    margin-left: calc(20% + 96px + 48px); /* nav width + gap */
+    margin-left: min(calc(18% + 72px), 240px); /* nav width + gap */
   }
 }
 
