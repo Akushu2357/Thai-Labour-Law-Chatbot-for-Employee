@@ -1,4 +1,6 @@
+import os
 from fastapi import FastAPI
+import uvicorn
 from routers import routers_act, routers_help, routers_section
 
 # Main application: do not initialize external clients at import-time.
@@ -17,3 +19,7 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
