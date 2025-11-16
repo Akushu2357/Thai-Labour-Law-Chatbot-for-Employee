@@ -119,13 +119,13 @@ for file in glob.glob("../*/backend/database/input_process/preprocess/preprocess
         continue
     
     response_act_books = supabase.table("act_books").insert([
-        {"act_id": response_act.data[0]['id'], "book_number": 0, "book_title": "Default Book"}
+        {"act_id": response_act.data[0]['id'], "book_number": 0, "book_title": "บรรพเริ่มต้น"}
     ]).execute()
     response_act_groups = supabase.table("act_groups").insert([
-        {"act_id": response_act.data[0]['id'], "book_id": response_act_books.data[0]['id'], "group_number": 0, "group_title": "Default Group"}
+        {"act_id": response_act.data[0]['id'], "book_id": response_act_books.data[0]['id'], "group_number": 0, "group_title": "กลุ่มเริ่มต้น"}
     ]).execute()
     response_act_super_sections = supabase.table("act_super_sections").insert([
-        {"act_id": response_act.data[0]['id'], "group_id": response_act_groups.data[0]['id'], "super_number": 0, "super_title": "Default Super Section"}
+        {"act_id": response_act.data[0]['id'], "group_id": response_act_groups.data[0]['id'], "super_number": 0, "super_title": "หมวดเริ่มต้น"}
     ]).execute()
     act_dict = {}
     for line in act[i:]:

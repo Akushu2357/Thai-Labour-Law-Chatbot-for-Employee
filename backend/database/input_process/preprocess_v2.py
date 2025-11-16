@@ -18,98 +18,106 @@ def clean_text(text):
     return text
 
 def find_references_in_text(text, key):
-    # find various legal reference patterns and attach them as a "references" map
-    # - มาตรา 41, มาตรา 100/1, มาตรา 47 ทวิ, มาตรา 47 ทวิ วรรคสาม และ วรรคสี่
-    # - มาตรา 77 (2)
-    # - หมวด 7
-    # - (1), (2) etc.
-    
-    patterns = [
-        # full "มาตรา" patterns with optional /, ordinal suffix and optional วรรค + number/word, allow chained "และ/หรือ" parts
-        rf"มาตรา\s+\d+(?:/\d+)?(?:\s*{ordinal_suffixes})?(?:\s+วรรค\s*(?:\d+|{thai_number_words}))?(?:\s*(?:และ|หรือ)\s*(?:มาตรา\s*)?\d+(?:/\d+)?(?:\s*{ordinal_suffixes})?(?:\s+วรรค\s*(?:\d+|{thai_number_words}))?)*",
-        # simple "หมวด 7"
-        r"หมวด\s+\d+",
-        # parenthesized numbers like (1)
-        r"\(\d+\)",
-        # standalone วรรคสอง, วรรคสาม etc.
-        rf"วรรค\s*(?:\d+|{thai_number_words})"
-    ]
+    # detect references like:
+    # - มาตรา 41
+    # - มาตรา 100/1
+    # - มาตรา 47 ทวิ
+    # - วรรคสาม (or วรรค 3)
+    # - (2) or (ก)
+    text = text[1:]
+    ord_inner = ordinal_suffixes[1:-1] if ordinal_suffixes.startswith("(") and ordinal_suffixes.endswith(")") else ordinal_suffixes
+    thai_nums_inner = thai_number_words[1:-1] if thai_number_words.startswith("(") and thai_number_words.endswith(")") else thai_number_words
 
-    refs = {}
-    for pat in patterns:
-        for m in re.finditer(pat, text[1:]):
-            pos = m.start()
-            match = m.group(0).strip()
-            # avoid duplicates at same position
-            if pos not in refs:
-                # escape any double-quotes inside match
-                safe = match.replace('"', '\\"')
-                refs[pos] = safe
-                
-    def extract_reference_details(ref_text):
-        details = {}
-        details["original_text"] = ref_text
-        # check for section reference
-        m = re.match(r"มาตรา\s+(\d+)(?:/(\d+))?(?:\s*({}))?".format(ordinal_suffixes), ref_text)
-        if m:
-            details["section_number"] = int(m.group(1))
-            if m.group(2):
-                details["sub_section"] = m.group(2)
-            if m.group(3):
-                details["ordinal_suffix"] = m.group(3)
-            # check for วรรค
-            m_w = re.search(r"วรรค\s*(\d+|{})".format(thai_number_words), ref_text)
-            if m_w:
-                details["paragraph_number"] = m_w.group(1)
-            return details
-        # check for หมวด reference
-        m = re.match(r"หมวด\s+(\d+)", ref_text)
-        if m:
-            details["super_section"] = int(m.group(1))
-            return details
-        # check for parenthesized item reference
-        m = re.match(r"\((\d+)\)", ref_text)
-        if m:
-            details["item_order"] = int(m.group(1))
-            return details
-        # check for วรรค reference
-        m = re.match(r"วรรค\s*(\d+|{})".format(thai_number_words), ref_text)
-        if m:
-            val = m.group(1)
-            # convert any Thai digits to arabic digits, then handle number words
-            val = val.translate(thai_to_arabic)
-            if re.fullmatch(r'\d+', val):
-                details["paragraph_number"] = int(val)
-            else:
-                details["paragraph_number"] = thai_word_map.get(val, val)
-            return details
-        return None
+    patterns = []
+    # section with optional sub and optional ordinal suffix (capture suffix)
+    patterns.append(("section", re.compile(rf"มาตรา\s+([0-9]+)(?:/([0-9]+))?(?:\s*({ord_inner}))?")))
+    # paragraph: วรรค + thai-word or arabic number
+    patterns.append(("paragraph", re.compile(rf"วรรค\s*({thai_nums_inner}|\d+)", flags=re.IGNORECASE)))
+    # parenthesized reference like (2) or (ก)
+    patterns.append(("parenthesis", re.compile(r'\(\s*([0-9]+|[ก-ฮ])\s*\)')))
 
-    if refs:
-        items = ""
-        for pos in sorted(refs.keys()):
-            ref_details = extract_reference_details(refs[pos])
-            items += f"{pos}:{ref_details},"
-        key += f"\"references\":{{{items}}},"
+    finds = []
+    for typ, pat in patterns:
+        for m in pat.finditer(text):
+            # ignore a leading parenthesis that marks the start-of-line item (we don't want to treat that as an inline reference)
+            if typ == "parenthesis" and m.start() == 0:
+                continue
+            info = {"type": typ, "pos": m.start(), "match": m.group(0)}
+            if typ == "section":
+                sec = m.group(1)
+                sub = m.group(2)
+                suffix = m.group(3) if m.lastindex and m.lastindex >= 3 else None
+                ref = f"{sec}" + (f"/{sub}" if sub else "") + (f" {suffix}" if suffix else "")
+                info["ref"] = ref
+                info["section"] = int(sec)
+                if sub:
+                    info["sub_section"] = sub
+                if suffix:
+                    info["suffix"] = suffix
+            elif typ == "paragraph":
+                grp = m.group(1)
+                # convert thai word to number if possible
+                if grp.isdigit():
+                    num = int(grp)
+                else:
+                    num = thai_word_map.get(grp, None)
+                info["ref"] = str(num) if num is not None else grp
+                if num is not None:
+                    info["paragraph"] = num
+            else:  # parenthesis
+                val = m.group(1)
+                info["ref"] = val
+                info["item"] = val
+            finds.append(info)
+
+    if not finds:
+        return key
+
+    # sort by position and append to key
+    finds.sort(key=lambda x: x["pos"])
+    key += "\"references\":{"
+    last_section = None
+    for f in finds:
+        # remember the most recent section so following refs (e.g., วรรค) can inherit it
+        if f.get("type") == "section" and "section" in f:
+            last_section = f["section"]
+
+        pos = f["pos"]
+        entry = f'{{"original_text":"{f["match"]}"'
+        # include numeric fields when present
+        if "section" in f:
+            entry += f',"section_number":{f["section"]}'
+        elif last_section is not None and typ in ("paragraph", "parenthesis"):
+            # inherit previous section number for paragraphs/parenthesis if not specified
+            entry += f',"section_number":{last_section}'
+
+        if "sub_section" in f:
+            entry += f',"sub_section":"{f["sub_section"]}"'
+        if "suffix" in f:
+            entry += f',"ordinal_suffix":"{f["suffix"]}"'
+        if "paragraph" in f:
+            entry += f',"paragraph_number":{f["paragraph"]}'
+        if "item" in f:
+            entry += f',"item_order":"{f["item"]}"'
+        entry += "}"
+        key += f'{pos+1}:{entry},'
+    key += "},"
     return key
 
 def find_citations_in_text(text, key):
-    m = re.search(r'\[\d+\]', text[1:]) # Match citations in text like ข้อความ[1]
-    if m:
-        key += "\"citations\":{"
-    else:
+    # Find all citations like [1] and record their positions (do not skip start)
+    finds = list(re.finditer(r'\[(\d+)\]', text))
+    if not finds:
         return key
-    while True:
-        if m:
-            citation = m.group(0)
-            key += f"{m.start()+1}:{{\"citation\":{citation[1:-1]}}},"
-            # remove citation from text
-            text = text[0] + re.sub(r'\[\d+\]', '', text[1:])
-        else:
-            key += "},"
-            break
-        m = re.search(r'\[\d+\]', text[1:]) # Match citations in text like ข้อความ[1]
+    key += "\"citations\":{"
+    for f in finds:
+        citation_num = f.group(1)
+        pos = f.start()
+        key += f"{pos}:{{\"citation\":{citation_num}}},"
+    # remove all citation markers from the text
+    text = re.sub(r'\[\d+\]', '', text)
     act[i] = text
+    key += "},"
     return key
 
 def parse_book_key(text, key):
@@ -238,7 +246,7 @@ for file_name in file_names:
             paragraph_number += 1
             i+=1
 
-    fn = file_name.replace("act\\act_", "preprocess\\preprocess_")
+    fn = file_name.replace("act\\act_", "preprocessv2\\preprocess_")
     print(f"Writing results to {fn}...")
     with open(fn, "a", encoding="utf-8") as f:
         for line in results:
