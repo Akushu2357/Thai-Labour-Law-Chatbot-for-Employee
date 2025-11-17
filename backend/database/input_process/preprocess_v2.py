@@ -76,31 +76,85 @@ def find_references_in_text(text, key):
     # sort by position and append to key
     finds.sort(key=lambda x: x["pos"])
     key += "\"references\":{"
+    i = 0
     last_section = None
-    for f in finds:
-        # remember the most recent section so following refs (e.g., วรรค) can inherit it
-        if f.get("type") == "section" and "section" in f:
-            last_section = f["section"]
+    while i < len(finds):
+        f = finds[i]
+        # section handling: if followed by paragraph(s), merge first paragraph into section
+        if f["type"] == "section":
+            sec = f.get("section")
+            last_section = sec
+            # lookahead for paragraph immediately after
+            if i + 1 < len(finds) and finds[i+1]["type"] == "paragraph":
+                p = finds[i+1]
+                pos = f["pos"]
+                orig = f["match"] + " " + p["match"]
+                entry = '{"original_text":"' + orig.replace('"', '\\"') + '"'
+                entry += f',"section_number":{sec}'
+                if "sub_section" in f:
+                    entry += f',"sub_section":"{f["sub_section"]}"'
+                if "suffix" in f:
+                    entry += f',"ordinal_suffix":"{f["suffix"]}"'
+                if "paragraph" in p:
+                    entry += f',"paragraph_number":{p["paragraph"]}'
+                entry += '}'
+                key += f'{pos+1}:{entry},'
+                i += 2
+                # any additional consecutive paragraphs become separate entries inheriting section_number
+                while i < len(finds) and finds[i]["type"] == "paragraph":
+                    p2 = finds[i]
+                    pos2 = p2["pos"]
+                    orig2 = p2["match"]
+                    entry2 = '{"original_text":"' + orig2.replace('"', '\\"') + '"'
+                    entry2 += f',"section_number":{sec}'
+                    if "paragraph" in p2:
+                        entry2 += f',"paragraph_number":{p2["paragraph"]}'
+                    entry2 += '}'
+                    key += f'{pos2+1}:{entry2},'
+                    i += 1
+                continue
+            else:
+                # standalone section
+                pos = f["pos"]
+                entry = '{"original_text":"' + f["match"].replace('"', '\\"') + '"'
+                entry += f',"section_number":{sec}'
+                if "sub_section" in f:
+                    entry += f',"sub_section":"{f["sub_section"]}"'
+                if "suffix" in f:
+                    entry += f',"ordinal_suffix":"{f["suffix"]}"'
+                entry += '}'
+                key += f'{pos+1}:{entry},'
+                i += 1
+                continue
 
-        pos = f["pos"]
-        entry = f'{{"original_text":"{f["match"]}"'
-        # include numeric fields when present
-        if "section" in f:
-            entry += f',"section_number":{f["section"]}'
-        elif last_section is not None and typ in ("paragraph", "parenthesis"):
-            # inherit previous section number for paragraphs/parenthesis if not specified
-            entry += f',"section_number":{last_section}'
+        # paragraph without preceding section -> standalone paragraph
+        if f["type"] == "paragraph":
+            pos = f["pos"]
+            orig = f["match"]
+            entry = '{"original_text":"' + orig.replace('"', '\\"') + '"'
+            if "paragraph" in f:
+                entry += f',"paragraph_number":{f["paragraph"]}'
+            entry += '}'
+            key += f'{pos+1}:{entry},'
+            i += 1
+            continue
 
-        if "sub_section" in f:
-            entry += f',"sub_section":"{f["sub_section"]}"'
-        if "suffix" in f:
-            entry += f',"ordinal_suffix":"{f["suffix"]}"'
-        if "paragraph" in f:
-            entry += f',"paragraph_number":{f["paragraph"]}'
-        if "item" in f:
+        # parenthesis (item), create separate entry and inherit last_section if available
+        if f["type"] == "parenthesis":
+            pos = f["pos"]
+            orig = f["match"]
+            entry = '{"original_text":"' + orig.replace('"', '\\"') + '"'
             entry += f',"item_order":"{f["item"]}"'
-        entry += "}"
-        key += f'{pos+1}:{entry},'
+            if last_section is not None:
+                entry += f',"section_number":{last_section}'
+            entry += '}'
+            key += f'{pos+1}:{entry},'
+            i += 1
+            continue
+
+        # fallback
+        i += 1
+
     key += "},"
     return key
 

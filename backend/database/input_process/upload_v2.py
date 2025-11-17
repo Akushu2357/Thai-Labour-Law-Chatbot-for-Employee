@@ -88,7 +88,7 @@ def text_with_cross_references(text: str, self_params: dict, references: dict[in
     # print(f"Processed text: {text}")
     return text
 
-for file in glob.glob("../*/backend/database/input_process/preprocess/preprocess_*.txt"):
+for file in glob.glob("../*/backend/database/input_process/preprocessv2/preprocess_*.txt"):
     print(file)
     with open(file, "r", encoding="utf-8", errors="ignore") as f:
         act = f.read()
