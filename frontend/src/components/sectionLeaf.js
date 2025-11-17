@@ -26,7 +26,7 @@ function SectionLeaf({ section }) {
             const itemOrder = ref.item_order || '';
 
             if (start > cursor) {
-                segments.push({ type: 'text', text: title.substring(cursor, start+1) });
+                segments.push({ type: 'text', text: title.substring(cursor, start) });
             }
 
             segments.push({ type: 'link', text: refText, 
@@ -35,7 +35,7 @@ function SectionLeaf({ section }) {
                 paragraphNumber: paragraphNumber,
                 itemOrder: itemOrder,
             });
-            cursor = start + length + 1;
+            cursor = start + length;
         }
 
         if (cursor < title.length) {
