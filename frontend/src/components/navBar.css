@@ -1,19 +1,16 @@
 .navbar-container {
-  background-color: #000000;
+  background: rgba(255,255,255,0.9);
+  border-radius: 30px 30px 0px 0px;
   padding: 10px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(to right, #f17720, #ffa630, #ebebeb, #00a7e1, #0474ba);
+  border-image-slice: 1;
 }
 
 .menu-btn {
   background: none;
   border: none;
-  color: #ffffff;
-  font-size: 24px;
   cursor: pointer;
-}
-
-span.material-symbols-outlined {
-  color: #909090;
 }
 
 .menu-panel {
@@ -21,8 +18,7 @@ span.material-symbols-outlined {
   inset: 0; /* top/right/bottom/left */
   width: 100%;
   height: 100vh; /* use vh for broader compatibility */
-  background-color: #000000;
-  color: #ffffff;
+  background: rgba(255,255,255,0.9);
   /* subtle slide-in */
   animation: slideIn 220ms ease-out forwards;
 }
@@ -32,9 +28,11 @@ span.material-symbols-outlined {
 }
 
 .span.brand {
-  font-size: 20px;
-  font-weight: bold;
   text-align: center;
+}
+
+span.material-symbols-outlined {
+  color: #f19e39;
 }
 
 .menu-header {
@@ -53,7 +51,6 @@ span.material-symbols-outlined {
 .close-btn {
   background: none;
   border: none;
-  color: #ffffff;
   font-size: 24px;
   cursor: pointer;
 }
@@ -74,7 +71,6 @@ button:focus-visible {
 }
 
 .menu-list {
-  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 30px;
@@ -92,24 +88,25 @@ button:focus-visible {
 }
 
 .menu-item {
-  color: #ffffff;
   text-decoration: none;
   font-size: 20px;
   display: grid;
   grid-template-columns: 10fr 1fr;
   border: 2px solid #909090;
-  padding: 10px;
   border-radius: 10px;
-  max-width: 260px;
+  width: 100%;
   align-items: center;
   justify-items: center;
   transition: background-color 160ms ease, transform 120ms ease;
 }
 
-.menu-item p {
-  margin: 0;
+.menu-item h3 {
   text-align: center;
-  font-size: 18px;
+  font-weight: normal;
+}
+
+.menu-item p {
+  text-align: center;
 }
 
 .menu-item:hover {
@@ -144,9 +141,7 @@ button.menu-item:active {
 }
 
 .menu-subitem p {
-  color: #ffffff;
   text-decoration: none;
-  font-size: 18px;
   margin: 0px;
   right: 0px;
   border: 2px solid #909090;
@@ -166,19 +161,18 @@ button.menu-item:active {
   justify-content: space-between;
   align-items: center;
   text-align: center;
-  background: #000000;
+  background: rgba(255,255,255,0.9);
   padding: 10px 16px;
-  color: #ffffff;
+  color: #4d4c4c;
   width: 18%;
   max-width: 250px;
-  height: 80vh;
+  height: stretch;
   position: fixed;
-  top: 48px;
-  left: 48px;
-  border-radius: 12px;
+  margin: 0px 0px 30px 0px;
+  border-radius: 30px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 820px) {
   /* hide mobile controls */
   .navbar-container { display: none; }
   .menu-panel { display: none; }
@@ -186,12 +180,11 @@ button.menu-item:active {
   /* show desktop nav */
   .desktop-navbar { display: block; }
 
-  /* optionally adjust desktop menu item visuals */
-  .desktop-menu-item p { margin: 0; font-size: 16px; }
-
   /* reserve left gutter for desktop nav so main content sits to the right */
-  .menu-content {
-    margin-left: min(calc(18% + 72px), 240px); /* nav width + gap */
+  .landing-content {
+    margin-left: calc(18% + 60px); /* nav width + gap */
+    border-radius: 30px;
+    height: calc(100vh - 60px);
   }
 }
 

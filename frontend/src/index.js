@@ -16,7 +16,7 @@ const Layout = () => {
   return (
     <>
       <NavBar />
-      <main className="menu-content">
+      <main className="landing-content">
         <Outlet />
       </main>
     </>

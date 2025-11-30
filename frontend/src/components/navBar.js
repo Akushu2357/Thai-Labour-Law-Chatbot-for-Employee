@@ -147,11 +147,11 @@ function NavBar() {
 
       {/* Desktop navbar */}
       <nav className="desktop-navbar" aria-label="Primary">
-        <span className="brand" aria-hidden onClick={() => handleClick('/')}>icon</span>
+        <h1 className="brand" aria-hidden onClick={() => handleClick('/')}>รายการ</h1>
         <nav className='menu-list' aria-label="Menu list">
             <div className="menu-block-item">
               <button className="menu-item" onClick={() => { /* new conversation action placeholder */ }}>
-                <p>เริ่มการสนทนาใหม่</p>
+                <h3>เริ่มการสนทนาใหม่</h3>
                 <span className="material-symbols-outlined" aria-hidden>
                   add_circle
                 </span>
@@ -166,7 +166,7 @@ function NavBar() {
                 aria-expanded={indexFocus === 1}
                 aria-controls="library-panel"
               >
-                <p>ห้องสมุดกฎหมาย</p>
+                <h3>ห้องสมุดกฎหมาย</h3>
                 <span className="material-symbols-outlined" aria-hidden>
                   {indexFocus === 1 ? 'arrow_circle_down' : 'arrow_circle_right'}
                 </span>
@@ -182,7 +182,7 @@ function NavBar() {
                 aria-controls="history-panel"
                 aria-disabled="true"
               >
-                <p>ประวัติการสนทนา</p>
+                <h3>ประวัติการสนทนา</h3>
                 <span className="material-symbols-outlined" aria-hidden>
                   {indexFocus === 2 ? 'arrow_circle_down' : 'arrow_circle_right'}
                 </span>
