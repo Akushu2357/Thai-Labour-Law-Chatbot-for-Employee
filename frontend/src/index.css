@@ -18,33 +18,47 @@ html {
 
 body {
   margin: 30px;
-  position: absolute;
+  position: relative; /* allow normal document flow and scrolling */
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
+  overflow: auto; /* allow scrolling if content exceeds viewport */
 }
 
 #root {
   height: 100%;
 }
 
-h1 { margin: 0; font-size: 34px;}
-h2 { margin: 0; font-size: 24px;}
-h3 { margin: 0; font-size: 18px;}
-p { margin: 0; font-size: 16px;}
+h1 { font-size: 34px;}
+h2 { font-size: 24px;}
+h3 { font-size: 18px;}
+p { font-size: 16px;}
+h1, h2, h3, p {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0;
+  width: 100%;
+  font-weight: normal;
+  margin: 0;
+}
 
 @media (min-width: 768px) {
-  h1 { margin: 0; font-size: 40px;}
-  h2 { margin: 0; font-size: 32px;}
-  h3 { margin: 0; font-size: 24px;}
-  p { margin: 0; font-size: 16px;}
+  h1 { font-size: 40px;}
+  h2 { font-size: 32px;}
+  h3 { font-size: 24px;}
+  p { font-size: 16px;}
 }
 
 .landing-content {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  bottom: 30px;
+  left: 30px;
+  padding-top: 50px;
+  z-index: 0;
   background: rgba(255,255,255,0.9);
-  border-radius: 0px 0px 30px 30px;
-  height: calc(100vh - 60px - 60px);
+  border-radius: 30px 30px 30px 30px;
   text-align: center;
 }

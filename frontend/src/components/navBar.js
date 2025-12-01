@@ -66,6 +66,77 @@ function NavBar() {
     </svg>
   );
 
+  const menuComponent = (
+    <>
+      <div className='menu-header'>
+        <button className='close-btn' onClick={handleMenuClick} aria-label="Close menu">
+          <span className="material-symbols-outlined" aria-hidden>
+            arrow_back
+          </span>
+        </button>
+        <h1 className="brand" aria-hidden onClick={() => handleClick('/')}>รายการ</h1>
+      </div>
+
+      <nav className='menu-list' aria-label="Menu list">
+        <div className="menu-block-item">
+          <button className="menu-item" onClick={() => { /* new conversation action placeholder */ }}>
+            <h3>เริ่มการสนทนาใหม่</h3>
+            <span className="material-symbols-outlined" aria-hidden>
+              add_circle
+            </span>
+          </button>
+        </div>
+
+        <div className='menu-block-item'>
+          <button
+            className="menu-item"
+            onClick={() => handleClick('/library')}
+            onKeyDown={(e) => handleKeyToggle(1, e)}
+            aria-expanded={indexFocus === 1}
+            aria-controls="library-panel"
+          >
+            <h3>ห้องสมุดกฎหมาย</h3>
+            <span className="material-symbols-outlined" aria-hidden>
+              {indexFocus === 1 ? 'arrow_circle_down' : 'arrow_circle_right'}
+            </span>
+          </button>
+        </div>
+
+        <div className="menu-block-item">
+          <button
+            className="menu-item"
+            onClick={() => handleFocusClick(2)}
+            onKeyDown={(e) => handleKeyToggle(2, e)}
+            aria-expanded={indexFocus === 2}
+            aria-controls="history-panel"
+            aria-disabled="true"
+          >
+            <h3>ประวัติการสนทนา</h3>
+            <span className="material-symbols-outlined" aria-hidden>
+              {indexFocus === 2 ? 'arrow_circle_down' : 'arrow_circle_right'}
+            </span>
+          </button>
+
+          {indexFocus === 2 && (
+            <div className='menu-subitem-list' id="history-panel">
+              <div className='menu-subitem'>
+                {subitemLineStyle}
+                <p>ประวัติการสนทนา ยังไม่พร้อมใช้งาน</p>
+              </div>
+              <div className='menu-subitem'>
+                {subitemLineStyle}
+                <p>ประวัติการสนทนา ยังไม่พร้อมใช้งาน</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+      <div className='menu-footer'>
+        <h3 className="brand" aria-hidden onClick={() => handleClick('/')}>จัดการบัญชี</h3>
+      </div>
+    </>
+  );
+
   return (
     <>
       {/* Mobile navbar */}
@@ -79,129 +150,12 @@ function NavBar() {
 
       {(isMenuOpen || isClosing) && (
         <aside className={`menu-panel ${isClosing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="Main menu">
-          <div className='menu-header'>
-            <button className='close-btn' onClick={handleMenuClick} aria-label="Close menu">
-              <span className="material-symbols-outlined" aria-hidden>
-                arrow_back
-              </span>
-            </button>
-            <span className="brand" aria-hidden onClick={() => handleClick('/')}>icon</span>
-          </div>
-
-          <nav className='menu-list' aria-label="Menu list">
-            <div className="menu-block-item">
-              <button className="menu-item" onClick={() => { /* new conversation action placeholder */ }}>
-                <p>เริ่มการสนทนาใหม่</p>
-                <span className="material-symbols-outlined" aria-hidden>
-                  add_circle
-                </span>
-              </button>
-            </div>
-
-            <div className='menu-block-item'>
-              <button
-                className="menu-item"
-                onClick={() => handleClick('/library')}
-                onKeyDown={(e) => handleKeyToggle(1, e)}
-                aria-expanded={indexFocus === 1}
-                aria-controls="library-panel"
-              >
-                <p>ห้องสมุดกฎหมาย</p>
-                <span className="material-symbols-outlined" aria-hidden>
-                  {indexFocus === 1 ? 'arrow_circle_down' : 'arrow_circle_right'}
-                </span>
-              </button>
-            </div>
-
-            <div className="menu-block-item">
-              <button
-                className="menu-item"
-                onClick={() => handleFocusClick(2)}
-                onKeyDown={(e) => handleKeyToggle(2, e)}
-                aria-expanded={indexFocus === 2}
-                aria-controls="history-panel"
-                aria-disabled="true"
-              >
-                <p>ประวัติการสนทนา</p>
-                <span className="material-symbols-outlined" aria-hidden>
-                  {indexFocus === 2 ? 'arrow_circle_down' : 'arrow_circle_right'}
-                </span>
-              </button>
-
-              {indexFocus === 2 && (
-                <div className='menu-subitem-list' id="history-panel">
-                  <div className='menu-subitem'>
-                    {subitemLineStyle}
-                    <p>ประวัติการสนทนา ยังไม่พร้อมใช้งาน</p>
-                  </div>
-                  <div className='menu-subitem'>
-                    {subitemLineStyle}
-                    <p>ประวัติการสนทนา ยังไม่พร้อมใช้งาน</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </nav>
+          {menuComponent}
         </aside>
       )}
 
-      {/* Desktop navbar */}
       <nav className="desktop-navbar" aria-label="Primary">
-        <h1 className="brand" aria-hidden onClick={() => handleClick('/')}>รายการ</h1>
-        <nav className='menu-list' aria-label="Menu list">
-            <div className="menu-block-item">
-              <button className="menu-item" onClick={() => { /* new conversation action placeholder */ }}>
-                <h3>เริ่มการสนทนาใหม่</h3>
-                <span className="material-symbols-outlined" aria-hidden>
-                  add_circle
-                </span>
-              </button>
-            </div>
-
-            <div className='menu-block-item'>
-              <button
-                className="menu-item"
-                onClick={() => handleClick('/library')}
-                onKeyDown={(e) => handleKeyToggle(1, e)}
-                aria-expanded={indexFocus === 1}
-                aria-controls="library-panel"
-              >
-                <h3>ห้องสมุดกฎหมาย</h3>
-                <span className="material-symbols-outlined" aria-hidden>
-                  {indexFocus === 1 ? 'arrow_circle_down' : 'arrow_circle_right'}
-                </span>
-              </button>
-            </div>
-
-            <div className="menu-block-item">
-              <button
-                className="menu-item"
-                onClick={() => handleFocusClick(2)}
-                onKeyDown={(e) => handleKeyToggle(2, e)}
-                aria-expanded={indexFocus === 2}
-                aria-controls="history-panel"
-                aria-disabled="true"
-              >
-                <h3>ประวัติการสนทนา</h3>
-                <span className="material-symbols-outlined" aria-hidden>
-                  {indexFocus === 2 ? 'arrow_circle_down' : 'arrow_circle_right'}
-                </span>
-              </button>
-
-              {indexFocus === 2 && (
-                <div className='menu-subitem-list' id="history-panel">
-                  <div className='menu-subitem'>
-                    {subitemLineStyle}
-                    <p>ประวัติการสนทนา ยังไม่พร้อมใช้งาน</p>
-                  </div>
-                  <div className='menu-subitem'>
-                    {subitemLineStyle}
-                    <p>ประวัติการสนทนา ยังไม่พร้อมใช้งาน</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </nav>
+        {menuComponent}
       </nav>
     </>
   );
