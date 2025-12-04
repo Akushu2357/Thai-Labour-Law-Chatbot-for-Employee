@@ -27,7 +27,7 @@ function ActTreeNode({
                 {open
                     ? <span className="material-symbols-outlined">arrow_circle_down</span>
                     : <span className="material-symbols-outlined">arrow_circle_right</span>}
-                {label.title}
+                <p>{label.title}</p>
                 {/* {label.tags && label.tags.map(tag => (
                     <span key={tag} className="act-tree-node-tag">{tag}</span>
                 ))} */}
@@ -42,9 +42,7 @@ function ActTreeNode({
                         if (isLeaf && renderLeaf) {
                             const Leaf = renderLeaf;
                             return (
-                                <div key={child.id}>
-                                    <Leaf section={child} />
-                                </div>
+                                <Leaf section={child} />
                             );
                         }
                         return (

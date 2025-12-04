@@ -10,7 +10,7 @@ function SectionLeaf({ section }) {
             .filter((n) => !Number.isNaN(n))
             .sort((a, b) => a - b);
 
-        if (keys.length === 0) return <span>{title}</span>;
+        if (keys.length === 0) return <p>{title}</p>;
 
         const segments = [];
         let cursor = 0;
@@ -43,7 +43,7 @@ function SectionLeaf({ section }) {
         }
 
         return segments.map((seg, i) => {
-            if (seg.type === 'text') return <span key={i}>{seg.text}</span>;
+            if (seg.type === 'text') return <p key={i}>{seg.text}</p>;
             // render link — using an anchor to a hash with the referenced section number
             const href = seg.sectionNumber ? `#section-${seg.sectionNumber}` : '#';
             return (
@@ -54,7 +54,7 @@ function SectionLeaf({ section }) {
         });
     };
 
-    return <div className="section-leaf">{renderWithCrossRefs()}</div>;
+    return <div className="section-leaf"><span style={{ paddingLeft: '40px' }}/>{renderWithCrossRefs()}</div>;
 }
 
 export default SectionLeaf;
