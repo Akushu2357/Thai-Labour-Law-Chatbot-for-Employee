@@ -32,3 +32,8 @@ def get_library_super_sections(group_id: int):
 def get_library_sections(super_section_id: int):
     sections = get_sections_by_super_section(super_section_id)
     return sections
+
+@router.get("/sections/{act_id}/{section_number}")
+def get_library_sections_by_number(act_id: int, section_number: str):
+    sections = get_sections_by_act_and_number(act_id, section_number)
+    return sections

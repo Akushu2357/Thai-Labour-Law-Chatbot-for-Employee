@@ -67,3 +67,19 @@ def get_sections_by_super_section(super_section_id: int):
             sections[idx]["key"] = "section"  # For frontend tree structure
         return sections
     return {"message": "No sections found for the given super_section_id"}
+
+def get_sections_by_act_and_number(act_id: int, section_number: str):
+    sections = get_supabase_client().table("act_sections").select(
+        "id, act_id, book_id, group_id, super_id, \
+        section_number, sub_section, paragraph_number, item_order, \
+        title:text_original, cross_references, external_citations"
+    ).eq("act_id", act_id).eq("section_number", section_number).order("id").execute().data
+    if sections:
+        for idx in range(len(sections)):
+            citations = get_supabase_client().table("act_section_tags").select(
+                "tag_id"
+            ).eq("act_section_id", sections[idx]["id"]).order("tag_id").execute().data
+            sections[idx]["tags"] = [c["tag_id"] for c in citations]
+            sections[idx]["key"] = "section"  # For frontend tree structure
+        return sections
+    return {"message": "No sections found for the given act_id and section_number"}
