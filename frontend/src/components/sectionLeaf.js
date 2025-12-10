@@ -203,7 +203,8 @@ function SectionLeaf({ section }) {
 
             return (
                 <span key={i} className="link-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
-                    <a
+                    <button
+                        type="button"
                         className="section-link"
                         onClick={(e) => handleLinkClick(e, seg)}
                         onMouseEnter={() => handleMouseEnter(seg)}
@@ -212,7 +213,7 @@ function SectionLeaf({ section }) {
                         title={`คลิกเพื่อไปยัง: ${seg.text}${getTextFromSegDetails(seg)}`}
                     >
                         {seg.text}
-                    </a>
+                    </button>
                     {isHovered && tooltip && (
                         <div className="section-tooltip">
                             <div className="tooltip-text">{tooltip.text}</div>

@@ -20,7 +20,7 @@ function ActTreeNode({
             setOpen(true);
             clearExpandRequest(label.id);
         }
-    }, [label.id, hasExpandRequest, clearExpandRequest]);
+    }, [label.id, label.title, open, hasExpandRequest, clearExpandRequest]);
     
     const { data: children, isLoading, isError } = useQuery({
         queryKey: [childrenKey, label.id],
@@ -61,7 +61,7 @@ function ActTreeNode({
         } else {
             setAllChildren(children);
         }
-    }, [children, dynamicSections, label.id, childrenKey]);
+    }, [children, dynamicSections, label.id, label.act_id, childrenKey]);
 
     const indent = { marginLeft: '16px' };
 
