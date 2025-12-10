@@ -4,6 +4,7 @@ import './acts.css';
 import ActTreeNode from "./actTreeNode";
 import SectionLeaf from "./sectionLeaf";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SectionProvider } from '../contexts/SectionContext';
 
 const queryClient = new QueryClient();
 
@@ -101,17 +102,19 @@ function Acts() {
     return (
         <>
             <main className="act-content">
-                <QueryClientProvider client={queryClient}>
-                    {acts.map((act) => (
-                        <ActTreeNode
-                            key={act.id}
-                            label={act}
-                            fetchChildren={getFetchFunction}
-                            childrenKey="books"
-                            renderLeaf={SectionLeaf}
-                        />
-                    ))}
-                </QueryClientProvider>
+                <SectionProvider>
+                    <QueryClientProvider client={queryClient}>
+                        {acts.map((act) => (
+                            <ActTreeNode
+                                key={act.id}
+                                label={act}
+                                fetchChildren={getFetchFunction}
+                                childrenKey="books"
+                                renderLeaf={SectionLeaf}
+                            />
+                        ))}
+                    </QueryClientProvider>
+                </SectionProvider>
             </main>
         </>
     );

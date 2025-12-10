@@ -9,6 +9,7 @@ import './index.css';
 import App from './App';
 import NavBar from './components/navBar';
 import PageLibrary from './pages/pageLibrary';
+import PageChat from './pages/pageChat';
 import Acts from './components/acts';
 // import reportWebVitals from './reportWebVitals';
 
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <App />,
+      },
+      {
+        path: "/chat",
+        element: <PageChat />,
       },
       {
         path: "/library",

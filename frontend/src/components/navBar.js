@@ -79,7 +79,7 @@ function NavBar() {
 
       <nav className='menu-list' aria-label="Menu list">
         <div className="menu-block-item">
-          <button className="menu-item" onClick={() => { /* new conversation action placeholder */ }}>
+          <button className="menu-item" onClick={() => handleClick('/chat')}>
             <h3>เริ่มการสนทนาใหม่</h3>
             <span className="material-symbols-outlined" aria-hidden>
               add_circle
