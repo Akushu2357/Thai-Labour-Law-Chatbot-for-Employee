@@ -9,7 +9,7 @@ def help_info():
             "/": "Welcome message.",
             "/health": "Health check endpoint.",
             "/api": "API endpoints.",
-            "/auth": "Authentication endpoints.",
+            # "/auth": "Authentication endpoints.",
         }
     }
 
@@ -18,7 +18,8 @@ def help_api():
     return {
         "endpoints": {
             "/acts": "Endpoints related to acts.",
-            "/sections": "Endpoints related to act sections."
+            "/sections": "Endpoints related to act sections.",
+            "/libraries": "Endpoints related to library resources."
         }
     }
 
@@ -58,5 +59,19 @@ def help_acts():
             "/super_sections/by/super_section_id/{super_section_id}": "Get super section by its ID.",
             "/super_sections/by/act_id/{act_id}/super_section_number/{super_section_number}": "Get super section by act ID and super section number.",
             "/super_sections/search/{keyword}": "Search super sections by keyword."
+        }
+    }
+
+@router.get("/api/libraries")
+def help_libraries():
+    return {
+        "endpoints": {
+            "/acts": "Get all acts in the library.",
+            "/tags": "Get all tags.",
+            "/acts/{act_id}/books": "Get books for an act.",
+            "/books/{book_id}/groups": "Get groups for a book.",
+            "/groups/{group_id}/super_sections": "Get super sections for a group.",
+            "/super_sections/{super_section_id}/sections": "Get sections for a super section.",
+            "/sections/{act_id}/{section_number}": "Get section by act ID and section number."
         }
     }
