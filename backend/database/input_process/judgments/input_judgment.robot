@@ -26,6 +26,7 @@ Extract Judgment Articles
             Wait Until Element Is Visible    //div[@id="result-sublist"]//div[@class="inforow"][${i}]//a    timeout=10s
             ${article_title}=    Get Text    //div[@id="result-sublist"]//div[@class="inforow"][${i}]//a
             ${article_title_sanitized}=    Replace String    ${article_title}    /    -
+            ${article_title_sanitized}=    Evaluate    re.sub(r'[^\d\-]', '', '${article_title_sanitized}')    modules=re
             ${aleary_exists}=    Run Keyword And Return Status    File Should Exist    ./database/input_process/judgments/text/${article_title_sanitized}.txt
             Continue For Loop If    ${aleary_exists}
             Click Element    //div[@id="result-sublist"]//div[@class="inforow"][${i}]//a
