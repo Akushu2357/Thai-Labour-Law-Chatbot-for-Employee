@@ -3,6 +3,10 @@ uvicorn[standard]
 supabase
 python-dotenv
 pydantic
+langchain_core
+pythainlp
+langchain_openai
+langchain_huggingface
 
 # Optional / dev
 # pytest
