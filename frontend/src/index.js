@@ -11,9 +11,15 @@ import NavBar from './components/navBar';
 import PageLibrary from './pages/pageLibrary';
 import PageChat from './pages/pageChat';
 import Acts from './components/acts';
+import PageAuth from './pages/pageAuth';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import RequireAuth from './components/RequireAuth';
 // import reportWebVitals from './reportWebVitals';
 
 const Layout = () => {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) return <PageAuth />;
+
   return (
     <>
       <NavBar />
@@ -31,19 +37,19 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <App />,
+        element: <RequireAuth><App /></RequireAuth>,
       },
       {
         path: "/chat",
-        element: <PageChat />,
+        element: <RequireAuth><PageChat /></RequireAuth>,
       },
       {
         path: "/library",
-        element: <PageLibrary />,
+        element: <RequireAuth><PageLibrary /></RequireAuth>,
       },
       {
         path: "/act/:actId",
-        element: <Acts />,
+        element: <RequireAuth><Acts /></RequireAuth>,
       }
     ],
   },
@@ -52,7 +58,9 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>
 );
 
