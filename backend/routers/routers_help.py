@@ -9,6 +9,7 @@ def help_info():
             "/": "Welcome message.",
             "/health": "Health check endpoint.",
             "/api": "API endpoints.",
+            "/llm": "LLM chatbot endpoints.",
             # "/auth": "Authentication endpoints.",
         }
     }
@@ -73,5 +74,14 @@ def help_libraries():
             "/groups/{group_id}/super_sections": "Get super sections for a group.",
             "/super_sections/{super_section_id}/sections": "Get sections for a super section.",
             "/sections/{act_id}/{section_number}": "Get section by act ID and section number."
+        }
+    }
+    
+@router.get("/llm")
+def help_llm():
+    return {
+        "endpoints": {
+            "/chat": "Endpoint for chat with LLM.",
+            "/chat_stream": "Endpoint for streaming chat with LLM."
         }
     }
