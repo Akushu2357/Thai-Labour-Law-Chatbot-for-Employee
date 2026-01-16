@@ -45,7 +45,7 @@ async def warmup():
 
 print(">>> Including routers...")
 from routers import routers_act, routers_help, routers_section, routers_library
-from llm import chatbot_router as routers_llm
+# from llm import chatbot_router as routers_llm
 
 # Include routers
 print(">>> Setting up API routers...")
@@ -53,4 +53,4 @@ app.include_router(routers_act.router, prefix="/api", tags=["api"])
 app.include_router(routers_section.router, prefix="/api", tags=["api"])
 app.include_router(routers_library.router, prefix="/api", tags=["api"])
 app.include_router(routers_help.router, prefix="", tags=["help"])
-app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
+# app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
