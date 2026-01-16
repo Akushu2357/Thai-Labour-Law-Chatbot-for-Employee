@@ -43,9 +43,17 @@ async def warmup():
     
     return {"status": "warmed up", "message": "Heavy resources loaded successfully"}
 
+@app.get("/enable-llm-router")
+async def enable_llm_router():
+    """
+    Endpoint to ensure LLM router is loaded.
+    This can be used to trigger lazy loading of the LLM-related routes.
+    """
+    from llm import chatbot_router as routers_llm
+    app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
+
 print(">>> Including routers...")
 from routers import routers_act, routers_help, routers_section, routers_library
-# from llm import chatbot_router as routers_llm
 
 # Include routers
 print(">>> Setting up API routers...")
@@ -53,4 +61,3 @@ app.include_router(routers_act.router, prefix="/api", tags=["api"])
 app.include_router(routers_section.router, prefix="/api", tags=["api"])
 app.include_router(routers_library.router, prefix="/api", tags=["api"])
 app.include_router(routers_help.router, prefix="", tags=["help"])
-# app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
