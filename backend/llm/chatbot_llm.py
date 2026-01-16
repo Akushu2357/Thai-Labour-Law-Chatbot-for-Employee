@@ -1,14 +1,9 @@
-import os
-from typing import Optional
-from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
-
 # Lazy-initialized LLM client. Calling get_llm() will create
 # and cache the client on first use. This prevents heavy initialization
 # at import time, allowing the server to bind to the port quickly.
-_llm: Optional[ChatOpenAI] = None
+_llm = None
 
-def get_llm() -> ChatOpenAI:
+def get_llm():
     """
     Get or create the LLM client (singleton pattern).
     Initializes on first call, then returns cached instance.
@@ -16,11 +11,15 @@ def get_llm() -> ChatOpenAI:
     global _llm
     if _llm is not None:
         return _llm
-    
+
     # Load environment variables
+    import os
+    from typing import Optional
+    from dotenv import load_dotenv
     load_dotenv()
-    
+
     print(">>> Initializing LLM client...")
+    from langchain_openai import ChatOpenAI
     _llm = ChatOpenAI(
         base_url=os.getenv("TYPHOON_BASE_URL"),  # https://api.opentyphoon.ai/v1
         api_key=os.getenv("TYPHOON_API_KEY"),

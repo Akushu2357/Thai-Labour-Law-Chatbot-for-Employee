@@ -32,12 +32,10 @@ async def warmup():
     Endpoint to preload heavy resources after deployment.
     This can be called manually or via a post-deployment script.
     """
-    from llm.embedder import get_embeddings
     from database.supabase_client import get_supabase_client
     from llm.chatbot_llm import get_llm
     
     # Preload resources
-    get_embeddings()
     get_supabase_client()
     get_llm()
     
@@ -51,6 +49,7 @@ async def enable_llm_router():
     """
     from llm import chatbot_router as routers_llm
     app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
+    return {"status": "LLM router enabled"}
 
 print(">>> Including routers...")
 from routers import routers_act, routers_help, routers_section, routers_library

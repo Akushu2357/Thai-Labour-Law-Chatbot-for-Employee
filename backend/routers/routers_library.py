@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from services.services_library import *
 
 router = APIRouter(prefix="/libraries", tags=["libraries"])

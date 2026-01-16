@@ -22,5 +22,7 @@ def get_supabase_client() -> Client:
     if not url or not key:
         raise RuntimeError("SUPABASE_URL and SUPABASE_KEY must be set in environment to use Supabase client")
 
+    print(">>> Initializing Supabase client...")
     _supabase_client = create_client(url, key)
+    print(">>> Supabase client initialized")
     return _supabase_client

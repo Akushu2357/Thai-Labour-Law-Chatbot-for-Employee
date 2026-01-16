@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 # from database.schema import ActSection
 from services.services_act import *
 

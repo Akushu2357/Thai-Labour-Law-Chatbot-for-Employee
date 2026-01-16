@@ -35,8 +35,7 @@ def retrieve_data(question: str):
     print(f"    กำลังค้นหาข้อมูลสำหรับ: {question}")
     
     # 1. แปลงคำถามเป็น Vector
-    embeddings = get_embeddings()
-    query_vector = embeddings.embed_query(question)
+    query_vector = get_embeddings(question)
     
     # 2. ยิงไปถาม Supabase (ใช้ฟังก์ชัน match_sections_v2 ที่เราสร้างใน SQL)
     supabase = get_supabase_client()
