@@ -24,12 +24,23 @@ async def root():
 async def health_check():
     return {"status": "ok"}
 
+@app.on_event("startup")
+async def startup_event():
+    print(">>> FastAPI started")
+
+    # preload หลัง server เปิดพอร์ตแล้ว
+    from llm.embedder import get_embeddings
+    from database.supabase_client import get_supabase_client
+
+    get_embedder()
+    get_supabase_client()
+
 from routers import routers_act, routers_help, routers_section, routers_library
-# from llm import chatbot_router as routers_llm
+from llm import chatbot_router as routers_llm
 
 # Include routers
 app.include_router(routers_act.router, prefix="/api", tags=["api"])
 app.include_router(routers_section.router, prefix="/api", tags=["api"])
 app.include_router(routers_library.router, prefix="/api", tags=["api"])
 app.include_router(routers_help.router, prefix="", tags=["help"])
-# app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
+app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])

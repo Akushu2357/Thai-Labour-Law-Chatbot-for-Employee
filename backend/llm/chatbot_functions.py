@@ -2,7 +2,6 @@
 from pythainlp.util import normalize          # สำหรับจัดระเบียบสระ/วรรณยุกต์
 from pythainlp.tokenize import word_tokenize  # สำหรับตัดคำ
 
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
@@ -10,11 +9,9 @@ from typing import List, Dict
 
 from llm.chatbot_prompts import rewrite_question_prompt_template
 from llm.chatbot_llm import llm
+from llm.embedder import get_embeddings
 
 from database.supabase_client import get_supabase_client
-supabase = get_supabase_client()
-
-embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-m3")
 
 # --- Helper Functions (ฟังก์ชันช่วยทำงาน) ---
 
@@ -38,9 +35,11 @@ def retrieve_data(question: str):
     print(f"    กำลังค้นหาข้อมูลสำหรับ: {question}")
     
     # 1. แปลงคำถามเป็น Vector
+    embeddings = get_embeddings()
     query_vector = embeddings.embed_query(question)
     
     # 2. ยิงไปถาม Supabase (ใช้ฟังก์ชัน match_sections_v2 ที่เราสร้างใน SQL)
+    supabase = get_supabase_client()
     response = supabase.rpc(
         "match_sections_v2",
         {
