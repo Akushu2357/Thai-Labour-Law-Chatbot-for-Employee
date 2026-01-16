@@ -8,7 +8,7 @@ from langchain_core.output_parsers import StrOutputParser
 from typing import List, Dict
 
 from llm.chatbot_prompts import rewrite_question_prompt_template
-from llm.chatbot_llm import llm
+from llm.chatbot_llm import get_llm
 from llm.embedder import get_embeddings
 
 from database.supabase_client import get_supabase_client
@@ -71,6 +71,7 @@ def rewrite_question(question: str, history: List[Dict[str, str]]) -> str:
     
     try:
         prompt = PromptTemplate(template=rewrite_template, input_variables=["chat_history", "question"])
+        llm = get_llm()  # Lazy load LLM
         chain = prompt | llm | StrOutputParser()
         
         # สั่ง AI ทำงาน

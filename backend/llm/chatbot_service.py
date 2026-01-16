@@ -8,7 +8,7 @@ from llm.chatbot_structure import ChatRequest, ChatResponse
 from llm.chatbot_functions import retrieve_data, rewrite_question, preprocess_thai_text
 from llm.chatbot_prompts import chat_prompt_template
 
-from llm.chatbot_llm import llm
+from llm.chatbot_llm import get_llm
 
 def chat_service(request: ChatRequest) -> ChatResponse:
     """
@@ -53,6 +53,7 @@ def chat_service(request: ChatRequest) -> ChatResponse:
         sources_list = sorted(list(sources_set)) # ถ้าเรียงไม่ได้ก็เรียงตามตัวอักษรปกติ
     
     prompt = PromptTemplate(template=chat_prompt_template(), input_variables=["context", "question"])
+    llm = get_llm()  # Lazy load LLM
     chain = prompt | llm | StrOutputParser()
     
     # ส่ง search_query (ที่แก้แล้ว) + context ไปให้ AI
@@ -106,6 +107,7 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
         }) + "\n"
 
         prompt = PromptTemplate(template=chat_prompt_template(), input_variables=["context", "question"])
+        llm = get_llm()  # Lazy load LLM
         chain = prompt | llm | StrOutputParser()
 
         # 3.3 สั่ง AI ตอบแบบ Stream (ทีละคำ)
