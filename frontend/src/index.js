@@ -14,6 +14,7 @@ import Acts from './components/acts';
 import PageAuth from './pages/pageAuth';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import RequireAuth from './components/RequireAuth';
+import 'bootstrap/dist/css/bootstrap.min.css';
 // import reportWebVitals from './reportWebVitals';
 
 const Layout = () => {

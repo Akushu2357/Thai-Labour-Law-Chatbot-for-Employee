@@ -7,3 +7,21 @@
     scrollbar-width: none;     /* Firefox */
 }
 .act-content::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
+
+.card-act {
+    margin-bottom: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-act:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    scale: 1.02;
+}
+
+.tag-stack {
+    width: 100%;
+    overflow: auto;
+}
+.tag-stack::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
+.tag-stack { -ms-overflow-style: none; scrollbar-width: none; }

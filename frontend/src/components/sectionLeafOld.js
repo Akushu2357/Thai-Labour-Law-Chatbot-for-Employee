@@ -1,4 +1,4 @@
-import './sectionLeaf.css';
+import './sectionLeafOld.css';
 import { useState } from 'react';
 import httpService from '../services/httpService';
 import { useSectionContext } from '../contexts/SectionContext';

@@ -54,7 +54,7 @@ function PageChat() {
             setMessages(prev => [...prev, assistantMessage]);
         } catch (error) {
             console.error('Error sending message:', error);
-            
+
             const errorMessage = {
                 id: Date.now() + 1,
                 type: 'error',
@@ -69,87 +69,84 @@ function PageChat() {
     };
 
     return (
-        <div className="page-chat">
-            <div className="chat-container">
-                <div className="chat-header">
-                    <h2>แชทบอทกฎหมายแรงงาน</h2>
-                    <p className="chat-subtitle">ถามคำถามเกี่ยวกับกฎหมายแรงงานไทย</p>
-                </div>
-
-                <div className="chat-messages">
-                    {messages.length === 0 ? (
-                        <div className="chat-empty">
-                            <div className="empty-icon">💬</div>
-                            <h3>ยินดีต้อนรับ!</h3>
-                            <p>ถามคำถามใดๆ เกี่ยวกับกฎหมายแรงงานไทย</p>
-                        </div>
-                    ) : (
-                        messages.map(msg => (
-                            <div key={msg.id} className={`chat-message ${msg.type}`}>
-                                <div className="message-bubble">
-                                    <p>{msg.text}</p>
-                                    {msg.metadata && (
-                                        <div className="message-metadata">
-                                            {msg.metadata.sections && msg.metadata.sections.length > 0 && (
-                                                <div className="metadata-item">
-                                                    <strong>มาตรา:</strong> {msg.metadata.sections.join(', ')}
-                                                </div>
-                                            )}
-                                            {msg.metadata.acts && msg.metadata.acts.length > 0 && (
-                                                <div className="metadata-item">
-                                                    <strong>พระราชบัญญัติ:</strong> {msg.metadata.acts.join(', ')}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="message-time">
-                                    {msg.timestamp.toLocaleTimeString('th-TH', {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    })}
-                                </div>
-                            </div>
-                        ))
-                    )}
-                    {isLoading && (
-                        <div className="chat-message assistant">
-                            <div className="message-bubble">
-                                <div className="typing-indicator">
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    <div ref={messagesEndRef} />
-                </div>
-
-                <form className="chat-input-form" onSubmit={handleSendMessage}>
-                    <div className="input-wrapper">
-                        <input
-                            type="text"
-                            className="chat-input"
-                            placeholder="พิมพ์คำถามของคุณ..."
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            disabled={isLoading}
-                        />
-                        <button
-                            type="submit"
-                            className="send-button"
-                            disabled={isLoading || !inputValue.trim()}
-                            title="ส่งข้อความ (Enter)"
-                        >
-                            <span className="material-symbols-outlined">send</span>
-                        </button>
-                    </div>
-                    <div className="input-hint">
-                        กดปุ่ม Enter เพื่อส่งข้อความ
-                    </div>
-                </form>
+        <div className="chat-container">
+            <div className="chat-header">
+                <p className="chat-subtitle">ถามคำถามเกี่ยวกับกฎหมายแรงงานไทย</p>
             </div>
+
+            <div className="chat-messages">
+                {messages.length === 0 ? (
+                    <div className="chat-empty">
+                        <div className="empty-icon">💬</div>
+                        <h3>ยินดีต้อนรับ!</h3>
+                        <p>ถามคำถามใดๆ เกี่ยวกับกฎหมายแรงงานไทย</p>
+                    </div>
+                ) : (
+                    messages.map(msg => (
+                        <div key={msg.id} className={`chat-message ${msg.type}`}>
+                            <div className="message-bubble">
+                                <p>{msg.text}</p>
+                                {msg.metadata && (
+                                    <div className="message-metadata">
+                                        {msg.metadata.sections && msg.metadata.sections.length > 0 && (
+                                            <div className="metadata-item">
+                                                <strong>มาตรา:</strong> {msg.metadata.sections.join(', ')}
+                                            </div>
+                                        )}
+                                        {msg.metadata.acts && msg.metadata.acts.length > 0 && (
+                                            <div className="metadata-item">
+                                                <strong>พระราชบัญญัติ:</strong> {msg.metadata.acts.join(', ')}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="message-time">
+                                {msg.timestamp.toLocaleTimeString('th-TH', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </div>
+                        </div>
+                    ))
+                )}
+                {isLoading && (
+                    <div className="chat-message assistant">
+                        <div className="message-bubble">
+                            <div className="typing-indicator">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
+            </div>
+
+            <form className="chat-input-form" onSubmit={handleSendMessage}>
+                <div className="input-wrapper">
+                    <input
+                        type="text"
+                        className="chat-input"
+                        placeholder="พิมพ์คำถามของคุณ..."
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    <button
+                        type="submit"
+                        className="send-button"
+                        disabled={isLoading || !inputValue.trim()}
+                        title="ส่งข้อความ (Enter)"
+                    >
+                        <span className="material-symbols-outlined">send</span>
+                    </button>
+                </div>
+                <div className="input-hint">
+                    กดปุ่ม Enter เพื่อส่งข้อความ
+                </div>
+            </form>
         </div>
     );
 }

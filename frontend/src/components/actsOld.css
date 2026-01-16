@@ -1,0 +1,9 @@
+.act-content {
+    padding: 20px;
+    width: calc(100% - 40px);
+    flex-grow: 1;
+    overflow-y: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+}
+.act-content::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
