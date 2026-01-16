@@ -24,16 +24,21 @@ async def root():
 async def health_check():
     return {"status": "ok"}
 
-@app.on_event("startup")
-async def startup_event():
-    print(">>> FastAPI started")
-
-    # preload หลัง server เปิดพอร์ตแล้ว
+@app.get("/warmup")
+async def warmup():
+    """
+    Endpoint to preload heavy resources after deployment.
+    This can be called manually or via a post-deployment script.
+    """
     from llm.embedder import get_embeddings
     from database.supabase_client import get_supabase_client
-
-    get_embedder()
+    
+    # Preload resources
+    get_embeddings()
     get_supabase_client()
+    
+    return {"status": "warmed up", "message": "Heavy resources loaded successfully"}
+
 
 from routers import routers_act, routers_help, routers_section, routers_library
 from llm import chatbot_router as routers_llm
