@@ -1,4 +1,4 @@
-.act-content {
+.pre-act-content {
     padding: 20px;
     width: calc(100% - 40px);
     flex-grow: 1;
@@ -6,7 +6,7 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;     /* Firefox */
 }
-.act-content::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
+.pre-act-content::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
 
 .card-act {
     margin-bottom: 16px;

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import httpService from '../services/httpService';
 import './actsOld.css';
 import ActTreeNode from "./actTreeNodeOld";
-import SectionLeaf from "./sectionLeafOld";
+import SectionLeaf from "../components/sectionLeafOld";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SectionProvider } from '../contexts/SectionContext';
 
@@ -56,7 +56,7 @@ function Acts() {
             .then(response => {
                 console.log('Fetched super section sections:', response.data);
                 response.data.forEach(section => {
-                    section.tags = section.tags.map(tagObj => tags[tagObj-1].name);
+                    section.tags = section.tags.map(tagObj => tags[tagObj - 1].name);
                 });
                 return response.data;
             })
@@ -64,7 +64,7 @@ function Acts() {
                 console.error('Error fetching super section sections:', error);
                 return [];
             });
-        }
+    }
 
     const [acts, setActs] = useState([]);
     const [tags, setTags] = useState([]);
@@ -87,8 +87,8 @@ function Acts() {
         httpService.get('/api/libraries/acts')
             .then(response => {
                 response.data.forEach(section => {
-                    section.tags = section.tags.map(tagObj => 
-                        tags[tagObj-1].name
+                    section.tags = section.tags.map(tagObj =>
+                        tags[tagObj - 1].name
                     );
                 });
                 setActs(response.data);
@@ -97,7 +97,7 @@ function Acts() {
             .catch(error => {
                 console.error('Error fetching act list:', error);
             });
-        }, [tags]);
+    }, [tags]);
 
     return (
         <>

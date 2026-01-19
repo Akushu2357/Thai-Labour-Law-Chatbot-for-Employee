@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './pageLibrary.css';
-import Acts from '../components/actsOld';
+import Acts from './actsOld';
 
 function PageLibrary() {
     const [searchTerm, setSearchTerm] = useState("");

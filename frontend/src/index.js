@@ -10,11 +10,13 @@ import App from './App';
 import NavBar from './components/navBar';
 import PageLibrary from './pages/pageLibrary';
 import PageChat from './pages/pageChat';
-import Acts from './components/acts';
+import PreActCard from './components/preActCard';
 import PageAuth from './pages/pageAuth';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LibraryProvider } from './contexts/LibraryContext';
 import RequireAuth from './components/RequireAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Laws from './components/laws';
 // import reportWebVitals from './reportWebVitals';
 
 const Layout = () => {
@@ -49,18 +51,50 @@ const router = createBrowserRouter([
         element: <RequireAuth><PageLibrary /></RequireAuth>,
       },
       {
-        path: "/act/:actId",
-        element: <RequireAuth><Acts /></RequireAuth>,
+        path: "/library/act",
+        element: <RequireAuth><Laws /></RequireAuth>,
+        children: [
+          {
+            path: ":act",
+            children: [
+              { index: true },
+              {
+                path: "book/:book",
+                children: [
+                  { index: true },
+                  {
+                    path: "group/:group",
+                    children: [
+                      { index: true },
+                      {
+                        path: "super_section/:super_section",
+                        children: [
+                          { index: true },
+                          {
+                            path: "section/:section",
+                            element: <Laws />,
+                          },
+                        ],
+                      },
+                    ],
+                  }
+                ]
+              }
+            ]
+          },
+        ],
       }
-    ],
-  },
+    ]
+  }
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <LibraryProvider>
+        <RouterProvider router={router} />
+      </LibraryProvider>
     </AuthProvider>
   </React.StrictMode>
 );
