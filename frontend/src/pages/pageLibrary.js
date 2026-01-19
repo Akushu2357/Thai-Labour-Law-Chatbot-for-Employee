@@ -78,11 +78,17 @@ function PageLibrary() {
                 </div>
                 {searchTerm.trim() !== '' && (
                     <ul className='tag-suggestions-list'>
-                        {tags.filter(tag =>
-                            tag.name.toLowerCase().includes(searchTerm.toLowerCase()) && !selectedTags.some(st => st.id === tag.id)
-                        ).map(tag => (
+                        {
+                        /*tags.filter(tag =>
+                             tag.name.toLowerCase().includes(searchTerm.toLowerCase()) && !selectedTags.some(st => st.id === tag.id)
+                        )*/
+                       selectedTags.map(tag => (
                             <li key={tag.id} onClick={() => addTag(tag)} style={{ cursor: 'pointer' }}>{tag.name}</li>
                         ))}
+                        <li key={"other"} onClick={() => addTag(searchTerm)} style={{ cursor: 'pointer' }}>
+                            <span style={{ fontSize: '10px', color: '#A9A9A9' }}>Keyword: </span>
+                            {searchTerm}
+                        </li>
                     </ul>
                 )}
             </div>
@@ -90,7 +96,7 @@ function PageLibrary() {
                 {selectedTags.map(tag => (
                     <Badge pill bg="info" key={tag.id} className="tag-badge">
                         {tag.name}
-                        <button onClick={() => removeTag(tag.id)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', marginLeft: '8px' }}>✕</button>
+                        <button onClick={() => removeTag(tag.id)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>✕</button>
                     </Badge>
                 ))}
             </Stack>

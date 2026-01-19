@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useNavigate } from 'react';
 import httpService from '../services/httpService';
 import './acts.css';
 import Badge from 'react-bootstrap/Badge';
@@ -7,6 +7,7 @@ import Stack from 'react-bootstrap/Stack';
 
 function Acts({ tags }) {
     const [acts, setActs] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (tags.length === 0) return;
@@ -30,10 +31,10 @@ function Acts({ tags }) {
         <>
             <main className="act-content">
                 {acts.map((act) => (
-                    <Card key={act.id} className="card-act">
+                    <Card key={act.id} className="card-act" onClick={() => navigate(`/${act.id}`)}>
                         <Card.Body>
                             <Card.Title>{act.title}</Card.Title>
-                            <Stack direction='horizontal' gap={3} className="tag-stack">
+                            <Stack direction='horizontal' gap={2} className="tag-stack">
                                 {act.tags.map((tag, index) => (
                                     <Badge pill key={index} bg="primary" className="badge-tag">
                                         {tag}
