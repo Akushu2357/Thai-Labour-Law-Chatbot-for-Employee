@@ -10,13 +10,13 @@ import App from './App';
 import NavBar from './components/navBar';
 import PageLibrary from './pages/pageLibrary';
 import PageChat from './pages/pageChat';
-import PreActCard from './components/preActCard';
 import PageAuth from './pages/pageAuth';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LibraryProvider } from './contexts/LibraryContext';
 import RequireAuth from './components/RequireAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Laws from './components/laws';
+import PageAccount from './pages/pageAccount';
 // import reportWebVitals from './reportWebVitals';
 
 const Layout = () => {
@@ -83,6 +83,10 @@ const router = createBrowserRouter([
             ]
           },
         ],
+      },
+      {
+        path: "/account",
+        element: <RequireAuth><PageAccount /></RequireAuth>,
       }
     ]
   }

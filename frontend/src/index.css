@@ -23,7 +23,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: auto; /* allow scrolling if content exceeds viewport */
+  overflow: hidden; /* allow scrolling if content exceeds viewport */
 }
 
 #root {
@@ -43,12 +43,12 @@ h1, h2, h3, p {
   margin: 0;
 }
 
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   h1 { font-size: 40px;}
   h2 { font-size: 32px;}
   h3 { font-size: 24px;}
   p { font-size: 16px;}
-}
+} */
 
 .landing-content {
   position: fixed;

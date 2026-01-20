@@ -38,7 +38,7 @@ function PageLibrary() {
         setLoading(true);
         // fetch only tags here (acts will load when Acts mounts)
         fetchTags().finally(() => { if (alive) setLoading(false); });
-    }, []);
+    }, [fetchTags]);
 
     useEffect(() => {
         const filterTags = tags.filter(tag =>
@@ -55,7 +55,7 @@ function PageLibrary() {
                     <span className="material-symbols-outlined">
                         document_search
                     </span>
-                    <input type="search" placeholder="ค้นหากฎหมาย..." value={searchTerm} onChange={handleSearchChange} onKeyDown={handleKeyDown} />
+                    <input type="search" placeholder="ค้นหากฎหมาย..." value={searchTerm} onChange={handleSearchChange} onKeyDown={handleKeyDown} disabled={loading} />
                     <span className="material-symbols-outlined">
                         send
                     </span>

@@ -13,7 +13,7 @@ function PreActCard() {
     // ensure acts are loaded when this component mounts (deduped in context)
     useEffect(() => {
         if (!(acts || []).length) fetchActs().catch(() => {});
-    }, []);
+    }, );
 
     return (
         <>

@@ -15,7 +15,7 @@ function Laws() {
         fetchActById(actId).then(a => { if (mounted) setActData(a); }).catch(() => {});
         fetchBooks(actId).then(b => { if (mounted) setBooks(b || []); }).catch(() => {});
         return () => { mounted = false; };
-    }, [actId]);
+    }, [actId, fetchActById, fetchBooks]);
 
     return (
         <div>
