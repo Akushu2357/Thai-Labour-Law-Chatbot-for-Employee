@@ -26,10 +26,17 @@ function PageAccount() {
                     <label className="account-label">สถานะของคุณ:</label>
                     <select className="account-input" value={status} onChange={(e) => setStatus(e.target.value)}>
                         <option value="" disabled>-- โปรดเลือกสถานะ --</option>
-                        <option value="employee">ลูกจ้าง</option>
-                        <option value="employer">นายจ้าง</option>
-                        <option value="freelancer">ฟรีแลนซ์</option>
-                        <option value="other">อื่นๆ</option>
+                        <option value="Permanent Employee">ลูกจ้างประจำ (Permanent Employee)</option>
+                        <option value="Probationary Employee">ลูกจ้างทดลองงาน (Probationary Employee)</option>
+                        <option value="Fixed-term Contract">ลูกจ้างชั่วคราว (Fixed-term Contract)</option>
+                        <option value="Daily/Part-time Worker">ลูกจ้างรายวัน / รายชั่วโมง (Daily/Part-time Worker)</option>
+                        <option value="Outsourced">ลูกจ้างรับเหมาค่าแรง (Outsourced)</option>
+                        <option value="Intern">นักศึกษาฝึกงาน (Intern)</option>
+                        <option value="Employer/Owner">เจ้าของกิจการ / นายจ้าง (Employer/Owner)</option>
+                        <option value="HR / Personnel Manager">ฝ่ายบุคคล (HR / Personnel Manager)</option>
+                        <option value="Manager/Supervisor">หัวหน้างาน / ผู้บริหาร (Manager/Supervisor)</option>
+                        <option value="Freelancer/Independent Contractor">ฟรีแลนซ์ / จ้างทำของ (Freelancer/Independent Contractor)</option>
+                        <option value="Other">อื่นๆ</option>
                     </select>
                 </div>
                 <div>
@@ -40,11 +47,14 @@ function PageAccount() {
                     <label className="account-label">ลักษณะงาน:</label>
                     <select className="account-input" value={jobType} onChange={(e) => setJobType(e.target.value)}>
                         <option value="" disabled>-- โปรดเลือกลักษณะงาน --</option>
-                        <option value="full_time">งานประจำ</option>
-                        <option value="part_time">งานพาร์ทไทม์</option>
-                        <option value="contract">งานสัญญาจ้าง</option>
-                        <option value="internship">ฝึกงาน</option>
-                        <option value="other">อื่นๆ</option>
+                        <option value="Office / Corporate">งานสำนักงาน (Office / Corporate)</option>
+                        <option value="Manufacturing / Factory">งานผลิตและอุตสาหกรรม (Manufacturing / Factory)</option>
+                        <option value="Service / Hospitality / Retail">งานบริการและค้าปลีก (Service / Hospitality / Retail)</option>
+                        <option value="Transportation / Logistics">งานขนส่งและโลจิสติกส์ (Transportation / Logistics)</option>
+                        <option value="Construction / Field Work">งานก่อสร้างและงานสนาม (Construction / Field Work)</option>
+                        <option value="Hazardous Work">งานอันตราย (Hazardous Work)</option>
+                        <option value="Agriculture / Forestry Work">งานเกษตรและป่าไม้ (Agriculture / Forestry Work)</option>
+                        <option value="Other">อื่นๆ</option>
                     </select>
                 </div>
                 <button type="submit" className="account-button">บันทึกการเปลี่ยนแปลง</button>

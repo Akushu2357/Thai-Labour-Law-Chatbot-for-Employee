@@ -30,7 +30,6 @@ function PreActCard() {
                                 ))}
                             </Stack>
                         </Card.Body>
-                        <p>{act.id}, {act.title}, {act.preface.slice(0, 10)}, {act.updated_at}, {act.key}</p>
                         {/* {id, title, preface, updated_at, tags, key} */}
                     </Card>
                 ))}
