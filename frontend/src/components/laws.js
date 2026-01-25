@@ -1,7 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useLibrary } from '../contexts/LibraryContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Badge from 'react-bootstrap/Badge';
+import Stack from 'react-bootstrap/esm/Stack';
 import Leaf from './leaf';
+import SearchBox from './SearchBox';
 import './laws.css';
 
 function Laws() {
@@ -9,7 +12,21 @@ function Laws() {
     const actId = params.actId || params.act;
     const { loading, fetchActById, fetchBooks } = useLibrary();
     const [actData, setActData] = useState(null);
+    const [filterText, setFilterText] = useState('');
+    const [filterTags, setFilterTags] = useState([]);
     const [books, setBooks] = useState([]);
+    const sectionMatchCacheRef = useRef({});
+
+    // Combine filterText and filterTags into single search term
+    const combinedFilterText = [
+        filterText,
+        ...filterTags.map(t => t.name)
+    ].filter(Boolean).join(' ');
+
+    // Clear cache when filter changes
+    useEffect(() => {
+        sectionMatchCacheRef.current = {};
+    }, [combinedFilterText]);
 
     useEffect(() => {
         let mounted = true;
@@ -25,6 +42,26 @@ function Laws() {
         return () => { mounted = false; };
     }, [actId]);
 
+    const handleAddFilterTag = (tag) => {
+        if (typeof tag === 'string') {
+            // Add as a tag (badge)
+            const textTag = { id: `text-${tag}`, name: tag, isText: true };
+            setFilterTags(prev => [...prev, textTag]);
+            setFilterText('');
+        } else {
+            setFilterTags(prev => [...prev, tag]);
+            setFilterText('');
+        }
+    };
+
+    const handleRemoveFilterTag = (tagId) => {
+        setFilterTags(prev => prev.filter(t => t.id !== tagId));
+    };
+
+    const handleSearchChange = (text) => {
+        setFilterText(text);
+    };
+
     return (
         <>
             {!actData && !loading && (
@@ -37,21 +74,35 @@ function Laws() {
                 <section>
                     <div className='laws-header'>
                         <h1 className='laws-title'>{actData.title}</h1>
-                        {/* {actData.preface && (
-                            <div className='laws-preface'>
-                                <h3>คำนำ</h3>
-                                <p>{actData.preface}</p>
-                            </div>
-                        )} */}
+                        <Stack direction="horizontal" gap={1} className="tags-stack">
+                            {actData.tags.map(tag => (
+                                <Badge pill bg="info" key={tag.id} className="tag-badge">
+                                    {tag}
+                                </Badge>
+                            ))}
+                        </Stack>
                     </div>
+
+                    <SearchBox
+                        onAddTag={handleAddFilterTag}
+                        onRemoveTag={handleRemoveFilterTag}
+                        selectedTags={filterTags}
+                        availableTags={[]}
+                        loading={loading}
+                        placeholder="ค้นหาในพระราชบัญญัติ..."
+                        onSearchChange={handleSearchChange}
+                    />
 
                     {books.length > 0 && (
                         <div className='laws-structure'>
                             {books.map(book => (
                                 <Leaf
+                                    key={book.id}
                                     depth={0}
                                     item={book}
                                     type="book"
+                                    filterText={combinedFilterText}
+                                    sectionMatchCache={sectionMatchCacheRef.current}
                                 />
                             ))}
                         </div>
@@ -62,6 +113,7 @@ function Laws() {
                             <p>ไม่พบข้อมูลโครงสร้างของพระราชบัญญัตินี้</p>
                         </div>
                     )}
+
                 </section>
             )}
         </>

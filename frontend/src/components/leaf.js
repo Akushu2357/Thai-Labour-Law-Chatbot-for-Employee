@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLibrary } from '../contexts/LibraryContext';
 import './leaf.css';
 
-function Leaf({ depth = 0, item, type }) {
+function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, allowedSections = null }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [children, setChildren] = useState([]);
     const [isHighlighted, setIsHighlighted] = useState(false);
@@ -18,6 +18,27 @@ function Leaf({ depth = 0, item, type }) {
             case 'section': return false;
             default: return false;
         }
+    };
+
+    const matchesFilter = (node, term) => {
+        if (!term) return true;
+        const needle = term.toLowerCase();
+        const haystack = [node.title, node.name, node.section_number, node.content]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+        return haystack.includes(needle);
+    };
+
+    // Highlight search terms in text
+    const highlightText = (text, searchTerm) => {
+        if (!searchTerm || !text) return text;
+        const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
+        return parts.map((part, i) => 
+            part.toLowerCase() === searchTerm.toLowerCase() 
+                ? <mark key={i} style={{ backgroundColor: '#ffeb3b', padding: '2px 0' }}>{part}</mark>
+                : part
+        );
     };
 
     const fetchChildren = async () => {
@@ -36,7 +57,8 @@ function Leaf({ depth = 0, item, type }) {
                     break;
                 case 'super_section':
                     childrenData = await fetchSections(item.id);
-                    setChildren(childrenData.map(child => ({ ...child, type: 'section' })));
+                    const sectionsWithType = childrenData.map(child => ({ ...child, type: 'section' }));
+                    setChildren(sectionsWithType);
                     break;
             }
         } catch (error) {
@@ -52,19 +74,63 @@ function Leaf({ depth = 0, item, type }) {
     };
 
     const getDisplayTitle = () => {
-        if (item.title) return item.title.replace('\\n', ' ');
-        if (item.name) return item.name.replace('\\n', ' ');
-        if (item.section_number && item.content) {
-            return item.content.replace('\\n', ' ')
+        let text = '';
+        if (item.title) text = item.title.replace('\\n', ' ');
+        else if (item.name) text = item.name.replace('\\n', ' ');
+        else if (item.section_number && item.content) text = item.content.replace('\\n', ' ');
+        else text = item.section_number?.replace('\\n', ' ') || `รายการที่ ${item.id}`;
+        
+        // Count matches in children for super_section
+        let matchCount = 0;
+        if (filterText && type === 'super_section' && children.length > 0) {
+            matchCount = children.filter(child => matchesFilter(child, filterText)).length;
         }
-        return item.section_number.replace('\\n', ' ') || `รายการที่ ${item.id}`;
+        
+        if (filterText && currentMatches) {
+            return (
+                <>
+                    <span style={{ color: '#ff9800', marginRight: '8px' }}>🔍</span>
+                    {highlightText(text, filterText)}
+                    {matchCount > 0 && (
+                        <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.9em' }}>({matchCount})</span>
+                    )}
+                </>
+            );
+        }
+        
+        // Show count even if not matched but has matched children
+        if (filterText && type === 'super_section' && matchCount > 0) {
+            return (
+                <>
+                    {text}
+                    <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.9em' }}>({matchCount})</span>
+                </>
+            );
+        }
+        
+        return text;
     };
 
     const getDisplaySection = () => {
         const elements = [];
+        
+        // Add match indicator if current section matches
+        if (filterText && currentMatches) {
+            elements.push(
+                <span key="match-indicator" style={{ color: '#ff9800', marginRight: '8px' }}>🔍</span>
+            );
+        }
+        
         let start = 0;
         for (const ref in item.cross_references) {
-            elements.push(item.title.slice(start, parseInt(ref)));
+            const textPart = item.title.slice(start, parseInt(ref));
+            // Highlight matching text
+            if (filterText && currentMatches) {
+                elements.push(<span key={`text-${start}`}>{highlightText(textPart, filterText)}</span>);
+            } else {
+                elements.push(textPart);
+            }
+            
             elements.push(
                 <a key={ref} className='reference' onClick={() => { handleReferenceClick(item.cross_references[ref]); setClickLoading(ref); }}>
                     {item.cross_references[ref].original_text}
@@ -77,7 +143,14 @@ function Leaf({ depth = 0, item, type }) {
             ));
             start = parseInt(ref) + item.cross_references[ref].original_text.length;
         }
-        elements.push(item.title.slice(start));
+        
+        const lastPart = item.title.slice(start);
+        if (filterText && currentMatches) {
+            elements.push(<span key={`text-${start}`}>{highlightText(lastPart, filterText)}</span>);
+        } else {
+            elements.push(lastPart);
+        }
+        
         return elements;
     };
 
@@ -136,27 +209,62 @@ function Leaf({ depth = 0, item, type }) {
         }
     }, [openTrail, type, item?.id]);
 
+    // Pre-compute which section_numbers should be shown (for super_section with sections)
+    let computedAllowedSections = allowedSections;
+    if (filterText && type === 'super_section' && children.length > 0) {
+        const matchedSectionNumbers = new Set();
+        children.forEach(child => {
+            if (child.type === 'section' && matchesFilter(child, filterText)) {
+                matchedSectionNumbers.add(child.section_number);
+            }
+        });
+        computedAllowedSections = matchedSectionNumbers;
+    }
+
+    // Filter only section nodes, always show book/group/super_section
+    let isVisible = true;
+    let currentMatches = false;
+    
+    if (filterText && type === 'section') {
+        // Check if this section_number is in allowed set
+        if (computedAllowedSections && computedAllowedSections.size > 0) {
+            isVisible = computedAllowedSections.has(item.section_number);
+            currentMatches = matchesFilter(item, filterText);
+        } else if (allowedSections === null) {
+            // Parent didn't compute allowedSections, fall back to direct check
+            currentMatches = matchesFilter(item, filterText);
+            isVisible = currentMatches;
+        } else {
+            isVisible = false;
+        }
+    }
+
+    if (!isVisible) return null;
+
     return (
-        <div className='leaf-container' ref={nodeRef}>
-            <div className={`leaf-header ${hasChildren() ? 'leaf-clickable' : ''} ${isExpanded ? 'leaf-expanded' : ''} ${isHighlighted ? 'leaf-highlight' : ''}`} onClick={hasChildren() ? handleToggle : undefined}>
+        <div className='leaf-container' ref={nodeRef} aria-label={`${item.act_id || 'unknown'}_${item.section_number || 'unknown'}`}>
+            <div className={
+                `leaf-header ${hasChildren() ? 'leaf-clickable' : ''} ${isExpanded ? 'leaf-expanded' : ''} ${isHighlighted ? 'leaf-highlight' : ''} ${type !== 'section' ? 'leaf-non-section' : 'leaf-section'}`
+            }
+                onClick={hasChildren() ? handleToggle : undefined}>
                 <div className='leaf-content'>
                     {hasChildren() && (
                         <span style={{ marginRight: '8px', fontSize: '12px' }}>
                             {isExpanded ? '▼' : '▶'}
                         </span>
                     )}
-                    <div>
+                    <>
                         {type !== 'section' &&
                             <p className='leaf-title'>
                                 {getDisplayTitle()}
                             </p>
                         }
                         {type === 'section' &&
-                            <p className='leaf-section-content'>
+                            <p className='leaf-section-title'>
                                 <span style={{ marginLeft: '2rem' }} />{getDisplaySection()}
                             </p>
                         }
-                    </div>
+                    </>
                 </div>
 
 
@@ -164,22 +272,45 @@ function Leaf({ depth = 0, item, type }) {
 
             {isExpanded &&
                 (children.length > 0
-                    ? (<div>
-                        {children.map((child) => (
-                            <Leaf
-                                key={child.id}
-                                depth={depth + 1}
-                                item={child}
-                                type={child.type}
-                            />
-                        ))}
-                    </div>)
+                    ? (
+                        <div>
+                            {(() => {
+                                const visibleChildren = children.filter(child => {
+                                    if (!filterText || child.type !== 'section') return true;
+                                    if (computedAllowedSections && computedAllowedSections.size > 0) {
+                                        return computedAllowedSections.has(child.section_number);
+                                    }
+                                    return matchesFilter(child, filterText);
+                                });
+
+                                if (visibleChildren.length === 0 && filterText) {
+                                    return (
+                                        <div style={{ padding: '1rem', color: '#999', fontStyle: 'italic' }}>
+                                            ไม่พบมาตราที่ตรงกับคำค้นหา "{filterText}"
+                                        </div>
+                                    );
+                                }
+
+                                return visibleChildren.map((child) => (
+                                    <Leaf
+                                        key={child.id}
+                                        depth={depth + 1}
+                                        item={child}
+                                        type={child.type}
+                                        filterText={filterText}
+                                        sectionMatchCache={sectionMatchCache}
+                                        allowedSections={computedAllowedSections}
+                                    />
+                                ));
+                            })()}
+                        </div>
+                    )
                     : loading && (
                         <div className='leaf-loading'>
                             <span className="loading-icon" aria-label="loading">
                                 <span className="material-symbols-outlined">progress_activity</span>
                             </span>
-                            <span style={{ marginLeft: '6px' }}>กำลังโหลด...</span>
+                            <span style={{ marginLeft: '0.5rem' }}>กำลังโหลด...</span>
                         </div>
                     )
                 )
