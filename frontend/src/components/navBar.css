@@ -82,18 +82,6 @@ button.close-btn {
   font: inherit;
 }
 
-button.menu-item {
-  height: 40px;
-}
-.menu-item h3 {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 10px;
-  width: 100%;
-  font-weight: normal;
-}
-
 button:focus-visible {
   outline: 3px solid rgba(255,255,255,0.18);
   outline-offset: 3px;
@@ -104,7 +92,7 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 30px;
-  padding: 10px;
+  padding: 15px;
   text-align: center;
   align-items: center;
   flex-grow: 1;
@@ -113,23 +101,39 @@ button:focus-visible {
 .menu-block-item {
   display: flex;
   flex-direction: column;
-  /* gap: 20px; */
   align-items: flex-end;
-  max-width: 100%;
+  width: 100%;
+  max-width: 300px;
 }
 
 .menu-item {
   text-decoration: none;
-  font-size: 20px;
+  height: fit-content;
+  padding: 6px 10px;
   display: grid;
-  grid-template-columns: 10fr 1fr;
-  border: 1px solid #000;
-  border-radius: 10px;
+  grid-template-columns: 1fr auto;
+  border: 2px solid #d4a574;
+  border-radius: 15px;
   width: 100%;
+  max-width: 300px;
   align-items: center;
-  justify-items: center;
+  justify-items: space-between;
   transition: background-color 160ms ease, transform 120ms ease;
+  /* background-color: #f5f5f5; */
+  gap: 10px;
 }
+
+/* button.menu-item {
+  height: 40px;
+}
+.menu-item h3 {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 10px;
+  width: 100%;
+  font-weight: normal;
+} */
 
 .menu-item:hover {
   background-color:#00a7e1;
@@ -146,14 +150,14 @@ button.menu-item:active {
   padding: 0px 0px 0px 5px;
   gap: 0px;
   align-items: flex-end;
-  max-width: 100%;
+  width: 100%;
 }
 
 .menu-subitem {
   position: relative;
   display: flex;
   margin-top: 5px;
-  max-width: 100%;
+  width: 100%;
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
@@ -167,12 +171,12 @@ button.menu-item:active {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  padding: 10px;
+  padding: 3px 5px;
   width: 100%;
   margin: 0px;
   right: 0px;
-  border: 2px solid #909090;
-  border-radius: 10px;
+  border: 2px solid #d4a574;
+  border-radius: 12px;
 }
 
 /* Desktop vs Mobile responsive rules
@@ -205,7 +209,7 @@ button.menu-item:active {
     /* top/right/bottom/left: keep top/bottom/left gutters, allow right to be automatic */
     inset: 30px auto 30px 30px;
     z-index: 90;
-    width: 18%;
+    width: 25%;
     max-width: 250px;
     animation: none; /* disable slide animation on desktop */
     border-radius: 30px;
@@ -214,7 +218,7 @@ button.menu-item:active {
 
   /* reserve left gutter for desktop nav so main content sits to the right */
   .landing-content {
-    margin-left: calc(18% + 30px); /* nav width + gap */
+    margin-left: calc(min(250px, 25%) + 30px); /* nav width + gap */
     border-radius: 30px;
     padding-top: 0px;
   }

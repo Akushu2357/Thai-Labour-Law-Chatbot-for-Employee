@@ -78,16 +78,16 @@ function NavBar() {
       </div>
 
       <nav className='menu-list' aria-label="Menu list">
-        <div className="menu-block-item">
+        {/* <div className="menu-block-item"> */}
           <button className="menu-item" onClick={() => handleClick('/chat')}>
-            <h3>เริ่มการสนทนาใหม่</h3>
+            <span className='text-h3'>แชตใหม่</span>
             <span className="material-symbols-outlined" aria-hidden>
               add_circle
             </span>
           </button>
-        </div>
+        {/* </div> */}
 
-        <div className='menu-block-item'>
+        {/* <div className='menu-block-item'> */}
           <button
             className="menu-item"
             onClick={() => handleClick('/library')}
@@ -95,12 +95,12 @@ function NavBar() {
             aria-expanded={indexFocus === 1}
             aria-controls="library-panel"
           >
-            <h3>ห้องสมุดกฎหมาย</h3>
+            <span className='text-h3'>ห้องสมุดกฎหมาย</span>
             <span className="material-symbols-outlined" aria-hidden>
               {indexFocus === 1 ? 'arrow_circle_down' : 'arrow_circle_right'}
             </span>
           </button>
-        </div>
+        {/* </div> */}
 
         <div className="menu-block-item">
           <button
@@ -111,7 +111,7 @@ function NavBar() {
             aria-controls="history-panel"
             aria-disabled="true"
           >
-            <h3>ประวัติการสนทนา</h3>
+            <span className='text-h3'>ประวัติการสนทนา</span>
             <span className="material-symbols-outlined" aria-hidden>
               {indexFocus === 2 ? 'arrow_circle_down' : 'arrow_circle_right'}
             </span>

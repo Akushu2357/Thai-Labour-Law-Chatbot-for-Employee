@@ -3,6 +3,13 @@
     padding: 20px;
 }
 
+section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+}
+
 .laws-loading {
     display: flex;
     justify-content: center;
@@ -52,7 +59,9 @@
 }
 
 .laws-structure {
-    padding: 30px;
+    padding: 10px;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 .laws-structure-title {

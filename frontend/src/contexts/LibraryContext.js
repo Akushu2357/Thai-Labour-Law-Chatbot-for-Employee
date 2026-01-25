@@ -8,25 +8,64 @@ export function LibraryProvider({ children }) {
   const [acts, setActs] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [openTrail, setOpenTrail] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingReference, setLoadingReference] = useState(false);
 
   const cacheRef = useRef({});
   const loadingRef = useRef({});
+  const loadingCountRef = useRef(0);
+  const loadingReferenceCountRef = useRef(0);
 
-  const fetchData = async (key, fetcher) => {
+  const fetchData = async (key, fetcher, isReference = false) => {
     if (cacheRef.current[key]) {
       return cacheRef.current[key];
     }
     if (loadingRef.current[key]) {
       return loadingRef.current[key];
     }
+    // start tracking a new fetch
+    if (isReference) {
+      loadingReferenceCountRef.current += 1;
+      setLoadingReference(true);
+    } else {
+      loadingCountRef.current += 1;
+      setLoading(true);
+    }
     loadingRef.current[key] = fetcher()
         .then(data => {
             cacheRef.current[key] = data;
             delete loadingRef.current[key];
+            if (isReference) {
+              loadingReferenceCountRef.current -= 1;
+              if (loadingReferenceCountRef.current <= 0) {
+                loadingReferenceCountRef.current = 0;
+                setLoadingReference(false);
+              }
+            } else {
+              loadingCountRef.current -= 1;
+              if (loadingCountRef.current <= 0) {
+                loadingCountRef.current = 0;
+                setLoading(false);
+              }
+            }
             return data;
         })
         .catch(err => {
             delete loadingRef.current[key];
+            if (isReference) {
+              loadingReferenceCountRef.current -= 1;
+              if (loadingReferenceCountRef.current <= 0) {
+                loadingReferenceCountRef.current = 0;
+                setLoadingReference(false);
+              }
+            } else {
+              loadingCountRef.current -= 1;
+              if (loadingCountRef.current <= 0) {
+                loadingCountRef.current = 0;
+                setLoading(false);
+              }
+            }
             throw err;
         });
     return loadingRef.current[key];
@@ -107,6 +146,11 @@ export function LibraryProvider({ children }) {
     return res.data || [];
   });
 
+  const fetchSectionsByActAndNumber = (act_id, section_number) => fetchData(`sections:${act_id}:${section_number}`, async () => {
+    const res = await httpService.get(`/api/libraries/sections/${act_id}/${encodeURIComponent(section_number)}`);
+    return res.data || [];
+  }, true);
+
   const addTag = (tag) => {
     if (!selectedTags.find(t => t.id === tag.id)) {
       setSelectedTags(prev => [...prev, tag]);
@@ -127,6 +171,7 @@ export function LibraryProvider({ children }) {
     fetchGroups,
     fetchSuperSections,
     fetchSections,
+    fetchSectionsByActAndNumber,
     selectedTags,
     searchTerm,
     setSearchTerm,
@@ -134,6 +179,10 @@ export function LibraryProvider({ children }) {
     removeTag,
     setTags,
     setActs,
+    openTrail,
+    setOpenTrail,
+    loading,
+    loadingReference,
     clearSelectedTags: () => setSelectedTags([]),
   };
 

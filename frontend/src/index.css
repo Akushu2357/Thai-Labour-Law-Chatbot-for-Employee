@@ -1,6 +1,7 @@
 html, body {
   margin: 0;
   font-family: 'Prompt', serif;
+  font-size: clamp(14px, 2vw, 18px);
   background-image: linear-gradient(135deg, #f17720, #ffa630, #ebebeb, #00a7e1, #0474ba);
   background-repeat: no-repeat;
   background-size: cover;
@@ -30,11 +31,12 @@ body {
   height: 100%;
 }
 
-h1 { font-size: 34px;}
-h2 { font-size: 24px;}
-h3 { font-size: 18px;}
-p { font-size: 16px;}
-h1, h2, h3, p {
+h1, .text-h1 { font-size: 2rem;}
+h2, .text-h2 { font-size: 1.5rem;}
+h3, .text-h3 { font-size: 1.25rem;}
+p, .text-p { font-size: 1rem;}
+small, .text-small { font-size: 0.75rem;}
+h1, h2, h3, p, small {
   text-overflow: ellipsis;
   overflow: hidden;
   padding: 0;
@@ -42,13 +44,6 @@ h1, h2, h3, p {
   font-weight: normal;
   margin: 0;
 }
-
-/* @media (min-width: 768px) {
-  h1 { font-size: 40px;}
-  h2 { font-size: 32px;}
-  h3 { font-size: 24px;}
-  p { font-size: 16px;}
-} */
 
 .landing-content {
   position: fixed;

@@ -8,6 +8,11 @@ def get_library_acts():
     acts = get_all_acts()
     return acts
 
+@router.get("/act/{act_id}")
+def get_library_act_by_id(act_id: int):
+    act = get_act_by_id(act_id)
+    return act
+
 @router.get("/tags")
 def get_library_tags():
     tags = get_tags()

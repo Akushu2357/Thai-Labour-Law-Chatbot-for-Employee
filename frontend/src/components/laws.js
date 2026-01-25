@@ -25,16 +25,8 @@ function Laws() {
         return () => { mounted = false; };
     }, [actId]);
 
-    if (loading) {
-        return (
-            <div className='laws-loading'>
-                <h1>กำลังโหลดข้อมูลพระราชบัญญัติ...</h1>
-            </div>
-        );
-    }
-
     return (
-        <div className='laws-container'>
+        <>
             {!actData && !loading && (
                 <div className='laws-no-data'>
                     <p>ไม่พบข้อมูลพระราชบัญญัติที่เลือก</p>
@@ -72,7 +64,7 @@ function Laws() {
                     )}
                 </section>
             )}
-        </div>
+        </>
     );
 }
 

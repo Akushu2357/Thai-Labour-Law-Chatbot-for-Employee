@@ -22,6 +22,20 @@ def get_all_acts():
         return acts
     return {"message": "No acts found"}
 
+def get_act_by_id(act_id: int):
+    act_rows = get_supabase_client().table("acts").select(
+        "id, title, preface, updated_at"
+    ).eq("id", act_id).limit(1).execute().data
+    if act_rows and len(act_rows) > 0:
+        act = act_rows[0]
+        act_tags = get_supabase_client().table("act_tags").select(
+            "tag_id"
+        ).eq("act_id", act["id"]).order("tag_id").execute().data
+        act["tags"] = [at["tag_id"] for at in act_tags]
+        act["key"] = "books"  # For frontend tree structure
+        return act
+    return {"message": "Act not found"}
+
 def get_books_by_act(act_id: int):
     books = get_supabase_client().table("act_books").select(
         "id, act_id, book_number, title:book_title"
