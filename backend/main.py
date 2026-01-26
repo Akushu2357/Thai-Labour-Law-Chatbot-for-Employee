@@ -26,30 +26,30 @@ async def root():
 async def health_check():
     return {"status": "ok"}
 
-# @app.get("/warmup")
-# async def warmup():
-#     """
-#     Endpoint to preload heavy resources after deployment.
-#     This can be called manually or via a post-deployment script.
-#     """
-#     from database.supabase_client import get_supabase_client
-#     from llm.chatbot_llm import get_llm
+@app.get("/warmup")
+async def warmup():
+    """
+    Endpoint to preload heavy resources after deployment.
+    This can be called manually or via a post-deployment script.
+    """
+    from database.supabase_client import get_supabase_client
+    from llm.chatbot_llm import get_llm
     
-#     # Preload resources
-#     get_supabase_client()
-#     get_llm()
+    # Preload resources
+    get_supabase_client()
+    get_llm()
     
-#     return {"status": "warmed up", "message": "Heavy resources loaded successfully"}
+    return {"status": "warmed up", "message": "Heavy resources loaded successfully"}
 
-# @app.get("/enable-llm-router")
-# async def enable_llm_router():
-#     """
-#     Endpoint to ensure LLM router is loaded.
-#     This can be used to trigger lazy loading of the LLM-related routes.
-#     """
-#     from llm import chatbot_router as routers_llm
-#     app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
-#     return {"status": "LLM router enabled"}
+@app.get("/enable-llm-router")
+async def enable_llm_router():
+    """
+    Endpoint to ensure LLM router is loaded.
+    This can be used to trigger lazy loading of the LLM-related routes.
+    """
+    from llm import chatbot_router as routers_llm
+    app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
+    return {"status": "LLM router enabled"}
 
 print(">>> Including routers...")
 from routers import routers_act, routers_help, routers_section, routers_library

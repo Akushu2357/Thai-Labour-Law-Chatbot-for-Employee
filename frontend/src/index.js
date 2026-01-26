@@ -17,6 +17,7 @@ import RequireAuth from './components/RequireAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Laws from './components/laws';
 import PageAccount from './pages/pageAccount';
+import PageChatStream from './pages/pageChatStream';
 // import reportWebVitals from './reportWebVitals';
 
 const Layout = () => {
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
       {
         path: "/chat",
         element: <RequireAuth><PageChat /></RequireAuth>,
+      },
+      {
+        path: "/chat_stream",
+        element: <RequireAuth><PageChatStream /></RequireAuth>,
       },
       {
         path: "/library",

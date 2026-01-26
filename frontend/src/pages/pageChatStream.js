@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import httpService from '../services/httpService';
 import './pageChat.css';
 
-function PageChat() {
+function PageChatStream() {
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -33,32 +33,89 @@ function PageChat() {
         };
 
         setMessages(prev => [...prev, userMessage]);
+        const currentQuestion = inputValue;
         setInputValue('');
         setIsLoading(true);
 
+        // สร้าง assistant message ว่างๆ ไว้ก่อน
+        const assistantMessageId = Date.now() + 1;
+        const assistantMessage = {
+            id: assistantMessageId,
+            type: 'assistant',
+            text: '',
+            timestamp: new Date(),
+            metadata: null
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+
         try {
-            // ส่ง message ไปยัง backend
-            console.log('Sending message to backend:', messages.map(msg => ({content: msg.text, role: msg.type})));
-            const response = await httpService.post('/llm/chat', {
-                question: inputValue,
-                history: messages.map(msg => ({content: msg.text, role: msg.type}))
+            // เรียก streaming API
+            const response = await fetch('http://localhost:8000/llm/chat_stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: currentQuestion,
+                    history: messages.map(msg => ({ content: msg.text, role: msg.type }))
+                })
             });
 
-            // เพิ่ม assistant message ลงใน chat
-            const assistantMessage = {
-                id: Date.now() + 1,
-                type: 'assistant',
-                text: response.data.response || response.data.message || response.data.answer || 'ขออภัยที่ไม่สามารถตอบได้ในขณะนี้',
-                timestamp: new Date(),
-                metadata: response.data.metadata || null
-            };
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
 
-            setMessages(prev => [...prev, assistantMessage]);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+
+                if (done) break;
+
+                // แปลง chunk เป็นข้อความ
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+                console.log('Received chunk:', chunk);
+                console.log('Parsed lines:', lines);
+
+                for (const line of lines) {
+                    if (line !== '') {
+
+                        try {
+                            const parsed = JSON.parse(line);
+                            // เพิ่ม token ที่ได้รับเข้าไปใน text
+                            accumulatedText += parsed.data;
+
+                            // Update message แบบ real-time
+                            setMessages(prev => prev.map(msg =>
+                                msg.id === assistantMessageId
+                                    ? { ...msg, text: accumulatedText }
+                                    : msg
+                            ));
+
+                            if (parsed.metadata) {
+                                // Update metadata เมื่อได้รับ
+                                setMessages(prev => prev.map(msg =>
+                                    msg.id === assistantMessageId
+                                        ? { ...msg, metadata: parsed.metadata }
+                                        : msg
+                                ));
+                            }
+                        } catch (e) {
+                            // ไม่ใช่ JSON ให้ข้ามไป
+                            console.log('Non-JSON data:', line);
+                        }
+                    }
+                }
+            }
+
         } catch (error) {
             console.error('Error sending message:', error);
 
             const errorMessage = {
-                id: Date.now() + 1,
+                id: Date.now() + 2,
                 type: 'error',
                 text: 'เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง',
                 timestamp: new Date()
@@ -153,4 +210,4 @@ function PageChat() {
     );
 }
 
-export default PageChat;
+export default PageChatStream;
