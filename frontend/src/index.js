@@ -44,11 +44,11 @@ const router = createBrowserRouter([
         element: <RequireAuth><App /></RequireAuth>,
       },
       {
-        path: "/chat",
+        path: "/chat_old",
         element: <RequireAuth><PageChat /></RequireAuth>,
       },
       {
-        path: "/chat_stream",
+        path: "/chat",
         element: <RequireAuth><PageChatStream /></RequireAuth>,
       },
       {

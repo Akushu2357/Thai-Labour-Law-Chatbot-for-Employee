@@ -102,28 +102,20 @@ export function LibraryProvider({ children }) {
   }).then(data => { setActs(data); return data; });
 
   const fetchActById = (id) => fetchData(`act-${id}`, async () => {
-    // try to find in cached acts first
+    // try to find in cached full acts list first
     const sid = String(id);
-    const fromState = (cacheRef.current['acts'] || acts || []).find(a => String(a.id) === sid);
-    if (fromState) return fromState;
-    // call backend endpoint for single act if available
-    const res = await httpService.get(`/api/libraries/acts/${sid}`);
+    const fromFullList = (cacheRef.current['acts'] || []).find(a => String(a.id) === sid);
+    if (fromFullList) return fromFullList;
+    // call backend endpoint for single act
+    const res = await httpService.get(`/api/libraries/act/${sid}`);
     const actData = res.data || null;
-    return actData;
-  }).then(a => {
-    if (a && a.id) {
+    if (actData && actData.id) {
       // map tags for this act using known tags
       const tagsData = cacheRef.current['tags'] || tags;
-      const mapped = { ...a, tags: (a.tags || []).map(t => getTagName(t, tagsData)) };
-      // store in acts state/cache
-      setActs(prev => {
-        const exists = (prev || []).some(x => String(x.id) === String(mapped.id));
-        if (exists) return prev.map(x => String(x.id) === String(mapped.id) ? mapped : x);
-        return [...(prev || []), mapped];
-      });
+      const mapped = { ...actData, tags: (actData.tags || []).map(t => getTagName(t, tagsData)) };
       return mapped;
     }
-    return a;
+    return actData;
   });
 
   const fetchBooks = (act_id) => fetchData(`acts:${act_id}:books`, async () => {

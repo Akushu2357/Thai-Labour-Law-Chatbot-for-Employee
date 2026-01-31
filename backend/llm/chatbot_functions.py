@@ -50,6 +50,14 @@ def retrieve_data(question: str):
     
     return response.data
 
+def get_act_name(act_id: int) -> str:
+    """ฟังก์ชันดึงชื่อตรากฎหมายจาก act_id"""
+    supabase = get_supabase_client()
+    response = supabase.table("acts").select("title").eq("id", act_id).execute()
+    if response.data and len(response.data) > 0:
+        return response.data[0]['title']
+    return "Unknown Act"
+
 def rewrite_question(question: str, history: List[Dict[str, str]]) -> str:
     """ฟังก์ชัน Context Awareness: แปลงคำถามกว้างๆ ให้ชัดเจนขึ้นโดยดูประวัติ"""
     

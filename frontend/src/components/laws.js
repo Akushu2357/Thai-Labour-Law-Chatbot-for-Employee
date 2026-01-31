@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useLibrary } from '../contexts/LibraryContext';
 import { useEffect, useRef, useState } from 'react';
 import Badge from 'react-bootstrap/Badge';
@@ -9,12 +9,14 @@ import './laws.css';
 
 function Laws() {
     const params = useParams();
+    const location = useLocation();
     const actId = params.actId || params.act;
-    const { loading, fetchActById, fetchBooks } = useLibrary();
+    const { loading, fetchActById, fetchBooks, fetchTags, setOpenTrail } = useLibrary();
     const [actData, setActData] = useState(null);
     const [filterText, setFilterText] = useState('');
     const [filterTags, setFilterTags] = useState([]);
     const [books, setBooks] = useState([]);
+    const [pendingOpenTrail, setPendingOpenTrail] = useState(null);
     const sectionMatchCacheRef = useRef({});
 
     // Combine filterText and filterTags into single search term
@@ -32,15 +34,37 @@ function Laws() {
         let mounted = true;
         if (!actId) return;
 
-        fetchActById(actId)
-            .then((act) => { if (mounted) setActData(act) })
-            .catch((error) => { console.error('Error fetching act:', error); });
-        fetchBooks(actId)
-            .then((booksData) => { if (mounted) setBooks(booksData || []) })
-            .catch((error) => { console.error('Error fetching books:', error); });
+        // โหลด tags ก่อนเพื่อให้ act มี tag names ที่ถูกต้อง
+        fetchTags().finally(() => {
+            fetchActById(actId)
+                .then((act) => { if (mounted) setActData(act) })
+                .catch((error) => { console.error('Error fetching act:', error); });
+            fetchBooks(actId)
+                .then((booksData) => { 
+                    if (mounted) {
+                        setBooks(booksData || []);
+                    }
+                })
+                .catch((error) => { console.error('Error fetching books:', error); });
+        });
 
         return () => { mounted = false; };
     }, [actId]);
+
+    // เก็บ openTrail จาก navigation state ไว้ก่อน
+    useEffect(() => {
+        if (location.state?.openTrail) {
+            setPendingOpenTrail(location.state.openTrail);
+        }
+    }, [location.state]);
+
+    // Apply openTrail หลังจาก books โหลดเสร็จแล้ว
+    useEffect(() => {
+        if (pendingOpenTrail && books.length > 0) {
+            setOpenTrail(pendingOpenTrail);
+            setPendingOpenTrail(null);
+        }
+    }, [pendingOpenTrail, books, setOpenTrail]);
 
     const handleAddFilterTag = (tag) => {
         if (typeof tag === 'string') {

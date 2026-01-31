@@ -75,10 +75,10 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
 
     const getDisplayTitle = () => {
         let text = '';
-        if (item.title) text = item.title.replace('\\n', ' ');
-        else if (item.name) text = item.name.replace('\\n', ' ');
-        else if (item.section_number && item.content) text = item.content.replace('\\n', ' ');
-        else text = item.section_number?.replace('\\n', ' ') || `รายการที่ ${item.id}`;
+        if (item.title) text = item.title.replaceAll('\\n', ' ');
+        else if (item.name) text = item.name.replaceAll('\\n', ' ');
+        else if (item.section_number && item.content) text = item.content.replaceAll('\\n', ' ');
+        else text = item.section_number?.replaceAll('\\n', ' ') || `รายการที่ ${item.id}`;
         
         // Count matches in children for super_section
         let matchCount = 0;

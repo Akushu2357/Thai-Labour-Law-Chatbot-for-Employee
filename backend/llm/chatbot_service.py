@@ -5,7 +5,7 @@ from langchain_core.output_parsers import StrOutputParser
 from fastapi.responses import StreamingResponse
 
 from llm.chatbot_structure import ChatRequest, ChatResponse
-from llm.chatbot_functions import retrieve_data, rewrite_question, preprocess_thai_text
+from llm.chatbot_functions import retrieve_data, rewrite_question, preprocess_thai_text, get_act_name
 from llm.chatbot_prompts import chat_prompt_template
 
 from llm.chatbot_llm import get_llm
@@ -72,9 +72,10 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
     retrieved_docs = retrieve_data(search_query)
     print(f"    Retrieved {len(retrieved_docs)} documents from database.")
 
-    # เตรียม Context และ Sources
+    # เตรียม Context และ Metadata
     context_text = ""
-    sources_set = set()
+    sections_list = []  # เก็บเลขมาตรา
+    acts_set = set()    # เก็บ act_id
     
     # ถ้าหาข้อมูลไม่เจอเลย
     if not retrieved_docs:
@@ -89,28 +90,54 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
     for doc in retrieved_docs:
         sec_num = doc.get('section_number', '?')
         text = doc.get('text_original', '')
+        act_id = doc.get('act_id')
+        
+        # Debug: ดูว่าแต่ละ doc มีอะไรบ้าง
+        print(f"    Document: section_number={sec_num}, act_id={act_id}")
+        
         context_text += f"- มาตรา {sec_num}: {text}\n\n"
-        sources_set.add(f"มาตรา {sec_num}")
+        
+        # เก็บเลขมาตราและ act_id
+        if sec_num and sec_num != '?':
+            sections_list.append({ 
+                "id": doc.get('id'), 
+                "act_id": act_id, 
+                "section_number": sec_num, 
+                "paragraph_number": doc.get('paragraph_number')
+            })
+        if act_id:
+            acts_set.add(act_id)
     
-    # เรียงลำดับ Sources ให้สวยงาม
-    try:
-        sources_list = sorted(list(sources_set), key=lambda x: int(x.split()[-1]) if x.split()[-1].isdigit() else 9999)
-    except:
-        sources_list = sorted(list(sources_set))
+    # Debug: ดู metadata ที่เตรียมจะส่ง
+    print(f"    Sections collected: {sections_list}")
+    print(f"    Acts collected: {list(acts_set)}")
+    
+    # ดึงชื่อพระราชบัญญัติ
+    acts = {}
+    for a in acts_set:
+        acts[a] = get_act_name(a)
+    
+    # สร้าง metadata
+    metadata = {
+        "sections": sorted(sections_list, key=lambda x: x["id"]),
+        "acts": sorted(acts.items(), key=lambda x: x[0])  # เรียงตาม act_id
+    }
+    
+    print(f"    Metadata to send: {metadata}")
 
     # --- Step 3: Generator Function (หัวใจของ Streaming) ---
     async def event_generator():
-        # 3.1 ส่ง "รายการมาตรา" (Sources) ไปให้ Frontend ก่อนเลย (เร็วมาก)
+        # 3.1 ส่ง metadata (sections และ acts) - ไม่ส่ง sources แยกแล้ว
         yield json.dumps({
-            "type": "sources", 
-            "data": sources_list
+            "type": "metadata",
+            "data": metadata
         }) + "\n"
 
         prompt = PromptTemplate(template=chat_prompt_template(), input_variables=["context", "question"])
         llm = get_llm()  # Lazy load LLM
         chain = prompt | llm | StrOutputParser()
 
-        # 3.3 สั่ง AI ตอบแบบ Stream (ทีละคำ)
+        # 3.2 สั่ง AI ตอบแบบ Stream (ทีละคำ)
         # ใช้ .astream แทน .invoke เพื่อรับข้อมูลทีละชิ้น
         async for chunk in chain.astream({"context": context_text, "question": search_query}):
             # ส่งเนื้อหาทีละนิดไปให้ Frontend
