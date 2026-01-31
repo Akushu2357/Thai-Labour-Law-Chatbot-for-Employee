@@ -2,15 +2,38 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useLibrary } from '../contexts/LibraryContext';
+import conversationService from '../services/conversationService';
 import './pageChat.css';
+import { useAuth } from '../contexts/AuthContext';
 
 function PageChatStream() {
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [currentRoomId, setCurrentRoomId] = useState(null);
     const messagesEndRef = useRef(null);
     const navigate = useNavigate();
     const { fetchSectionsByActAndNumber, setOpenTrail } = useLibrary();
+    const { user } = useAuth();
+
+    // สร้างห้องสนทนาใหม่เมื่อ component โหลด
+    useEffect(() => {
+        const initializeRoom = async () => {
+            console.log('Initializing chat room for user:', user);
+            try {
+                const room = await conversationService.createRoom({
+                    user_id: user?.id || null,
+                    title: `สนทนา - ${new Date().toLocaleDateString('th-TH')}`
+                });
+                setCurrentRoomId(room.id);
+                console.log('Created chat room:', room.id);
+            } catch (error) {
+                console.error('Failed to create chat room:', error);
+            }
+        };
+
+        initializeRoom();
+    }, []);
 
     // Auto scroll ไปด้านล่างเมื่อมีข้อความใหม่
     const scrollToBottom = () => {
@@ -27,7 +50,7 @@ function PageChatStream() {
             // ดึงข้อมูล section จาก API
             const sections = await fetchSectionsByActAndNumber(actId, sectionNumber);
             let target = Array.isArray(sections) ? sections[0] : sections;
-            
+
             if (!target || !target.id) {
                 console.error('Section not found');
                 return;
@@ -69,7 +92,7 @@ function PageChatStream() {
         const availableSections = new Set(
             metadata.sections.map(s => String(typeof s === 'object' ? s.section_number : s))
         );
-        
+
         // รองรับทั้ง format เก่า (number) และใหม่ (tuple)
         let actId = null;
         if (metadata.acts && metadata.acts.length > 0) {
@@ -91,7 +114,7 @@ function PageChatStream() {
 
         // Custom components สำหรับ ReactMarkdown
         const components = {
-            a: ({node, href, children, ...props}) => {
+            a: ({ node, href, children, ...props }) => {
                 const sectionMatch = href?.match(/#section-(\d+[ก-ฮ]?)/);
                 if (sectionMatch) {
                     const sectionNumber = sectionMatch[1];
@@ -124,17 +147,31 @@ function PageChatStream() {
             return;
         }
 
+        const userMessageText = inputValue;
+
         // เพิ่ม user message ลงใน chat
         const userMessage = {
             id: Date.now(),
             type: 'user',
-            text: inputValue,
+            text: userMessageText,
             timestamp: new Date()
         };
 
         setMessages(prev => [...prev, userMessage]);
         setInputValue('');
         setIsLoading(true);
+
+        // บันทึกข้อความของ user ลงฐานข้อมูล
+        if (currentRoomId) {
+            try {
+                await conversationService.addMessage(currentRoomId, {
+                    sender: 'user',
+                    message: userMessageText
+                });
+            } catch (error) {
+                console.error('Failed to save user message:', error);
+            }
+        }
 
         // สร้าง assistant message ว่างๆ ไว้ก่อน
         const assistantMessageId = Date.now() + 1;
@@ -158,7 +195,7 @@ function PageChatStream() {
                 },
                 body: JSON.stringify({
                     question: inputValue,
-                    history: messages.map(msg => ({content: msg.text, role: msg.type}))
+                    history: messages.map(msg => ({ content: msg.text, role: msg.type }))
                 })
             });
 
@@ -187,7 +224,7 @@ function PageChatStream() {
 
                         try {
                             const parsed = JSON.parse(line);
-                            
+
                             // ถ้าเป็น metadata
                             if (parsed.type === 'metadata') {
                                 console.log('Received metadata:', parsed.data);
@@ -232,17 +269,25 @@ function PageChatStream() {
                 }
             }
 
+            // บันทึกข้อความของ bot ลงฐานข้อมูลหลังจากได้คำตอบเต็มแล้ว
+            if (currentRoomId && accumulatedText) {
+                try {
+                    await conversationService.addMessage(currentRoomId, {
+                        sender: 'bot',
+                        message: accumulatedText
+                    });
+                } catch (error) {
+                    console.error('Failed to save bot message:', error);
+                }
+            }
+
         } catch (error) {
             console.error('Error sending message:', error);
-
-            const errorMessage = {
-                id: Date.now() + 2,
-                type: 'error',
-                text: 'เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง',
-                timestamp: new Date()
-            };
-
-            setMessages(prev => [...prev, errorMessage]);
+            setMessages(prev => prev.map(msg =>
+                msg.id === assistantMessageId
+                    ? { ...msg, type: 'error', text: 'เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง' }
+                    : msg
+            ));
         } finally {
             setIsLoading(false);
             setMessages(prev => prev.map(msg =>
@@ -270,76 +315,77 @@ function PageChatStream() {
                     messages.map(msg => {
                         console.log('Rendering message:', { id: msg.id, hasMetadata: !!msg.metadata, metadata: msg.metadata });
                         return (
-                        <div key={msg.id} className={`chat-message ${msg.type}`}>
-                            <div className="message-bubble">
-                                {renderMessageWithSectionLinks(msg.text, msg.metadata)}
+                            <div key={msg.id} className={`chat-message ${msg.type}`}>
+                                <div className="message-bubble">
+                                    {renderMessageWithSectionLinks(msg.text, msg.metadata)}
 
-                                {msg.metadata && (
-                                    <div className="message-metadata">
-                                        {msg.metadata.acts && msg.metadata.acts.length > 0 && (
-                                            <div className="metadata-section">
-                                                <div className="metadata-header">
-                                                    <span className="material-symbols-outlined">book</span>
-                                                    <strong>แหล่งอ้างอิง</strong>
-                                                </div>
-                                                <div className="metadata-content">
-                                                    {msg.metadata.acts.map((act, idx) => {
-                                                        const actName = Array.isArray(act) ? act[1] : `พระราชบัญญัติ ${act}`;
-                                                        const actId = Array.isArray(act) ? act[0] : act;
-                                                        return (
-                                                            <div key={idx} className="act-item">
-                                                                <span className="act-name">{actName}</span>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
-                                        {msg.metadata.sections && msg.metadata.sections.length > 0 && (
-                                            <div className="metadata-section">
-                                                <div className="metadata-header">
-                                                    <span className="material-symbols-outlined">gavel</span>
-                                                    <strong>มาตราที่เกี่ยวข้อง</strong>
-                                                </div>
-                                                <div className="metadata-content">
-                                                    <div className="sections-list">
-                                                        {msg.metadata.sections.map((section, idx) => {
-                                                            const sectionNum = typeof section === 'object' ? section.section_number : section;
-                                                            const actId = msg.metadata.acts?.[0];
-                                                            const actIdNum = Array.isArray(actId) ? actId[0] : actId;
+                                    {msg.metadata && (
+                                        <div className="message-metadata">
+                                            {msg.metadata.acts && msg.metadata.acts.length > 0 && (
+                                                <div className="metadata-section">
+                                                    <div className="metadata-header">
+                                                        <span className="material-symbols-outlined">book</span>
+                                                        <strong>แหล่งอ้างอิง</strong>
+                                                    </div>
+                                                    <div className="metadata-content">
+                                                        {msg.metadata.acts.map((act, idx) => {
+                                                            const actName = Array.isArray(act) ? act[1] : `พระราชบัญญัติ ${act}`;
+                                                            const actId = Array.isArray(act) ? act[0] : act;
                                                             return (
-                                                                <span
-                                                                    key={idx}
-                                                                    className="section-badge"
-                                                                    onClick={() => handleSectionClick(String(sectionNum), actIdNum)}
-                                                                    title="คลิกเพื่อดูรายละเอียด"
-                                                                >
-                                                                    มาตรา {sectionNum}
-                                                                </span>
+                                                                <div key={idx} className="act-item">
+                                                                    <span className="act-name">{actName}</span>
+                                                                </div>
                                                             );
                                                         })}
                                                     </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                                {msg.isLoading && (
-                                    <div className="typing-indicator">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </div>
-                                )}
+                                            )}
+                                            {msg.metadata.sections && msg.metadata.sections.length > 0 && (
+                                                <div className="metadata-section">
+                                                    <div className="metadata-header">
+                                                        <span className="material-symbols-outlined">gavel</span>
+                                                        <strong>มาตราที่เกี่ยวข้อง</strong>
+                                                    </div>
+                                                    <div className="metadata-content">
+                                                        <div className="sections-list">
+                                                            {msg.metadata.sections.map((section, idx) => {
+                                                                const sectionNum = typeof section === 'object' ? section.section_number : section;
+                                                                const actId = msg.metadata.acts?.[0];
+                                                                const actIdNum = Array.isArray(actId) ? actId[0] : actId;
+                                                                return (
+                                                                    <span
+                                                                        key={idx}
+                                                                        className="section-badge"
+                                                                        onClick={() => handleSectionClick(String(sectionNum), actIdNum)}
+                                                                        title="คลิกเพื่อดูรายละเอียด"
+                                                                    >
+                                                                        มาตรา {sectionNum}
+                                                                    </span>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {msg.isLoading && (
+                                        <div className="typing-indicator">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="message-time">
+                                    {msg.timestamp.toLocaleTimeString('th-TH', {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </div>
                             </div>
-                            <div className="message-time">
-                                {msg.timestamp.toLocaleTimeString('th-TH', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
-                            </div>
-                        </div>
-                    )})
+                        )
+                    })
                 )}
 
                 <div ref={messagesEndRef} />
