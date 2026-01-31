@@ -1,0 +1,45 @@
+import { useState } from 'react';
+import './ChatInput.css';
+
+function ChatInput({ onSendMessage, isLoading }) {
+    const [inputValue, setInputValue] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        
+        if (!inputValue.trim() || isLoading) {
+            return;
+        }
+
+        onSendMessage(inputValue);
+        setInputValue('');
+    };
+
+    return (
+        <form className="chat-input-form" onSubmit={handleSubmit}>
+            <div className="input-wrapper">
+                <input
+                    type="text"
+                    className="chat-input"
+                    placeholder="พิมพ์คำถามของคุณ..."
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    disabled={isLoading}
+                />
+                <button
+                    type="submit"
+                    className="send-button"
+                    disabled={isLoading || !inputValue.trim()}
+                    title="ส่งข้อความ (Enter)"
+                >
+                    <span className="material-symbols-outlined">send</span>
+                </button>
+            </div>
+            <div className="input-hint">
+                กดปุ่ม Enter เพื่อส่งข้อความ
+            </div>
+        </form>
+    );
+}
+
+export default ChatInput;

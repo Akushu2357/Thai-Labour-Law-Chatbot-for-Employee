@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './navBar.css';
+import conversationService from '../services/conversationService';
+import { useAuth } from '../contexts/AuthContext';
 
 function NavBar() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [indexFocus, setIndexFocus] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [historys, setHistorys] = useState([]);
+  const { user } = useAuth();
 
   const closeMenu = () => {
     // play close animation then unmount
@@ -66,6 +70,17 @@ function NavBar() {
     </svg>
   );
 
+  const handleClickHistory = async () => {
+    try {
+      // ดึงประวัติการสนทนา
+      const history = await conversationService.getUserRooms(user.id);
+      setHistorys(history);
+    } catch (error) {
+      console.error('Error getting chat history:', error);
+      alert('ไม่สามารถโหลดประวัติการสนทนาได้');
+    }
+  };
+
   const menuComponent = (
     <>
       <div className='menu-header'>
@@ -79,7 +94,7 @@ function NavBar() {
 
       <nav className='menu-list' aria-label="Menu list">
         {/* <div className="menu-block-item"> */}
-          <button className="menu-item" onClick={() => handleClick('/chat')}>
+          <button className="menu-item" onClick={() => handleClick('/')}>
             <span className='text-h3'>แชตใหม่</span>
             <span className="material-symbols-outlined" aria-hidden>
               add_circle
@@ -105,7 +120,7 @@ function NavBar() {
         <div className="menu-block-item">
           <button
             className="menu-item"
-            onClick={() => handleFocusClick(2)}
+            onClick={() => {handleFocusClick(2); handleClickHistory();}}
             onKeyDown={(e) => handleKeyToggle(2, e)}
             aria-expanded={indexFocus === 2}
             aria-controls="history-panel"
@@ -117,16 +132,18 @@ function NavBar() {
             </span>
           </button>
 
-          {indexFocus === 2 && (
+          {indexFocus === 2 && historys.length > 0 && (
             <div className='menu-subitem-list' id="history-panel">
-              <div className='menu-subitem'>
-                {subitemLineStyle}
-                <p>ประวัติการสนทนา ยังไม่พร้อมใช้งาน</p>
-              </div>
-              <div className='menu-subitem'>
-                {subitemLineStyle}
-                <p>ประวัติการสนทนา ยังไม่พร้อมใช้งาน</p>
-              </div>
+              {historys.map((history) => (
+                <div
+                  key={history.id}
+                    className='menu-subitem'
+                  onClick={() => handleClick(`/chat/${history.id}`)}
+                  >
+                    {subitemLineStyle}
+                    <p>{history.title || 'ห้องสนทนาไม่มีชื่อ'}</p>
+                  </div>
+              ))}
             </div>
           )}
         </div>

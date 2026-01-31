@@ -92,14 +92,16 @@ def delete_chat_room(room_id: int):
         print(f"Error deleting chat room: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def add_message(room_id: int, sender: str, message: str):
+def add_message(room_id: int, sender: str, message: str, metadata: dict = None):
     """เพิ่มข้อความในห้องสนทนา"""
     try:
         # เพิ่มข้อความ
+        print(f"Adding message to room {room_id}: sender={sender}, message={message}, metadata={metadata}")
         message_data = {
             "room_id": room_id,
             "sender": sender,  # 'user' หรือ 'bot'
             "message": message,
+            "metadata": metadata,
             "created_at": datetime.now().isoformat()
         }
         
@@ -142,7 +144,8 @@ def get_chat_history(room_id: int):
             for msg in messages:
                 history.append({
                     "role": msg["sender"],  # 'user' หรือ 'bot'
-                    "content": msg["message"]
+                    "content": msg["message"],
+                    "metadata": msg.get("metadata", None)
                 })
             return history
         return []

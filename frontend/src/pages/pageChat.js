@@ -1,26 +1,188 @@
 import { useState, useEffect, useRef } from 'react';
-import httpService from '../services/httpService';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import conversationService from '../services/conversationService';
+import MessageList from '../components/MessageList';
+import ChatInput from '../components/ChatInput';
 import './pageChat.css';
 
 function PageChat() {
     const [messages, setMessages] = useState([]);
-    const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = useRef(null);
+    const [roomInfo, setRoomInfo] = useState(null);
+    const navigate = useNavigate();
+    const { chat_id } = useParams();
+    const location = useLocation();
+    const hasProcessedFirstMessage = useRef(false);
+    const hasLoadedHistory = useRef(false);
+    const messagesRef = useRef(messages);
 
-    // Auto scroll ไปด้านล่างเมื่อมีข้อความใหม่
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
+    // Update ref ทุกครั้งที่ messages เปลี่ยน
     useEffect(() => {
-        scrollToBottom();
+        messagesRef.current = messages;
     }, [messages]);
 
-    const handleSendMessage = async (e) => {
-        e.preventDefault();
+    // รีเซ็ตสถานะเมื่อเปลี่ยนห้อง
+    useEffect(() => {
+        hasLoadedHistory.current = false;
+        hasProcessedFirstMessage.current = false;
+    }, [chat_id]);
 
-        if (!inputValue.trim()) {
+    // โหลดประวัติการสนทนาเมื่อเข้าหน้า
+    useEffect(() => {
+        const loadChatHistory = async () => {
+            if (!chat_id) {
+                navigate('/');
+                return;
+            }
+
+            if (hasLoadedHistory.current) {
+                return;
+            }
+
+            try {
+                // ดึงข้อมูลห้อง
+                const room = await conversationService.getRoom(chat_id);
+                setRoomInfo(room);
+
+                // ดึงประวัติข้อความ
+                const history = await conversationService.getMessages(chat_id);
+
+                // แปลง format จาก API เป็น format ที่ใช้ใน component
+                const formattedMessages = history.map((msg, idx) => ({
+                    id: msg.id || idx,
+                    type: msg.sender === 'user' ? 'user' : 'assistant',
+                    text: msg.message,
+                    timestamp: new Date(msg.created_at),
+                    metadata: null
+                }));
+
+                setMessages(prev => (prev.length > 0 ? prev : formattedMessages));
+                hasLoadedHistory.current = true;
+
+                // ถ้ามี firstMessage จาก landing page ให้เริ่ม stream
+                const firstMessage = location.state?.firstMessage;
+                if (firstMessage && !hasProcessedFirstMessage.current) {
+                    hasProcessedFirstMessage.current = true;
+                    handleStreamResponse(firstMessage);
+                    // เคลียร์ state เพื่อป้องกันเรียกซ้ำจาก StrictMode
+                    navigate(location.pathname, { replace: true, state: {} });
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+                alert('ไม่สามารถโหลดประวัติการสนทนาได้');
+                navigate('/');
+            }
+        };
+
+        loadChatHistory();
+    }, [chat_id, navigate]);
+
+    const handleStreamResponse = async (userMessageText) => {
+        // สร้าง assistant message ว่างๆ ไว้ก่อน
+        const assistantMessageId = Date.now();
+        const assistantMessage = {
+            id: assistantMessageId,
+            type: 'assistant',
+            text: '',
+            timestamp: new Date(),
+            metadata: null,
+            isLoading: true
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        setIsLoading(true);
+
+        try {
+            // เรียก streaming API
+            const baseURL = process.env.REACT_APP_BASE_API_URL || 'http://localhost:10000';
+            const response = await fetch(`${baseURL}/llm/chat_stream`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: userMessageText,
+                    history: messagesRef.current
+                        .filter(m => m.type !== 'error' && !m.isLoading)
+                        .map(msg => ({ content: msg.text, role: msg.type }))
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedText = '';
+            let metadata = null;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line !== '') {
+                        try {
+                            const parsed = JSON.parse(line);
+
+                            if (parsed.type === 'metadata') {
+                                metadata = parsed.data || {};
+                                setMessages(prev => prev.map(msg =>
+                                    msg.id === assistantMessageId
+                                        ? { ...msg, metadata: parsed.data }
+                                        : msg
+                                ));
+                            } else if (parsed.type === 'content') {
+                                accumulatedText += parsed.data || '';
+                                setMessages(prev => prev.map(msg =>
+                                    msg.id === assistantMessageId
+                                        ? { ...msg, text: accumulatedText }
+                                        : msg
+                                ));
+                            }
+                        } catch (e) {
+                            console.log('Non-JSON data:', line);
+                        }
+                    }
+                }
+            }
+
+            // บันทึกข้อความของ bot ลงฐานข้อมูล
+            if (chat_id && accumulatedText) {
+                try {
+                    console.log('Saving bot message with metadata:', metadata);
+                    await conversationService.addMessage(chat_id, {
+                        sender: 'bot',
+                        message: accumulatedText,
+                        metadata: metadata || {}
+                    });
+                } catch (error) {
+                    console.error('Failed to save bot message:', error);
+                }
+            }
+
+        } catch (error) {
+            console.error('Error sending message:', error);
+            setMessages(prev => prev.map(msg =>
+                msg.id === assistantMessageId
+                    ? { ...msg, type: 'error', text: 'เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง' }
+                    : msg
+            ));
+        } finally {
+            setIsLoading(false);
+            setMessages(prev => prev.map(msg =>
+                msg.id === assistantMessageId
+                    ? { ...msg, isLoading: false }
+                    : msg
+            ));
+        }
+    };
+
+    const handleSendMessage = async (userMessageText) => {
+        if (!userMessageText.trim() || isLoading) {
             return;
         }
 
@@ -28,127 +190,41 @@ function PageChat() {
         const userMessage = {
             id: Date.now(),
             type: 'user',
-            text: inputValue,
+            text: userMessageText,
             timestamp: new Date()
         };
 
         setMessages(prev => [...prev, userMessage]);
-        setInputValue('');
-        setIsLoading(true);
 
-        try {
-            // ส่ง message ไปยัง backend
-            console.log('Sending message to backend:', messages.map(msg => ({content: msg.text, role: msg.type})));
-            const response = await httpService.post('/llm/chat', {
-                question: inputValue,
-                history: messages.map(msg => ({content: msg.text, role: msg.type}))
-            });
-
-            // เพิ่ม assistant message ลงใน chat
-            const assistantMessage = {
-                id: Date.now() + 1,
-                type: 'assistant',
-                text: response.data.response || response.data.message || response.data.answer || 'ขออภัยที่ไม่สามารถตอบได้ในขณะนี้',
-                timestamp: new Date(),
-                metadata: response.data.metadata || null
-            };
-
-            setMessages(prev => [...prev, assistantMessage]);
-        } catch (error) {
-            console.error('Error sending message:', error);
-
-            const errorMessage = {
-                id: Date.now() + 1,
-                type: 'error',
-                text: 'เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง',
-                timestamp: new Date()
-            };
-
-            setMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setIsLoading(false);
+        // บันทึกข้อความของ user ลงฐานข้อมูล
+        if (chat_id) {
+            try {
+                await conversationService.addMessage(chat_id, {
+                    sender: 'user',
+                    message: userMessageText
+                });
+            } catch (error) {
+                console.error('Failed to save user message:', error);
+            }
         }
+
+        // เริ่ม stream response
+        await handleStreamResponse(userMessageText);
     };
 
     return (
         <div className="chat-container">
             <div className="chat-header">
+                <h2>{roomInfo?.title || 'กำลังโหลด...'}</h2>
                 <p className="chat-subtitle">ถามคำถามเกี่ยวกับกฎหมายแรงงานไทย</p>
             </div>
 
-            <div className="chat-messages">
-                {messages.length === 0 ? (
-                    <div className="chat-empty">
-                        <div className="empty-icon">💬</div>
-                        <h3>ยินดีต้อนรับ!</h3>
-                        <p>ถามคำถามใดๆ เกี่ยวกับกฎหมายแรงงานไทย</p>
-                    </div>
-                ) : (
-                    messages.map(msg => (
-                        <div key={msg.id} className={`chat-message ${msg.type}`}>
-                            <div className="message-bubble">
-                                <p>{msg.text}</p>
-                                {msg.metadata && (
-                                    <div className="message-metadata">
-                                        {msg.metadata.sections && msg.metadata.sections.length > 0 && (
-                                            <div className="metadata-item">
-                                                <strong>มาตรา:</strong> {msg.metadata.sections.join(', ')}
-                                            </div>
-                                        )}
-                                        {msg.metadata.acts && msg.metadata.acts.length > 0 && (
-                                            <div className="metadata-item">
-                                                <strong>พระราชบัญญัติ:</strong> {msg.metadata.acts.join(', ')}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="message-time">
-                                {msg.timestamp.toLocaleTimeString('th-TH', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
-                            </div>
-                        </div>
-                    ))
-                )}
-                {isLoading && (
-                    <div className="chat-message assistant">
-                        <div className="message-bubble">
-                            <div className="typing-indicator">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                <div ref={messagesEndRef} />
-            </div>
+            <MessageList messages={messages} />
 
-            <form className="chat-input-form" onSubmit={handleSendMessage}>
-                <div className="input-wrapper">
-                    <input
-                        type="text"
-                        className="chat-input"
-                        placeholder="พิมพ์คำถามของคุณ..."
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        disabled={isLoading}
-                    />
-                    <button
-                        type="submit"
-                        className="send-button"
-                        disabled={isLoading || !inputValue.trim()}
-                        title="ส่งข้อความ (Enter)"
-                    >
-                        <span className="material-symbols-outlined">send</span>
-                    </button>
-                </div>
-                <div className="input-hint">
-                    กดปุ่ม Enter เพื่อส่งข้อความ
-                </div>
-            </form>
+            <ChatInput
+                onSendMessage={handleSendMessage}
+                isLoading={isLoading}
+            />
         </div>
     );
 }

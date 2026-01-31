@@ -43,6 +43,38 @@ const conversationService = {
     },
 
     /**
+     * ดึงรายการห้องสนทนาของผู้ใช้คนหนึ่ง
+     * @param {number|null} userId - ID ของผู้ใช้
+     * @returns {Promise} Array of room objects
+     */
+    getUserRooms: async (userId) => {
+        try {
+            return await conversationService.getRooms({ 
+                user_id: userId, 
+                include_archived: false 
+            });
+        } catch (error) {
+            console.error('Error getting user rooms:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * อัพเดทชื่อห้องสนทนา
+     * @param {number} roomId - ID ของห้อง
+     * @param {string} title - ชื่อใหม่
+     * @returns {Promise} Updated room object
+     */
+    updateRoomTitle: async (roomId, title) => {
+        try {
+            return await conversationService.updateRoom(roomId, { title });
+        } catch (error) {
+            console.error('Error updating room title:', error);
+            throw error;
+        }
+    },
+
+    /**
      * ดึงข้อมูลห้องสนทนาตาม ID
      * @param {number} roomId
      * @returns {Promise} Room object
@@ -93,15 +125,17 @@ const conversationService = {
     /**
      * เพิ่มข้อความในห้องสนทนา
      * @param {number} roomId
-     * @param {Object} params - { sender: 'user'|'bot', message: string }
+     * @param {Object} params - { sender: 'user'|'bot', message: string, metadata?: Object }
      * @returns {Promise} Message object
      */
     addMessage: async (roomId, params) => {
-        const { sender, message } = params;
+        const { sender, message, metadata } = params;
+        console.log('Adding message with metadata:', metadata);
         try {
             const response = await httpService.post(`/api/conversations/rooms/${roomId}/messages`, {
                 sender,
-                message
+                message,
+                metadata: metadata || {}
             });
             return response.data;
         } catch (error) {

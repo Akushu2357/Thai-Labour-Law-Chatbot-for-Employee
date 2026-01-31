@@ -16,7 +16,7 @@ class UpdateRoomRequest(BaseModel):
 class AddMessageRequest(BaseModel):
     sender: str  # 'user' หรือ 'bot'
     message: str
-
+    metadata: Optional[dict] = None
 # ===================== Chat Rooms =====================
 
 @router.post("/rooms")
@@ -52,7 +52,7 @@ def delete_room(room_id: int):
 @router.post("/rooms/{room_id}/messages")
 def add_message_to_room(room_id: int, request: AddMessageRequest):
     """เพิ่มข้อความในห้องสนทนา"""
-    return add_message(room_id=room_id, sender=request.sender, message=request.message)
+    return add_message(room_id=room_id, sender=request.sender, message=request.message, metadata=request.metadata)
 
 @router.get("/rooms/{room_id}/messages")
 def get_room_messages(

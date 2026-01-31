@@ -6,8 +6,8 @@ import {
   Outlet,
 } from "react-router-dom";
 import './index.css';
-import App from './App';
 import NavBar from './components/navBar';
+import PageLanding from './pages/pageLanding';
 import PageLibrary from './pages/pageLibrary';
 import PageChat from './pages/pageChat';
 import PageAuth from './pages/pageAuth';
@@ -17,8 +17,6 @@ import RequireAuth from './components/RequireAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Laws from './components/laws';
 import PageAccount from './pages/pageAccount';
-import PageChatStream from './pages/pageChatStream';
-// import reportWebVitals from './reportWebVitals';
 
 const Layout = () => {
   const { isAuthenticated } = useAuth();
@@ -41,15 +39,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <RequireAuth><App /></RequireAuth>,
+        element: <RequireAuth><PageLanding /></RequireAuth>,
       },
       {
-        path: "/chat_old",
+        path: "/chat/:chat_id",
         element: <RequireAuth><PageChat /></RequireAuth>,
-      },
-      {
-        path: "/chat",
-        element: <RequireAuth><PageChatStream /></RequireAuth>,
       },
       {
         path: "/library",
