@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import conversationService from '../services/conversationService';
 import './pageLanding.css';
 import ChatInput from '../components/ChatInput';
+import logo from '../assets/logo.svg';
 
 function PageLanding() {
     const [inputValue, setInputValue] = useState('');
@@ -47,24 +48,25 @@ function PageLanding() {
     return (
         <div className="landing-container">
             <div className="landing-hero">
-                <div className="hero-icon">⚖️</div>
-                <h1 className="hero-title">แชทบอทกฎหมายแรงงานไทย</h1>
-                <p className="hero-subtitle">
+                {/* <div className="hero-icon">⚖️</div> */}
+                <img src={logo} className="hero-logo" alt="Logo" />
+                <span className="text-h1 hero-title">แชทบอทกฎหมายแรงงานไทย</span>
+                <span className="text-h3 hero-subtitle">
                     ถามคำถามเกี่ยวกับสิทธิและหน้าที่ของคุณในฐานะพนักงาน
-                </p>
+                </span>
 
                 <div className="hero-features">
                     <div className="feature-item">
                         <span className="material-symbols-outlined">verified</span>
-                        <span>อ้างอิงกฎหมายที่ถูกต้อง</span>
+                        <span className="text-p">อ้างอิงกฎหมายโดยตรง</span>
                     </div>
                     <div className="feature-item">
                         <span className="material-symbols-outlined">chat</span>
-                        <span>ตอบคำถามได้ทันที</span>
+                        <span className="text-p">พูดคุยโต้ตอบได้</span>
                     </div>
                     <div className="feature-item">
                         <span className="material-symbols-outlined">history</span>
-                        <span>บันทึกประวัติการสนทนา</span>
+                        <span className="text-p">บันทึกประวัติการสนทนา</span>
                     </div>
                 </div>
             </div>

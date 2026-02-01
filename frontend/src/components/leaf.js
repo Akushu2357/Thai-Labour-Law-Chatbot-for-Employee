@@ -34,8 +34,8 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
     const highlightText = (text, searchTerm) => {
         if (!searchTerm || !text) return text;
         const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
-        return parts.map((part, i) => 
-            part.toLowerCase() === searchTerm.toLowerCase() 
+        return parts.map((part, i) =>
+            part.toLowerCase() === searchTerm.toLowerCase()
                 ? <mark key={i} style={{ backgroundColor: '#ffeb3b', padding: '2px 0' }}>{part}</mark>
                 : part
         );
@@ -79,13 +79,13 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
         else if (item.name) text = item.name.replaceAll('\\n', ' ');
         else if (item.section_number && item.content) text = item.content.replaceAll('\\n', ' ');
         else text = item.section_number?.replaceAll('\\n', ' ') || `รายการที่ ${item.id}`;
-        
+
         // Count matches in children for super_section
         let matchCount = 0;
         if (filterText && type === 'super_section' && children.length > 0) {
             matchCount = children.filter(child => matchesFilter(child, filterText)).length;
         }
-        
+
         if (filterText && currentMatches) {
             return (
                 <>
@@ -97,7 +97,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                 </>
             );
         }
-        
+
         // Show count even if not matched but has matched children
         if (filterText && type === 'super_section' && matchCount > 0) {
             return (
@@ -107,20 +107,20 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                 </>
             );
         }
-        
+
         return text;
     };
 
     const getDisplaySection = () => {
         const elements = [];
-        
+
         // Add match indicator if current section matches
         if (filterText && currentMatches) {
             elements.push(
                 <span key="match-indicator" style={{ color: '#ff9800', marginRight: '8px' }}>🔍</span>
             );
         }
-        
+
         let start = 0;
         for (const ref in item.cross_references) {
             const textPart = item.title.slice(start, parseInt(ref));
@@ -130,7 +130,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             } else {
                 elements.push(textPart);
             }
-            
+
             elements.push(
                 <a key={ref} className='reference' onClick={() => { handleReferenceClick(item.cross_references[ref]); setClickLoading(ref); }}>
                     {item.cross_references[ref].original_text}
@@ -143,14 +143,14 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             ));
             start = parseInt(ref) + item.cross_references[ref].original_text.length;
         }
-        
+
         const lastPart = item.title.slice(start);
         if (filterText && currentMatches) {
             elements.push(<span key={`text-${start}`}>{highlightText(lastPart, filterText)}</span>);
         } else {
             elements.push(lastPart);
         }
-        
+
         return elements;
     };
 
@@ -224,7 +224,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
     // Filter only section nodes, always show book/group/super_section
     let isVisible = true;
     let currentMatches = false;
-    
+
     if (filterText && type === 'section') {
         // Check if this section_number is in allowed set
         if (computedAllowedSections && computedAllowedSections.size > 0) {
@@ -249,9 +249,10 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                 onClick={hasChildren() ? handleToggle : undefined}>
                 <div className='leaf-content'>
                     {hasChildren() && (
-                        <span style={{ marginRight: '8px', fontSize: '12px' }}>
-                            {isExpanded ? '▼' : '▶'}
+                        <span className="material-symbols-outlined">
+                            {isExpanded ? 'arrow_drop_down' : 'arrow_right'}
                         </span>
+
                     )}
                     <>
                         {type !== 'section' &&
@@ -310,7 +311,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                             <span className="loading-icon" aria-label="loading">
                                 <span className="material-symbols-outlined">progress_activity</span>
                             </span>
-                            <span style={{ marginLeft: '0.5rem' }}>กำลังโหลด...</span>
+                            <span className="text-p-without-color" style={{ marginLeft: '0.5rem', textAlign: 'left' }}>กำลังโหลด...</span>
                         </div>
                     )
                 )

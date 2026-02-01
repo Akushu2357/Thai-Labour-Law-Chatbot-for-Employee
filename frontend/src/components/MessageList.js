@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useLibrary } from '../contexts/LibraryContext';
@@ -8,6 +8,7 @@ function MessageList({ messages }) {
     const messagesEndRef = useRef(null);
     const navigate = useNavigate();
     const { fetchSectionsByActAndNumber, setOpenTrail } = useLibrary();
+    const [openMetadataId, setOpenMetadataId] = useState(null);
 
     // Auto scroll ไปด้านล่างเมื่อมีข้อความใหม่
     const scrollToBottom = () => {
@@ -17,6 +18,10 @@ function MessageList({ messages }) {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    const toggleMetadata = (messageId) => {
+        setOpenMetadataId(prev => (prev === messageId ? null : messageId));
+    };
 
     // ฟังก์ชันสำหรับจัดการคลิกลิงก์มาตรา
     const handleSectionClick = async (sectionNumber, actId) => {
@@ -119,61 +124,77 @@ function MessageList({ messages }) {
             {messages.length === 0 ? (
                 <div className="chat-empty">
                     <div className="empty-icon">💬</div>
-                    <h3>ยินดีต้อนรับ!</h3>
-                    <p>ถามคำถามใดๆ เกี่ยวกับกฎหมายแรงงานไทย</p>
+                    <span className="text-h3-without-color">ยินดีต้อนรับ!</span>
+                    <span className="text-p-without-color">ถามคำถามใดๆ เกี่ยวกับกฎหมายแรงงานไทย</span>
                 </div>
             ) : (
-                messages.map(msg => (
+                messages.map(msg => {
+                    const isMetadataOpen = openMetadataId === msg.id;
+                    return (
                     <div key={msg.id} className={`chat-message ${msg.type}`}>
                         <div className="message-bubble">
                             {renderMessageWithSectionLinks(msg.text, msg.metadata)}
 
                             {msg.metadata && (
-                                <div className="message-metadata">
-                                    {msg.metadata.acts && msg.metadata.acts.length > 0 && (
-                                        <div className="metadata-section">
-                                            <div className="metadata-header">
-                                                <span className="material-symbols-outlined">book</span>
-                                                <strong>แหล่งอ้างอิง</strong>
-                                            </div>
-                                            <div className="metadata-content">
-                                                {msg.metadata.acts.map((act, idx) => {
-                                                    const actName = Array.isArray(act) ? act[1] : `พระราชบัญญัติ ${act}`;
-                                                    return (
-                                                        <div key={idx} className="act-item">
-                                                            <span className="act-name">{actName}</span>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {msg.metadata.sections && msg.metadata.sections.length > 0 && (
-                                        <div className="metadata-section">
-                                            <div className="metadata-header">
-                                                <span className="material-symbols-outlined">gavel</span>
-                                                <strong>มาตราที่เกี่ยวข้อง</strong>
-                                            </div>
-                                            <div className="metadata-content">
-                                                <div className="sections-list">
-                                                    {msg.metadata.sections.map((section, idx) => {
-                                                        const sectionNum = typeof section === 'object' ? section.section_number : section;
-                                                        const actId = msg.metadata.acts?.[0];
-                                                        const actIdNum = Array.isArray(actId) ? actId[0] : actId;
-                                                        return (
-                                                            <span
-                                                                key={idx}
-                                                                className="section-badge"
-                                                                onClick={() => handleSectionClick(String(sectionNum), actIdNum)}
-                                                                title="คลิกเพื่อดูรายละเอียด"
-                                                            >
-                                                                มาตรา {sectionNum}
-                                                            </span>
-                                                        );
-                                                    })}
+                                <div className={`message-metadata ${isMetadataOpen ? 'expanded' : ''}`}>
+                                    <button
+                                        type="button"
+                                        className="metadata-toggle"
+                                        onClick={() => toggleMetadata(msg.id)}
+                                        aria-expanded={isMetadataOpen}
+                                    >
+                                        <span className='material-symbols-outlined close'>book_2</span>
+                                        <span className='material-symbols-outlined open'>menu_book</span>
+                                        <span className='text-p-without-color'><strong>แหล่งอ้างอิง</strong></span>
+                                    </button>
+                                    {isMetadataOpen && (
+                                        <>
+                                            {msg.metadata.acts && msg.metadata.acts.length > 0 && (
+                                                <div className="metadata-section">
+                                                    <div className="metadata-header">
+                                                        <span className="material-symbols-outlined">book</span>
+                                                        <span className='text-small-without-color'><strong>พระราชบัญญัติที่เกี่ยวข้อง</strong></span>
+                                                    </div>
+                                                    <div className="metadata-content">
+                                                        {msg.metadata.acts.map((act, idx) => {
+                                                            const actName = Array.isArray(act) ? act[1] : `พระราชบัญญัติ ${act}`;
+                                                            return (
+                                                                <div key={idx} className="act-item">
+                                                                    <span className="small act-name">{actName}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            )}
+                                            {msg.metadata.sections && msg.metadata.sections.length > 0 && (
+                                                <div className="metadata-section">
+                                                    <div className="metadata-header">
+                                                        <span className="material-symbols-outlined">gavel</span>
+                                                        <span className='text-small-without-color'><strong>มาตราที่เกี่ยวข้อง</strong></span>
+                                                    </div>
+                                                    <div className="metadata-content">
+                                                        <div className="sections-list">
+                                                            {msg.metadata.sections.map((section, idx) => {
+                                                                const sectionNum = typeof section === 'object' ? section.section_number : section;
+                                                                const actId = msg.metadata.acts?.[0];
+                                                                const actIdNum = Array.isArray(actId) ? actId[0] : actId;
+                                                                return (
+                                                                    <span
+                                                                        key={idx}
+                                                                        className="small section-badge"
+                                                                        onClick={() => handleSectionClick(String(sectionNum), actIdNum)}
+                                                                        title="คลิกเพื่อดูรายละเอียด"
+                                                                    >
+                                                                        มาตรา {sectionNum}
+                                                                    </span>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             )}
@@ -192,7 +213,8 @@ function MessageList({ messages }) {
                             })}
                         </div>
                     </div>
-                ))
+                );
+                })
             )}
             <div ref={messagesEndRef} />
         </div>

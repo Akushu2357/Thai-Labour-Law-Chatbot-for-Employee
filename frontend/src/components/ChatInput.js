@@ -20,7 +20,7 @@ function ChatInput({ onSendMessage, isLoading }) {
             <div className="input-wrapper">
                 <input
                     type="text"
-                    className="chat-input"
+                    className="chat-input text-p-without-color"
                     placeholder="พิมพ์คำถามของคุณ..."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
@@ -35,7 +35,7 @@ function ChatInput({ onSendMessage, isLoading }) {
                     <span className="material-symbols-outlined">send</span>
                 </button>
             </div>
-            <div className="input-hint">
+            <div className="input-hint text-small-without-color">
                 กดปุ่ม Enter เพื่อส่งข้อความ
             </div>
         </form>

@@ -11,13 +11,17 @@ section {
 }
 
 .tags-stack {
-    margin-top: 5px;
-    margin-bottom: 10px;
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
     overflow-x: auto;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;     /* Firefox */
 }
 .tags-stack::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
+
+.bg-0474ba {
+    background-color: #0474ba !important;
+}
 
 .tag-badge {
     font-size: 0.8rem;
@@ -47,8 +51,6 @@ section {
 }
 
 .laws-title {
-    font-size: 2rem;
-    margin: 0 0 1.5rem 0;
     font-weight: 600;
     text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }

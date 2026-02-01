@@ -120,6 +120,10 @@
 .selected-tags-stack::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
 .selected-tags-stack { -ms-overflow-style: none; scrollbar-width: none; }
 
+.bg-0474ba {
+    background-color: #0474ba !important;
+}
+
 /* .tag-badge {
     display: flex;
     align-items: center;

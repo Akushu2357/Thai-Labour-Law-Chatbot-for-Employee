@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './navBar.css';
 import conversationService from '../services/conversationService';
 import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/logo.svg';
 
 function NavBar() {
   const navigate = useNavigate();
@@ -63,13 +64,6 @@ function NavBar() {
     }
   };
 
-  const subitemLineStyle = (
-    <svg width="20" height="40" viewBox="0 0 20 40" fill="none" aria-hidden>
-      <line x1={0} y1={40} x2={20} y2={40} stroke="#909090" strokeWidth={4}></line>
-      <line x1={0} y1={0} x2={0} y2={40} stroke="#909090" strokeWidth={6}></line>
-    </svg>
-  );
-
   const handleClickHistory = async () => {
     try {
       // ดึงประวัติการสนทนา
@@ -89,38 +83,38 @@ function NavBar() {
             arrow_back
           </span>
         </button>
-        <h1 className="brand" aria-hidden onClick={() => handleClick('/')}>รายการ</h1>
+        <span className="text-h1 brand" aria-hidden onClick={() => handleClick('/')}>
+          <img src={logo} alt="Logo" className='menu-logo' />
+          รายการ
+        </span>
       </div>
 
       <nav className='menu-list' aria-label="Menu list">
-        {/* <div className="menu-block-item"> */}
-          <button className="menu-item" onClick={() => handleClick('/')}>
-            <span className='text-h3'>แชตใหม่</span>
-            <span className="material-symbols-outlined" aria-hidden>
-              add_circle
-            </span>
-          </button>
-        {/* </div> */}
+        <button className="menu-item" onClick={() => handleClick('/')}>
+          <span className='text-h3'>แชตใหม่</span>
+          <span className="material-symbols-outlined" aria-hidden>
+            add_circle
+          </span>
+        </button>
 
-        {/* <div className='menu-block-item'> */}
-          <button
-            className="menu-item"
-            onClick={() => handleClick('/library')}
-            onKeyDown={(e) => handleKeyToggle(1, e)}
-            aria-expanded={indexFocus === 1}
-            aria-controls="library-panel"
-          >
-            <span className='text-h3'>ห้องสมุดกฎหมาย</span>
-            <span className="material-symbols-outlined" aria-hidden>
-              {indexFocus === 1 ? 'arrow_circle_down' : 'arrow_circle_right'}
-            </span>
-          </button>
+        <button
+          className="menu-item"
+          onClick={() => handleClick('/library')}
+          onKeyDown={(e) => handleKeyToggle(1, e)}
+          aria-expanded={indexFocus === 1}
+          aria-controls="library-panel"
+        >
+          <span className='text-h3'>ห้องสมุดกฎหมาย</span>
+          <span className="material-symbols-outlined" aria-hidden>
+            {indexFocus === 1 ? 'arrow_circle_down' : 'arrow_circle_right'}
+          </span>
+        </button>
         {/* </div> */}
 
         <div className="menu-block-item">
           <button
             className="menu-item"
-            onClick={() => {handleFocusClick(2); handleClickHistory();}}
+            onClick={() => { handleFocusClick(2); handleClickHistory(); }}
             onKeyDown={(e) => handleKeyToggle(2, e)}
             aria-expanded={indexFocus === 2}
             aria-controls="history-panel"
@@ -137,19 +131,21 @@ function NavBar() {
               {historys.map((history) => (
                 <div
                   key={history.id}
-                    className='menu-subitem'
+                  className='menu-subitem'
                   onClick={() => handleClick(`/chat/${history.id}`)}
-                  >
-                    {subitemLineStyle}
-                    <p>{history.title || 'ห้องสนทนาไม่มีชื่อ'}</p>
-                  </div>
+                >
+                  <span className="material-symbols-outlined">
+                    arrow_right
+                  </span>
+                  <span className="text-p">{history.title || 'ห้องสนทนาไม่มีชื่อ'}</span>
+                </div>
               ))}
             </div>
           )}
         </div>
       </nav>
       <div className='menu-footer'>
-        <h3 className="brand" aria-hidden onClick={() => handleClick('/')}>จัดการบัญชี</h3>
+        <span className="text-h1 brand" aria-hidden onClick={() => handleClick('/account')}>จัดการบัญชี</span>
       </div>
     </>
   );

@@ -91,6 +91,7 @@ function SearchBox({
                     <input 
                         type="search" 
                         placeholder={placeholder}
+                        className='text-p'
                         value={searchTerm} 
                         onChange={handleSearchChange} 
                         onKeyDown={handleKeyDown} 
@@ -108,7 +109,7 @@ function SearchBox({
                                 onClick={() => handleTagClick(tag)} 
                                 style={{ cursor: 'pointer' }}
                             >
-                                {tag.name}
+                                <span className="text-small">{tag.name}</span>
                             </li>
                         ))}
                         <li 
@@ -117,7 +118,7 @@ function SearchBox({
                             style={{ cursor: 'pointer' }}
                         >
                             <span style={{ fontSize: '10px', color: '#A9A9A9' }}>Keyword: </span>
-                            {searchTerm}
+                            <span className="text-small">{searchTerm}</span>
                         </li>
                     </ul>
                 )}
@@ -125,8 +126,8 @@ function SearchBox({
             {selectedTags.length > 0 && (
                 <Stack direction="horizontal" gap={1} className="selected-tags-stack">
                     {selectedTags.map(tag => (
-                        <Badge pill bg="info" key={tag.id} className="tag-badge">
-                            {tag.name}
+                        <Badge pill bg="info" key={tag.id} className="tag-badge bg-0474ba">
+                            <span className="text-small-without-color">{tag.name}</span>
                             <button 
                                 onClick={() => onRemoveTag(tag.id)} 
                                 style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}

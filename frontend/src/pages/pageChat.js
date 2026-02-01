@@ -53,7 +53,7 @@ function PageChat() {
                     type: msg.sender === 'user' ? 'user' : 'assistant',
                     text: msg.message,
                     timestamp: new Date(msg.created_at),
-                    metadata: null
+                    metadata: msg.sender === 'user' ? null : msg.metadata || null
                 }));
 
                 setMessages(prev => (prev.length > 0 ? prev : formattedMessages));
@@ -215,8 +215,8 @@ function PageChat() {
     return (
         <div className="chat-container">
             <div className="chat-header">
-                <h2>{roomInfo?.title || 'กำลังโหลด...'}</h2>
-                <p className="chat-subtitle">ถามคำถามเกี่ยวกับกฎหมายแรงงานไทย</p>
+                <span className="h2">{roomInfo?.title || 'กำลังโหลด...'}</span>
+                <span className="p chat-subtitle">ถามคำถามเกี่ยวกับกฎหมายแรงงานไทย</span>
             </div>
 
             <MessageList messages={messages} />

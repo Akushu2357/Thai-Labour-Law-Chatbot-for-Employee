@@ -13,6 +13,14 @@
   z-index: 20;
 }
 
+.brand {
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
 .menu-btn {
   padding: 0;
   background: none;
@@ -29,6 +37,7 @@
   width: auto;
   background: #fff;
   border-radius: 30px;
+  height: 100;
   /* subtle slide-in */
   animation: slideIn 220ms ease-out forwards;
 }
@@ -43,26 +52,31 @@ span.material-symbols-outlined {
 
 .menu-header {
   justify-content: space-between;
-  padding: 10px;
+  /* padding: 10px; */
   border-bottom: 1px solid transparent;
   border-image: linear-gradient(to right, #f17720, #ffa630, #ebebeb, #00a7e1, #0474ba);
   border-image-slice: 1;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
-  gap: 10px;
+  /* gap: 10px; */
   align-items: center;
   text-align: center;
-  max-height: 50px;
+  max-height: 3rem;
+}
+
+.menu-logo {
+  height: 2rem;
+  width: 2rem;
 }
 
 .menu-footer {
-  max-height: 50px;
-  align-items: center;
-  text-align: center;
-  padding: 10px;
+  /* padding: 10px; */
   border-top: 1px solid transparent;
   border-image: linear-gradient(to right, #f17720, #ffa630, #ebebeb, #00a7e1, #0474ba);
   border-image-slice: 1;
+  align-items: center;
+  text-align: center;
+  max-height: 3rem;
   width: auto;
 }
 
@@ -96,6 +110,8 @@ button:focus-visible {
   text-align: center;
   align-items: center;
   flex-grow: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .menu-block-item {
@@ -104,6 +120,7 @@ button:focus-visible {
   align-items: flex-end;
   width: 100%;
   max-width: 300px;
+  overflow: hidden;
 }
 
 .menu-item {
@@ -150,6 +167,9 @@ button.menu-item:active {
   padding: 0px 0px 0px 5px;
   gap: 0px;
   align-items: flex-end;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
   width: 100%;
 }
 
@@ -161,13 +181,18 @@ button.menu-item:active {
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-}
-.menu-subitem svg {
-  position: relative;
-  top: -10px;
+  cursor: pointer;
 }
 
-.menu-subitem p {
+.menu-subitem .material-symbols-outlined {
+  rotate: 90deg;
+}
+
+.menu-subitem:hover .material-symbols-outlined {
+  rotate: 0deg;
+}
+
+.menu-subitem .text-p {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -175,8 +200,9 @@ button.menu-item:active {
   width: 100%;
   margin: 0px;
   right: 0px;
-  border: 2px solid #d4a574;
-  border-radius: 12px;
+  text-align: left;
+  /* border: 2px solid #d4a574;
+  border-radius: 12px; */
 }
 
 /* Desktop vs Mobile responsive rules

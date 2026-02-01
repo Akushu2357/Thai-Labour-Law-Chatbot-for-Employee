@@ -90,18 +90,18 @@ function Laws() {
         <>
             {!actData && !loading && (
                 <div className='laws-no-data'>
-                    <p>ไม่พบข้อมูลพระราชบัญญัติที่เลือก</p>
+                    <span className='text-p-without-color'>ไม่พบข้อมูลพระราชบัญญัติที่เลือก</span>
                 </div>
             )}
 
             {actData && (
                 <section>
                     <div className='laws-header'>
-                        <h1 className='laws-title'>{actData.title}</h1>
+                        <span className='laws-title text-h1'>{actData.title}</span>
                         <Stack direction="horizontal" gap={1} className="tags-stack">
                             {actData.tags.map(tag => (
-                                <Badge pill bg="info" key={tag.id} className="tag-badge">
-                                    {tag}
+                                <Badge pill bg="info" key={tag.id} className="tag-badge bg-0474ba">
+                                    <span className="text-small-without-color">{tag}</span>
                                 </Badge>
                             ))}
                         </Stack>
@@ -134,7 +134,7 @@ function Laws() {
 
                     {books.length === 0 && !loading && (
                         <div className='laws-no-books'>
-                            <p>ไม่พบข้อมูลโครงสร้างของพระราชบัญญัตินี้</p>
+                            <span className="text-p-without-color">ไม่พบข้อมูลโครงสร้างของพระราชบัญญัตินี้</span>
                         </div>
                     )}
 

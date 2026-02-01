@@ -46,6 +46,11 @@
     word-break: break-word;
 }
 
+.message-bubble p {
+    margin: 0;
+    color: white;
+}
+
 /* assistant (blue) */
 .chat-message.assistant .message-bubble, 
 .chat-message.error .message-bubble {
@@ -121,15 +126,40 @@
 
 /* Metadata Styling */
 .message-metadata {
-    margin-top: 12px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.5);
+    margin-top: 0.8rem;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 12px;
     border-left: 3px solid #1976d2;
 }
 
+.metadata-toggle {
+    width: 100%;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+
+.open {
+    display: none;
+}
+
+.message-metadata.expanded .close {
+    display: none;
+}
+
+.message-metadata.expanded .open {
+    display: inline;
+}
+
 .metadata-section {
-    margin-bottom: 12px;
+    margin-bottom: 0.5rem;
 }
 
 .metadata-section:last-child {
@@ -139,47 +169,48 @@
 .metadata-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    color: #124d67;
-    font-size: 13px;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #000;
 }
 
-.metadata-header .material-symbols-outlined {
+/* .metadata-header .material-symbols-outlined {
     font-size: 18px;
     color: #1976d2;
-}
+} */
 
 .metadata-content {
-    margin-left: 26px;
+    margin-left: 1.5rem;
+    height: min-content;
+    max-height: 3rem;
+    overflow-y: auto;
 }
 
 .act-item {
-    padding: 6px 12px;
+    padding: 0.5rem 0.75rem;
     background: rgba(25, 118, 210, 0.06);
-    border-radius: 8px;
-    margin-bottom: 6px;
+    border-radius: 0.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .act-name {
-    color: #0b4a66;
-    font-size: 13px;
-    font-weight: 500;
+    color: #000;
+    font-weight: 400;
 }
 
 .sections-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .section-badge {
-    padding: 6px 12px;
+    padding: 0.5rem 0.75rem;
     background: linear-gradient(135deg, #1976d2, #1565c0);
     color: white;
     border-radius: 16px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 400;
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);

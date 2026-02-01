@@ -1,13 +1,14 @@
 .chat-input-form {
     width: 100%;
-    padding: 12px;
+    padding: 0.875rem;
     background: transparent;
     border-top: 1px solid rgba(12,34,56,0.04);
+    justify-items: center;
 }
 
 .input-wrapper {
     display: flex;
-    width: calc(100% - 20px);
+    width: calc(100% - 1rem);
     gap: 10px;
     align-items: center;
     background: rgba(255,255,255,0.85);

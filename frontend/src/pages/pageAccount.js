@@ -12,19 +12,19 @@ function PageAccount() {
 
     return (
         <div className="page-account">
-            <div className="account-title"><h1>จัดการบัญชี</h1></div>
+            <div className="account-title"><span className="text-h1"><strong>จัดการบัญชี</strong></span></div>
             <form className="account-form">
                 <div>
-                    <label className="account-label">อีเมล:</label>
-                    <input className="account-input" type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <label className="text-p account-label">อีเมล:</label>
+                    <input className="text-p account-input" type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div>
-                    <label className="account-label">วัน/เดือน/ปีเกิด:</label>
-                    <input className="account-input" type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} />
+                    <label className="text-p account-label">วัน/เดือน/ปีเกิด:</label>
+                    <input className="text-p account-input" type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} />
                 </div>
                 <div>
-                    <label className="account-label">สถานะของคุณ:</label>
-                    <select className="account-input" value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <label className="text-p account-label">สถานะของคุณ:</label>
+                    <select className="text-p account-input" value={status} onChange={(e) => setStatus(e.target.value)}>
                         <option value="" disabled>-- โปรดเลือกสถานะ --</option>
                         <option value="Permanent Employee">ลูกจ้างประจำ (Permanent Employee)</option>
                         <option value="Probationary Employee">ลูกจ้างทดลองงาน (Probationary Employee)</option>
@@ -40,12 +40,12 @@ function PageAccount() {
                     </select>
                 </div>
                 <div>
-                    <label className="account-label">วัน/เดือน/ปีที่เริ่มงาน:</label>
-                    <input className="account-input" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                    <label className="text-p account-label">วัน/เดือน/ปีที่เริ่มงาน:</label>
+                    <input className="text-p account-input" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                 </div>
                 <div>
-                    <label className="account-label">ลักษณะงาน:</label>
-                    <select className="account-input" value={jobType} onChange={(e) => setJobType(e.target.value)}>
+                    <label className="text-p account-label">ลักษณะงาน:</label>
+                    <select className="text-p account-input" value={jobType} onChange={(e) => setJobType(e.target.value)}>
                         <option value="" disabled>-- โปรดเลือกลักษณะงาน --</option>
                         <option value="Office / Corporate">งานสำนักงาน (Office / Corporate)</option>
                         <option value="Manufacturing / Factory">งานผลิตและอุตสาหกรรม (Manufacturing / Factory)</option>
@@ -57,7 +57,7 @@ function PageAccount() {
                         <option value="Other">อื่นๆ</option>
                     </select>
                 </div>
-                <button type="submit" className="account-button">บันทึกการเปลี่ยนแปลง</button>
+                <button type="submit" className="text-p account-button">บันทึกการเปลี่ยนแปลง</button>
             </form>
         </div>
     );
