@@ -15,5 +15,5 @@ def get_embeddings(text: str):
     print(">>> Generating embeddings...", text[:30], "...")
     return _embeddings.feature_extraction(
             text=text,
-            model="BAAI/bge-m3",
+            model="BAAI/bge-small-en-v1.5",
         ).tolist()
