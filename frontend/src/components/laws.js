@@ -49,7 +49,7 @@ function Laws() {
         });
 
         return () => { mounted = false; };
-    }, [actId]);
+    }, [actId, fetchActById, fetchBooks, fetchTags]);
 
     // เก็บ openTrail จาก navigation state ไว้ก่อน
     useEffect(() => {

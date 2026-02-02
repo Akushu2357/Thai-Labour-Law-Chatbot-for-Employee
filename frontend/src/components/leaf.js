@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLibrary } from '../contexts/LibraryContext';
 import './leaf.css';
 
@@ -10,7 +10,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
     const nodeRef = useRef(null);
     const { fetchGroups, fetchSuperSections, fetchSections, fetchSectionsByActAndNumber, openTrail, setOpenTrail, loadingReference, loading } = useLibrary();
 
-    const hasChildren = () => {
+    const hasChildren = useCallback(() => {
         switch (type) {
             case 'book': return true;
             case 'group': return true;
@@ -18,7 +18,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             case 'section': return false;
             default: return false;
         }
-    };
+    }, [type]);
 
     const matchesFilter = (node, term) => {
         if (!term) return true;
@@ -41,7 +41,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
         );
     };
 
-    const fetchChildren = async () => {
+    const fetchChildren = useCallback(async () => {
         if (!hasChildren() || children.length > 0) return;
 
         try {
@@ -60,11 +60,13 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                     const sectionsWithType = childrenData.map(child => ({ ...child, type: 'section' }));
                     setChildren(sectionsWithType);
                     break;
+                default:
+                    break;
             }
         } catch (error) {
             console.error('Error fetching children:', error);
         }
-    };
+    }, [type, item.id, children.length, fetchGroups, fetchSuperSections, fetchSections, hasChildren]);
 
     const handleToggle = () => {
         if (!isExpanded) {
@@ -132,9 +134,9 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             }
 
             elements.push(
-                <a key={ref} className='reference' onClick={() => { handleReferenceClick(item.cross_references[ref]); setClickLoading(ref); }}>
+                <button key={ref} className='button-link reference' onClick={() => { handleReferenceClick(item.cross_references[ref]); setClickLoading(ref); }}>
                     {item.cross_references[ref].original_text}
-                </a>
+                </button>
             );
             elements.push(clickLoading === ref && loadingReference && (
                 <span key={`loading-${ref}`} className="loading-icon" aria-label="loading">
@@ -191,7 +193,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             setIsExpanded(true);
             fetchChildren();
         }
-    }, [openTrail]);
+    }, [openTrail, fetchChildren, isExpanded, item.id, type]);
 
     useEffect(() => {
         if (clickLoading && !loadingReference && !loading) {

@@ -63,6 +63,11 @@
     background-size: 100% 0.1em;
 }
 
+.button-link {
+    border: none;
+    padding: 0;
+}
+
 .leaf-highlight {
     background-color: #fff3cd;
     /* soft yellow */

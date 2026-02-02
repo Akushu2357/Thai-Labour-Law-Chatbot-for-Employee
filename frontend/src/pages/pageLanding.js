@@ -7,7 +7,6 @@ import ChatInput from '../components/ChatInput';
 import logo from '../assets/logo.svg';
 
 function PageLanding() {
-    const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { user } = useAuth();

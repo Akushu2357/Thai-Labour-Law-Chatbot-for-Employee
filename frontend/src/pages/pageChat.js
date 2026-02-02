@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import conversationService from '../services/conversationService';
 import MessageList from '../components/MessageList';
@@ -27,57 +27,7 @@ function PageChat() {
         hasProcessedFirstMessage.current = false;
     }, [chat_id]);
 
-    // โหลดประวัติการสนทนาเมื่อเข้าหน้า
-    useEffect(() => {
-        const loadChatHistory = async () => {
-            if (!chat_id) {
-                navigate('/');
-                return;
-            }
-
-            if (hasLoadedHistory.current) {
-                return;
-            }
-
-            try {
-                // ดึงข้อมูลห้อง
-                const room = await conversationService.getRoom(chat_id);
-                setRoomInfo(room);
-
-                // ดึงประวัติข้อความ
-                const history = await conversationService.getMessages(chat_id);
-
-                // แปลง format จาก API เป็น format ที่ใช้ใน component
-                const formattedMessages = history.map((msg, idx) => ({
-                    id: msg.id || idx,
-                    type: msg.sender === 'user' ? 'user' : 'assistant',
-                    text: msg.message,
-                    timestamp: new Date(msg.created_at),
-                    metadata: msg.sender === 'user' ? null : msg.metadata || null
-                }));
-
-                setMessages(prev => (prev.length > 0 ? prev : formattedMessages));
-                hasLoadedHistory.current = true;
-
-                // ถ้ามี firstMessage จาก landing page ให้เริ่ม stream
-                const firstMessage = location.state?.firstMessage;
-                if (firstMessage && !hasProcessedFirstMessage.current) {
-                    hasProcessedFirstMessage.current = true;
-                    handleStreamResponse(firstMessage);
-                    // เคลียร์ state เพื่อป้องกันเรียกซ้ำจาก StrictMode
-                    navigate(location.pathname, { replace: true, state: {} });
-                }
-            } catch (error) {
-                console.error('Error loading chat history:', error);
-                alert('ไม่สามารถโหลดประวัติการสนทนาได้');
-                navigate('/');
-            }
-        };
-
-        loadChatHistory();
-    }, [chat_id, navigate]);
-
-    const handleStreamResponse = async (userMessageText) => {
+    const handleStreamResponse = useCallback(async (userMessageText) => {
         // สร้าง assistant message ว่างๆ ไว้ก่อน
         const assistantMessageId = Date.now();
         const assistantMessage = {
@@ -136,10 +86,10 @@ function PageChat() {
                                         : msg
                                 ));
                             } else if (parsed.type === 'content') {
-                                accumulatedText += parsed.data || '';
+                                const parsedText = parsed.data || '';
                                 setMessages(prev => prev.map(msg =>
                                     msg.id === assistantMessageId
-                                        ? { ...msg, text: accumulatedText }
+                                        ? { ...msg, text: (msg.text + parsedText) }
                                         : msg
                                 ));
                             }
@@ -179,7 +129,57 @@ function PageChat() {
                     : msg
             ));
         }
-    };
+    }, [chat_id]);
+
+    // โหลดประวัติการสนทนาเมื่อเข้าหน้า
+    useEffect(() => {
+        const loadChatHistory = async () => {
+            if (!chat_id) {
+                navigate('/');
+                return;
+            }
+
+            if (hasLoadedHistory.current) {
+                return;
+            }
+
+            try {
+                // ดึงข้อมูลห้อง
+                const room = await conversationService.getRoom(chat_id);
+                setRoomInfo(room);
+
+                // ดึงประวัติข้อความ
+                const history = await conversationService.getMessages(chat_id);
+
+                // แปลง format จาก API เป็น format ที่ใช้ใน component
+                const formattedMessages = history.map((msg, idx) => ({
+                    id: msg.id || idx,
+                    type: msg.sender === 'user' ? 'user' : 'assistant',
+                    text: msg.message,
+                    timestamp: new Date(msg.created_at),
+                    metadata: msg.sender === 'user' ? null : msg.metadata || null
+                }));
+
+                setMessages(prev => (prev.length > 0 ? prev : formattedMessages));
+                hasLoadedHistory.current = true;
+
+                // ถ้ามี firstMessage จาก landing page ให้เริ่ม stream
+                const firstMessage = location.state?.firstMessage;
+                if (firstMessage && !hasProcessedFirstMessage.current) {
+                    hasProcessedFirstMessage.current = true;
+                    handleStreamResponse(firstMessage);
+                    // เคลียร์ state เพื่อป้องกันเรียกซ้ำจาก StrictMode
+                    navigate(location.pathname, { replace: true, state: {} });
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+                alert('ไม่สามารถโหลดประวัติการสนทนาได้');
+                navigate('/');
+            }
+        };
+
+        loadChatHistory();
+    }, [chat_id, navigate, handleStreamResponse, location.pathname, location.state]);
 
     const handleSendMessage = async (userMessageText) => {
         if (!userMessageText.trim() || isLoading) {

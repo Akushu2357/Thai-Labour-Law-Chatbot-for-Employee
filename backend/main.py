@@ -62,3 +62,13 @@ app.include_router(routers_library.router, prefix="/api", tags=["api"])
 app.include_router(routers_conversation.router, prefix="/api", tags=["api"])
 app.include_router(routers_user.router, prefix="/api", tags=["api"])
 app.include_router(routers_help.router, prefix="", tags=["help"])
+
+print(">>> Preloading heavy resources...")
+from database.supabase_client import get_supabase_client
+from llm.chatbot_llm import get_llm
+get_supabase_client()
+get_llm()
+print(">>> Heavy resources loaded successfully.")
+from llm import chatbot_router as routers_llm
+app.include_router(routers_llm.router, prefix="/llm", tags=["llm"])
+print(">>> LLM router included.")

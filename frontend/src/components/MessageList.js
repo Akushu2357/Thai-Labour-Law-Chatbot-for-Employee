@@ -98,18 +98,17 @@ function MessageList({ messages }) {
                 if (sectionMatch) {
                     const sectionNumber = sectionMatch[1];
                     return (
-                        <a
-                            href="#"
+                        <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 handleSectionClick(sectionNumber, actId);
                             }}
-                            className="section-link"
+                            className="section-link button-link"
                             title={`ไปที่มาตรา ${sectionNumber}`}
                             {...props}
                         >
                             {children}
-                        </a>
+                        </button>
                     );
                 }
                 return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;

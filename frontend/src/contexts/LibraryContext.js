@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useState } from 'react';
+import React, { createContext, useContext, useRef, useState, useCallback } from 'react';
 import httpService from '../services/httpService';
 
 const LibraryContext = createContext(null);
@@ -81,27 +81,27 @@ export function LibraryProvider({ children }) {
     return String(tagObj);
   };
 
-  const mapActTagsToNames = (actsData, tagsData) => {
+  const mapActTagsToNames = useCallback((actsData, tagsData) => {
     return actsData.map(act => ({
       ...act,
       tags: (act.tags || []).map(tagObj => getTagName(tagObj, tagsData))
     }));
-  };
+  }, []);
   // --- Lazy fetch helpers using generic fetchData (deduped) ---
-  const fetchTags = () => fetchData('tags', () =>
+  const fetchTags = useCallback(() => fetchData('tags', () =>
     httpService.get('/api/libraries/tags').then(r => r.data || [])
-  ).then(data => { setTags(data); return data; });
+  ).then(data => { setTags(data); return data; }), []);
 
-  const fetchActs = () => fetchData('acts', async () => {
+  const fetchActs = useCallback(() => fetchData('acts', async () => {
     // ensure tags available
     const tagsData = (cacheRef.current['tags'] || tags.length > 0) ? (cacheRef.current['tags'] || tags) : await fetchTags();
     const res = await httpService.get('/api/libraries/acts');
     const actsData = res.data || [];
     const mapped = mapActTagsToNames(actsData, tagsData);
     return mapped;
-  }).then(data => { setActs(data); return data; });
+  }).then(data => { setActs(data); return data; }), [fetchTags, tags, mapActTagsToNames]);
 
-  const fetchActById = (id) => fetchData(`act-${id}`, async () => {
+  const fetchActById = useCallback((id) => fetchData(`act-${id}`, async () => {
     // try to find in cached full acts list first
     const sid = String(id);
     const fromFullList = (cacheRef.current['acts'] || []).find(a => String(a.id) === sid);
@@ -116,32 +116,32 @@ export function LibraryProvider({ children }) {
       return mapped;
     }
     return actData;
-  });
+  }), [tags]);
 
-  const fetchBooks = (act_id) => fetchData(`acts:${act_id}:books`, async () => {
+  const fetchBooks = useCallback((act_id) => fetchData(`acts:${act_id}:books`, async () => {
     const res = await httpService.get(`/api/libraries/acts/${act_id}/books`);
     return res.data || [];
-  });
+  }), []);
 
-  const fetchGroups = (book_id) => fetchData(`books:${book_id}:groups`, async () => {
+  const fetchGroups = useCallback((book_id) => fetchData(`books:${book_id}:groups`, async () => {
     const res = await httpService.get(`/api/libraries/books/${book_id}/groups`);
     return res.data || [];
-  });
+  }), []);
 
-  const fetchSuperSections = (group_id) => fetchData(`groups:${group_id}:super_sections`, async () => {
+  const fetchSuperSections = useCallback((group_id) => fetchData(`groups:${group_id}:super_sections`, async () => {
     const res = await httpService.get(`/api/libraries/groups/${group_id}/super_sections`);
     return res.data || [];
-  });
+  }), []);
 
-  const fetchSections = (super_section_id) => fetchData(`super_sections:${super_section_id}:sections`, async () => {
+  const fetchSections = useCallback((super_section_id) => fetchData(`super_sections:${super_section_id}:sections`, async () => {
     const res = await httpService.get(`/api/libraries/super_sections/${super_section_id}/sections`);
     return res.data || [];
-  });
+  }), []);
 
-  const fetchSectionsByActAndNumber = (act_id, section_number) => fetchData(`sections:${act_id}:${section_number}`, async () => {
+  const fetchSectionsByActAndNumber = useCallback((act_id, section_number) => fetchData(`sections:${act_id}:${section_number}`, async () => {
     const res = await httpService.get(`/api/libraries/sections/${act_id}/${encodeURIComponent(section_number)}`);
     return res.data || [];
-  }, true);
+  }, true), []);
 
   const addTag = (tag) => {
     if (!selectedTags.find(t => t.id === tag.id)) {
