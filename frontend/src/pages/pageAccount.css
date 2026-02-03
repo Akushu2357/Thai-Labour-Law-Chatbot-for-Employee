@@ -23,7 +23,7 @@
     flex-direction: column;
     gap: 10px;
     align-items: stretch;
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
 }
 
@@ -31,20 +31,18 @@
 .account-form { -ms-overflow-style: none; scrollbar-width: none; }
 
 .account-label {
-    font-size: 14px;
     color: #555;
-    margin-bottom: 6px;
     display: block;
 }
 
 .account-input {
     width: 100%;
-    padding: 10px 14px;
+    max-width: 20rem;
+    padding: 0.5rem 0.75rem;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 14px;
     color: #111;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
 .account-button {
@@ -53,9 +51,16 @@
     color: #fff;
     border: none;
     border-radius: 28px;
-    padding: 12px 18px;
-    font-size: 16px;
+    padding: 0.5rem 0.75rem;
     cursor: pointer;
     transition: background 0.3s ease;
-    margin-top: 12px;
+    margin-top: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.account-button:disabled {
+    background: #888;
+    cursor: not-allowed;
+    opacity: 0.6;
 }

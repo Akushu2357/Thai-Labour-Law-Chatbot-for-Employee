@@ -1,7 +1,7 @@
 .pre-act-content {
     padding: 20px;
     width: calc(100% - 40px);
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;     /* Firefox */
@@ -16,7 +16,7 @@
 
 .card-act:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    scale: 1.02;
+    transform: scale(1.02);
 }
 
 .tag-stack {

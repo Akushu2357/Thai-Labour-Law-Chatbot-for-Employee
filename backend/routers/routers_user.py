@@ -15,6 +15,10 @@ class UpdateUserRequest(BaseModel):
     display_name: Optional[str] = None
     avatar_url: Optional[str] = None
     detail: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    job_description: Optional[str] = None
+    start_work_date: Optional[str] = None
+    job_type_description: Optional[str] = None
 
 # ===================== User Profile =====================
 
@@ -40,10 +44,26 @@ def update_user(user_id: str, request: UpdateUserRequest):
         user_id=user_id,
         display_name=request.display_name,
         avatar_url=request.avatar_url,
-        detail=request.detail
+        detail=request.detail,
+        date_of_birth=request.date_of_birth,
+        job_description=request.job_description,
+        start_work_date=request.start_work_date,
+        job_type_description=request.job_type_description
     )
 
 @router.delete("/{user_id}")
 def delete_user_profile(user_id: str):
     """ลบ user profile"""
     return delete_user(user_id)
+
+# ===================== Job & Job Type Options =====================
+
+@router.get("/options/jobs")
+def get_jobs():
+    """ดึงรายชื่อ job ทั้งหมด"""
+    return get_all_jobs()
+
+@router.get("/options/job-types")
+def get_job_types():
+    """ดึงรายชื่อ job_type ทั้งหมด"""
+    return get_all_job_types()

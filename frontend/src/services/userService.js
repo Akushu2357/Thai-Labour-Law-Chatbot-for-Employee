@@ -40,11 +40,12 @@ const userService = {
     /**
      * อัพเดทข้อมูล user profile
      * @param {string} userId
-     * @param {Object} params - { display_name?, avatar_url?, detail? }
+     * @param {Object} params - { display_name?, avatar_url?, detail?, date_of_birth?, job_description?, start_work_date?, job_type_description? }
      * @returns {Promise} Updated user object
      */
     updateUser: async (userId, params) => {
         try {
+            console.log('Updating user with params:', params);
             const response = await httpService.put(`/api/users/${userId}`, params);
             return response.data;
         } catch (error) {
@@ -64,6 +65,34 @@ const userService = {
             return response.data;
         } catch (error) {
             console.error('Error deleting user:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * ดึงรายชื่อ job ทั้งหมด
+     * @returns {Promise} Array of jobs
+     */
+    getJobs: async () => {
+        try {
+            const response = await httpService.get('/api/users/options/jobs');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching jobs:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * ดึงรายชื่อ job_type ทั้งหมด
+     * @returns {Promise} Array of job_types
+     */
+    getJobTypes: async () => {
+        try {
+            const response = await httpService.get('/api/users/options/job-types');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching job types:', error);
             throw error;
         }
     }

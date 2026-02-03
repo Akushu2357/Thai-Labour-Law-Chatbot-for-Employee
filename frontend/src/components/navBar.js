@@ -159,6 +159,8 @@ function NavBar() {
             menu
           </span>
         </button>
+        <span />
+        <span />
       </div>
 
       {(isMenuOpen || isClosing) && (

@@ -56,7 +56,61 @@ def get_user_by_id(user_id: str):
         print(f"Error getting user: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def update_user_profile(user_id: str, display_name: str = None, avatar_url: str = None, detail: str = None):
+def get_or_create_job(description: str):
+    """ดึงหรือสร้าง job ตามชื่อ"""
+    try:
+        if not description:
+            return None
+        
+        # ค้นหา job ที่มีอยู่
+        result = get_supabase_client().table("job").select("*").eq("description", description).limit(1).execute()
+        
+        if result.data and len(result.data) > 0:
+            return result.data[0]["id"]
+        
+        # สร้าง job ใหม่
+        new_job = {
+            "description": description,
+            "created_at": datetime.now().isoformat()
+        }
+        create_result = get_supabase_client().table("job").insert(new_job).execute()
+        
+        if create_result.data and len(create_result.data) > 0:
+            return create_result.data[0]["id"]
+        return None
+    except Exception as e:
+        print(f"Error getting/creating job: {e}")
+        return None
+
+def get_or_create_job_type(description: str):
+    """ดึงหรือสร้าง job_type ตามชื่อ"""
+    try:
+        if not description:
+            return None
+        
+        # ค้นหา job_type ที่มีอยู่
+        result = get_supabase_client().table("job_type").select("*").eq("description", description).limit(1).execute()
+        
+        if result.data and len(result.data) > 0:
+            return result.data[0]["id"]
+        
+        # สร้าง job_type ใหม่
+        new_job_type = {
+            "description": description,
+            "created_at": datetime.now().isoformat()
+        }
+        create_result = get_supabase_client().table("job_type").insert(new_job_type).execute()
+        
+        if create_result.data and len(create_result.data) > 0:
+            return create_result.data[0]["id"]
+        return None
+    except Exception as e:
+        print(f"Error getting/creating job_type: {e}")
+        return None
+
+def update_user_profile(user_id: str, display_name: str = None, avatar_url: str = None, detail: str = None, 
+                       date_of_birth: str = None, job_description: str = None, start_work_date: str = None, 
+                       job_type_description: str = None):
     """อัพเดทข้อมูล user profile"""
     try:
         update_data = {
@@ -71,6 +125,24 @@ def update_user_profile(user_id: str, display_name: str = None, avatar_url: str 
         
         if detail is not None:
             update_data["detail"] = detail
+        
+        if date_of_birth is not None:
+            update_data["date_of_birth"] = date_of_birth
+        
+        if start_work_date is not None:
+            update_data["start_work_date"] = start_work_date
+        
+        # Handle job_description
+        if job_description is not None:
+            job_id = get_or_create_job(job_description)
+            if job_id is not None:
+                update_data["job_id"] = job_id
+        
+        # Handle job_type_description
+        if job_type_description is not None:
+            job_type_id = get_or_create_job_type(job_type_description)
+            if job_type_id is not None:
+                update_data["job_type_id"] = job_type_id
         
         result = get_supabase_client().table("users").update(update_data).eq("id", user_id).execute()
         
@@ -89,3 +161,25 @@ def delete_user(user_id: str):
     except Exception as e:
         print(f"Error deleting user: {e}")
         return {"message": f"Error: {str(e)}"}
+
+def get_all_jobs():
+    """ดึงรายชื่อ job ทั้งหมด"""
+    try:
+        result = get_supabase_client().table("job").select("id, description").order("id").execute()
+        if result.data:
+            return result.data
+        return []
+    except Exception as e:
+        print(f"Error fetching jobs: {e}")
+        return []
+
+def get_all_job_types():
+    """ดึงรายชื่อ job_type ทั้งหมด"""
+    try:
+        result = get_supabase_client().table("job_type").select("id, description").order("id").execute()
+        if result.data:
+            return result.data
+        return []
+    except Exception as e:
+        print(f"Error fetching job types: {e}")
+        return []

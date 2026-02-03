@@ -1,7 +1,7 @@
 html, body {
   margin: 0;
   font-family: "Prompt", sans-serif;
-  font-size: clamp(12px, 2vw, 16px);
+  font-size: clamp(16px, 2vw, 18px);
   background-image: linear-gradient(135deg, #f17720, #ffa630, #ebebeb, #00a7e1, #0474ba);
   background-repeat: no-repeat;
   background-size: cover;
@@ -35,7 +35,7 @@ h1, .h1, .text-h1, .text-h1-without-color { font-size: 2rem; line-height: 2.5rem
 h2, .h2, .text-h2, .text-h2-without-color { font-size: 1.5rem; line-height: 2rem;}
 h3, .h3, .text-h3, .text-h3-without-color { font-size: 1.25rem; line-height: 1.75rem;}
 p, .p, .text-p, .text-p-without-color { font-size: 1rem; line-height: 1.5rem;}
-small, .small, .text-small, .text-small-without-color { font-size: 0.75rem; line-height: 1rem;}
+small, .small, .text-small, .text-small-without-color { font-size: 0.9rem; line-height: 1.4rem;}
 h1, h2, h3, p, small, .text-h1, .text-h2, .text-h3, .text-p, .text-small, .text-h1-without-color, .text-h2-without-color, .text-h3-without-color, .text-p-without-color, .text-small-without-color {
   text-overflow: ellipsis;
   overflow: hidden;

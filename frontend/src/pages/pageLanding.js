@@ -18,9 +18,9 @@ function PageLanding() {
             // 1. สร้างห้องสนทนาใหม่
             const room = await conversationService.createRoom({
                 user_id: user?.id || null,
-                title: message.length > 50
+                title: `${(message.length > 50
                     ? message.substring(0, 50) + '...'
-                    : message
+                    : message)}_${new Date().toISOString().split('T')[0]}`
             });
 
             console.log('Created room:', room.id);

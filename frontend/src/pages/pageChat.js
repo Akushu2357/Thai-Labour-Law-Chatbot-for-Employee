@@ -43,7 +43,7 @@ function PageChat() {
 
         try {
             // เรียก streaming API
-            const baseURL = process.env.REACT_APP_BASE_API_URL || 'http://localhost:10000';
+            const baseURL = process.env.REACT_APP_BASE_API_URL || 'http://localhost:8000';
             const response = await fetch(`${baseURL}/llm/chat_stream`, {
                 method: 'POST',
                 headers: {
@@ -63,8 +63,8 @@ function PageChat() {
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-            let accumulatedText = '';
             let metadata = null;
+            let assistantText = '';
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -86,10 +86,10 @@ function PageChat() {
                                         : msg
                                 ));
                             } else if (parsed.type === 'content') {
-                                const parsedText = parsed.data || '';
+                                assistantText = assistantText + (parsed.data || '');
                                 setMessages(prev => prev.map(msg =>
                                     msg.id === assistantMessageId
-                                        ? { ...msg, text: (msg.text + parsedText) }
+                                        ? { ...msg, text: (msg.text + parsed.data) }
                                         : msg
                                 ));
                             }
@@ -101,12 +101,12 @@ function PageChat() {
             }
 
             // บันทึกข้อความของ bot ลงฐานข้อมูล
-            if (chat_id && accumulatedText) {
+            if (chat_id && assistantText) {
                 try {
                     console.log('Saving bot message with metadata:', metadata);
                     await conversationService.addMessage(chat_id, {
                         sender: 'bot',
-                        message: accumulatedText,
+                        message: assistantText,
                         metadata: metadata || {}
                     });
                 } catch (error) {
@@ -159,6 +159,7 @@ function PageChat() {
                     timestamp: new Date(msg.created_at),
                     metadata: msg.sender === 'user' ? null : msg.metadata || null
                 }));
+                console.log('Loaded chat history:', formattedMessages);
 
                 setMessages(prev => (prev.length > 0 ? prev : formattedMessages));
                 hasLoadedHistory.current = true;
@@ -215,7 +216,7 @@ function PageChat() {
     return (
         <div className="chat-container">
             <div className="chat-header">
-                <span className="h2">{roomInfo?.title || 'กำลังโหลด...'}</span>
+                <span className="text-h2">{roomInfo?.title || 'กำลังโหลด...'}</span>
                 <span className="p chat-subtitle">ถามคำถามเกี่ยวกับกฎหมายแรงงานไทย</span>
             </div>
 

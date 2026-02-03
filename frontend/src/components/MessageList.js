@@ -123,7 +123,7 @@ function MessageList({ messages }) {
             {messages.length === 0 ? (
                 <div className="chat-empty">
                     <div className="empty-icon">💬</div>
-                    <span className="text-h3-without-color">ยินดีต้อนรับ!</span>
+                    <span className="text-h3-without-color" style={{ display: 'block' }}>ยินดีต้อนรับ!</span>
                     <span className="text-p-without-color">ถามคำถามใดๆ เกี่ยวกับกฎหมายแรงงานไทย</span>
                 </div>
             ) : (

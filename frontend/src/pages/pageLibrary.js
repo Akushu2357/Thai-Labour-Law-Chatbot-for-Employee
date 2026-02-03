@@ -19,7 +19,9 @@ function PageLibrary() {
 
     return (
         <main className="library-content">
-            <span className='text-h1'>ยินดีต้อนรับสู่ห้องสมุดกฎหมาย</span>
+            <div className='text-h1'>
+                ยินดีต้อนรับสู่ห้องสมุดกฎหมาย
+            </div>
             <SearchBox
                 onAddTag={addTag}
                 onRemoveTag={removeTag}
