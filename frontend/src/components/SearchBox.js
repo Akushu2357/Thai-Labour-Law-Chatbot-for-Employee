@@ -130,7 +130,7 @@ function SearchBox({
                             <span className="text-small-without-color">{tag.name}</span>
                             <button 
                                 onClick={() => onRemoveTag(tag.id)} 
-                                style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+                                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#fff' }}
                             >
                                 ✕
                             </button>

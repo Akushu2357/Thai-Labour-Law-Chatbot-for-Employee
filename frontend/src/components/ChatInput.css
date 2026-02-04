@@ -5,6 +5,10 @@
     border-top: 1px solid rgba(12,34,56,0.04);
     justify-items: center;
     align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .input-wrapper {
