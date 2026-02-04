@@ -6,6 +6,13 @@
     width: 100%;
     max-width: 600px;
     align-self: center;
+    padding: 0 1rem;
+}
+
+@media (max-width: 480px) {
+    .search-box-container {
+        padding: 0 0.75rem;
+    }
 }
 
 .search-box {
@@ -23,39 +30,35 @@
 }
 
 .search-input-container {
-    /* display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #fff; */
     display: flex;
     align-items: center;
-    padding: 20px;
+    padding: 5px 10px;
     background-color: #fff;
     border: 2px solid #000;
     border-radius: 20px;
-    padding: 5px 10px;
     width: 100%;
     height: 40px;
     max-width: 400px;
     box-sizing: border-box;
 }
 
+@media (max-width: 480px) {
+    .search-input-container {
+        max-width: 100%;
+        height: 44px;
+        border-radius: 24px;
+        padding: 8px 12px;
+    }
+}
+
 .search-input-container input {
-    /* flex: 1;
-    border: none;
-    outline: none;
-    font-size: 1rem;
-    padding: 0.5rem; */
     flex: 1;
     border: none;
     outline: none;
     background-color: transparent;
-    font-size: 16px;
     padding: 8px;
     width: 100%;
+    -webkit-appearance: none;
 }
 
 .search-input-container .material-symbols-outlined {
@@ -65,20 +68,6 @@
 }
 
 .tag-suggestions-list {
-    /* position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    list-style: none;
-    padding: 0;
-    margin: 0.25rem 0 0 0;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 10; */
     width: 100%;
     max-width: 400px;
     list-style: none;
@@ -92,6 +81,14 @@
     position: absolute;
     z-index: 10;
     top: 40px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .tag-suggestions-list {
+        max-width: 100%;
+        top: 44px;
+    }
 }
 
 .tag-suggestions-list li {
@@ -110,14 +107,20 @@
 }
 
 .selected-tags-stack {
-    /* margin-top: 1rem; */
-    /* flex-wrap: wrap; */
     width: 100%;
     max-width: 400px;
     height: 40px;
     overflow-x: auto;
+    box-sizing: border-box;
 }
-.selected-tags-stack::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
+
+@media (max-width: 480px) {
+    .selected-tags-stack {
+        max-width: 100%;
+        height: 44px;
+    }
+}
+.selected-tags-stack::-webkit-scrollbar { display: none; }
 .selected-tags-stack { -ms-overflow-style: none; scrollbar-width: none; }
 
 .bg-0474ba {

@@ -64,3 +64,23 @@
     cursor: not-allowed;
     opacity: 0.6;
 }
+
+.account-button-logout {
+    width: 100%;
+    background: #ff0000;
+    color: #fff;
+    border: none;
+    border-radius: 28px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.account-button-logout:disabled {
+    background: #888;
+    cursor: not-allowed;
+    opacity: 0.6;
+}

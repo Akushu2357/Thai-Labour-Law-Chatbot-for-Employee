@@ -1,18 +1,20 @@
 .navbar-container {
   position: fixed;
-  top: 30px;
-  right: 30px;
-  left: 30px;
+  top: 2rem;
+  right: 2rem;
+  left: 2rem;
   height: 3rem;
   background: rgba(255,255,255,0.9);
-  border-radius: 30px 30px 0px 0px;
-  padding: 10px 15px 10px 15px;
+  border-radius: 2rem 2rem 0 0;
+  padding: 0.75rem 1rem 0.75rem 1rem;
   border-bottom: 1px solid transparent;
   border-image: linear-gradient(to right, #f17720, #ffa630, #ebebeb, #00a7e1, #0474ba);
   border-image-slice: 1;
   z-index: 20;
   display: grid;
   grid-template-columns: 1fr 3fr 1fr;
+  box-sizing: border-box;
+  align-content: center;
 }
 
 .brand {
@@ -34,11 +36,11 @@
   display: flex;
   flex-direction: column;
   position: fixed;
-  inset: 30px; /* top/right/bottom/left */
+  inset: 2rem; /* top/right/bottom/left */
   z-index: 100;
   width: auto;
   background: #fff;
-  border-radius: 30px;
+  border-radius: 2rem;
   height: 100;
   /* subtle slide-in */
   animation: slideIn 220ms ease-out forwards;
@@ -131,14 +133,14 @@ button:focus-visible {
   text-decoration: none;
   height: fit-content;
   padding: 6px 10px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  border: 2px solid #d4a574;
-  border-radius: 15px;
   width: 100%;
   max-width: 300px;
   align-items: center;
   justify-items: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  border: 2px solid #d4a574;
+  border-radius: 15px;
   transition: background-color 160ms ease, transform 120ms ease;
   /* background-color: #f5f5f5; */
   gap: 10px;
@@ -237,19 +239,19 @@ button.menu-item:active {
     flex-direction: column;
     position: fixed;
     /* top/right/bottom/left: keep top/bottom/left gutters, allow right to be automatic */
-    inset: 30px auto 30px 30px;
+    inset: 2rem auto 2rem 2rem;
     z-index: 90;
     width: 25%;
     max-width: 250px;
     animation: none; /* disable slide animation on desktop */
-    border-radius: 30px;
+    border-radius: 2rem;
     background: rgba(255,255,255,0.9);
   }
 
   /* reserve left gutter for desktop nav so main content sits to the right */
   .landing-content {
-    margin-left: calc(min(250px, 25%) + 30px); /* nav width + gap */
-    border-radius: 30px;
+    margin-left: calc(min(250px, 25%) + 2rem); /* nav width + gap */
+    border-radius: 2rem;
     padding-top: 0px;
   }
 }

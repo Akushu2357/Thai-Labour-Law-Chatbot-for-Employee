@@ -91,7 +91,7 @@ function NavBar() {
 
       <nav className='menu-list' aria-label="Menu list">
         <button className="menu-item" onClick={() => handleClick('/')}>
-          <span className='text-h3'>แชตใหม่</span>
+          <span className='text-p'>แชตใหม่</span>
           <span className="material-symbols-outlined" aria-hidden>
             add_circle
           </span>
@@ -104,7 +104,7 @@ function NavBar() {
           aria-expanded={indexFocus === 1}
           aria-controls="library-panel"
         >
-          <span className='text-h3'>ห้องสมุดกฎหมาย</span>
+          <span className='text-p'>ห้องสมุดกฎหมาย</span>
           <span className="material-symbols-outlined" aria-hidden>
             {indexFocus === 1 ? 'arrow_circle_down' : 'arrow_circle_right'}
           </span>
@@ -120,7 +120,7 @@ function NavBar() {
             aria-controls="history-panel"
             aria-disabled="true"
           >
-            <span className='text-h3'>ประวัติการสนทนา</span>
+            <span className='text-p'>ประวัติการสนทนา</span>
             <span className="material-symbols-outlined" aria-hidden>
               {indexFocus === 2 ? 'arrow_circle_down' : 'arrow_circle_right'}
             </span>
@@ -144,8 +144,16 @@ function NavBar() {
           )}
         </div>
       </nav>
-      <div className='menu-footer'>
-        <span className="text-h1 brand" aria-hidden onClick={() => handleClick('/account')}>จัดการบัญชี</span>
+      {/* <div className='menu-footer'>
+        <span className="text-p brand" aria-hidden onClick={() => handleClick('/account')}>จัดการบัญชี</span>
+      </div> */}
+      <div style={{ padding: '15px', display: 'flex', justifyContent: 'center' }} >
+        <button
+          className="menu-item"
+          onClick={() => handleClick('/account')}
+        >
+          <span className='text-p'>จัดการบัญชี</span>
+        </button>
       </div>
     </>
   );

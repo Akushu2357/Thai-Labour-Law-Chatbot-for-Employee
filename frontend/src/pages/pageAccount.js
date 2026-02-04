@@ -11,8 +11,8 @@ function PageAccount() {
     const [startDate, setStartDate] = useState(user?.start_work_date || '');
     const [jobType, setJobType] = useState(user?.job_type_description || '');
     const [loading, setLoading] = useState(false);
-    const [jobs, setJobs] = useState(['1','2']);
-    const [jobTypes, setJobTypes] = useState([]);
+    const [jobs, setJobs] = useState(['loading...']);
+    const [jobTypes, setJobTypes] = useState(['loading...']);
     const [optionsLoading, setOptionsLoading] = useState(true);
     const [userLoading, setUserLoading] = useState(true);
     const { logout } = useAuth();
@@ -39,7 +39,7 @@ function PageAccount() {
                 setOptionsLoading(false);
             }
         };
-        
+
         fetchOptions();
     }, []);
 
@@ -74,7 +74,7 @@ function PageAccount() {
             return;
         }
         setLoading(true);
-        
+
         try {
             const updateData = {
                 date_of_birth: birthdate || null,
@@ -82,7 +82,7 @@ function PageAccount() {
                 start_work_date: startDate || null,
                 job_type_description: jobType || null
             };
-            
+
             await userService.updateUser(user.id, updateData);
         } catch (error) {
             console.error('Error saving user data:', error);
@@ -97,7 +97,7 @@ function PageAccount() {
             <form className="account-form" onSubmit={handleSubmit}>
                 <div>
                     <label className="text-small account-label">อีเมล:</label>
-                    <input className="text-small account-input" type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled/>
+                    <input className="text-small account-input" type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled />
                 </div>
                 <div>
                     <label className="text-small account-label">วัน/เดือน/ปีเกิด:</label>
@@ -130,8 +130,10 @@ function PageAccount() {
                 <button type="submit" className="text-small account-button" disabled={loading || optionsLoading || userLoading}>
                     <span className="text-small-without-color">{loading ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}</span>
                 </button>
+                <button type="button" className="text-small account-button-logout" onClick={() => logout()}>
+                    <span className="text-small-without-color">ออกจากระบบ</span>
+                </button>
             </form>
-            <button type="button" className="text-small account-button-logout" onClick={() => logout()}>ออกจากระบบ</button>
         </div>
     );
 }
