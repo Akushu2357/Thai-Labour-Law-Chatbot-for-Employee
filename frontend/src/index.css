@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: "Prompt", sans-serif;
-  font-size: clamp(14px, 2vw, 18px);
+  font-size: clamp(14px, 2vw, 16px);
   background-image: linear-gradient(135deg, #f17720, #ffa630, #ebebeb, #00a7e1, #0474ba);
   background-repeat: no-repeat;
   background-size: cover;

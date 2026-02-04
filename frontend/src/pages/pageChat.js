@@ -23,6 +23,7 @@ function PageChat() {
 
     // รีเซ็ตสถานะเมื่อเปลี่ยนห้อง
     useEffect(() => {
+        setMessages([]);
         hasLoadedHistory.current = false;
         hasProcessedFirstMessage.current = false;
     }, [chat_id]);

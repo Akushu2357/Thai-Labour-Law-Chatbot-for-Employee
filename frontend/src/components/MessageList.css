@@ -90,7 +90,7 @@
 .chat-message.assistant .message-time { text-align: left; }
 
 .typing-indicator { 
-    display: flex; 
+    display: inline-flex; 
     gap: 6px; 
     align-items: center; 
     padding: 6px 4px; 

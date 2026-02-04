@@ -130,89 +130,90 @@ function MessageList({ messages }) {
                 messages.map(msg => {
                     const isMetadataOpen = openMetadataId === msg.id;
                     return (
-                    <div key={msg.id} className={`chat-message ${msg.type}`}>
-                        <div className="message-bubble">
-                            {renderMessageWithSectionLinks(msg.text, msg.metadata)}
+                        <div key={msg.id} className={`chat-message ${msg.type}`}>
+                            <div className="message-bubble">
+                                {renderMessageWithSectionLinks(msg.text, msg.metadata)}
 
-                            {msg.metadata && (
-                                <div className={`message-metadata ${isMetadataOpen ? 'expanded' : ''}`}>
-                                    <button
-                                        type="button"
-                                        className="metadata-toggle"
-                                        onClick={() => toggleMetadata(msg.id)}
-                                        aria-expanded={isMetadataOpen}
-                                    >
-                                        <span className='material-symbols-outlined close'>book_2</span>
-                                        <span className='material-symbols-outlined open'>menu_book</span>
-                                        <span className='text-p-without-color'><strong>แหล่งอ้างอิง</strong></span>
-                                    </button>
-                                    {isMetadataOpen && (
-                                        <>
-                                            {msg.metadata.acts && msg.metadata.acts.length > 0 && (
-                                                <div className="metadata-section">
-                                                    <div className="metadata-header">
-                                                        <span className="material-symbols-outlined">book</span>
-                                                        <span className='text-small-without-color'><strong>พระราชบัญญัติที่เกี่ยวข้อง</strong></span>
-                                                    </div>
-                                                    <div className="metadata-content">
-                                                        {msg.metadata.acts.map((act, idx) => {
-                                                            const actName = Array.isArray(act) ? act[1] : `พระราชบัญญัติ ${act}`;
-                                                            return (
-                                                                <div key={idx} className="act-item">
-                                                                    <span className="small act-name">{actName}</span>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {msg.metadata.sections && msg.metadata.sections.length > 0 && (
-                                                <div className="metadata-section">
-                                                    <div className="metadata-header">
-                                                        <span className="material-symbols-outlined">gavel</span>
-                                                        <span className='text-small-without-color'><strong>มาตราที่เกี่ยวข้อง</strong></span>
-                                                    </div>
-                                                    <div className="metadata-content">
-                                                        <div className="sections-list">
-                                                            {msg.metadata.sections.map((section, idx) => {
-                                                                const sectionNum = typeof section === 'object' ? section.section_number : section;
-                                                                const actId = msg.metadata.acts?.[0];
-                                                                const actIdNum = Array.isArray(actId) ? actId[0] : actId;
+                                {msg.isLoading && (
+                                    <div className="typing-indicator">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                )}
+
+                                {msg.metadata && !msg.isLoading && (
+                                    <div className={`message-metadata ${isMetadataOpen ? 'expanded' : ''}`}>
+                                        <button
+                                            type="button"
+                                            className="metadata-toggle"
+                                            onClick={() => toggleMetadata(msg.id)}
+                                            aria-expanded={isMetadataOpen}
+                                        >
+                                            <span className='material-symbols-outlined close'>book_2</span>
+                                            <span className='material-symbols-outlined open'>menu_book</span>
+                                            <span className='text-p-without-color'><strong>แหล่งอ้างอิง</strong></span>
+                                        </button>
+                                        {isMetadataOpen && (
+                                            <>
+                                                {msg.metadata.acts && msg.metadata.acts.length > 0 && (
+                                                    <div className="metadata-section">
+                                                        <div className="metadata-header">
+                                                            <span className="material-symbols-outlined">book</span>
+                                                            <span className='text-small-without-color'><strong>พระราชบัญญัติที่เกี่ยวข้อง</strong></span>
+                                                        </div>
+                                                        <div className="metadata-content">
+                                                            {msg.metadata.acts.map((act, idx) => {
+                                                                const actName = Array.isArray(act) ? act[1] : `พระราชบัญญัติ ${act}`;
                                                                 return (
-                                                                    <span
-                                                                        key={idx}
-                                                                        className="small section-badge"
-                                                                        onClick={() => handleSectionClick(String(sectionNum), actIdNum)}
-                                                                        title="คลิกเพื่อดูรายละเอียด"
-                                                                    >
-                                                                        มาตรา {sectionNum}
-                                                                    </span>
+                                                                    <div key={idx} className="act-item">
+                                                                        <span className="small act-name">{actName}</span>
+                                                                    </div>
                                                                 );
                                                             })}
                                                         </div>
                                                     </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            )}
-                            {msg.isLoading && (
-                                <div className="typing-indicator">
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                </div>
-                            )}
+                                                )}
+                                                {msg.metadata.sections && msg.metadata.sections.length > 0 && (
+                                                    <div className="metadata-section">
+                                                        <div className="metadata-header">
+                                                            <span className="material-symbols-outlined">gavel</span>
+                                                            <span className='text-small-without-color'><strong>มาตราที่เกี่ยวข้อง</strong></span>
+                                                        </div>
+                                                        <div className="metadata-content">
+                                                            <div className="sections-list">
+                                                                {msg.metadata.sections.map((section, idx) => {
+                                                                    const sectionNum = typeof section === 'object' ? section.section_number : section;
+                                                                    const actId = msg.metadata.acts?.[0];
+                                                                    const actIdNum = Array.isArray(actId) ? actId[0] : actId;
+                                                                    return (
+                                                                        <span
+                                                                            key={idx}
+                                                                            className="small section-badge"
+                                                                            onClick={() => handleSectionClick(String(sectionNum), actIdNum)}
+                                                                            title="คลิกเพื่อดูรายละเอียด"
+                                                                        >
+                                                                            มาตรา {sectionNum}
+                                                                        </span>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="message-time">
+                                {msg.timestamp.toLocaleTimeString('th-TH', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </div>
                         </div>
-                        <div className="message-time">
-                            {msg.timestamp.toLocaleTimeString('th-TH', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
-                        </div>
-                    </div>
-                );
+                    );
                 })
             )}
             <div ref={messagesEndRef} />
