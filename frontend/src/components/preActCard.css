@@ -19,35 +19,35 @@
     transform: scale(1.02);
 }
 
-.tag-stack {
+.pre-act-tags-stack {
     width: 100%;
     overflow: auto;
-    padding-bottom: 3px;
+    padding-bottom: 10px;
 }
 
 /* Scrollbar track */
-.tag-stack::-webkit-scrollbar {
+.pre-act-tags-stack::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
-.tag-stack::-webkit-scrollbar-track {
+.pre-act-tags-stack::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 6px;
 }
 
 /* Scrollbar thumb (slider) */
-.tag-stack::-webkit-scrollbar-thumb {
+.pre-act-tags-stack::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 6px;
 }
 
-.tag-stack::-webkit-scrollbar-thumb:hover {
+.pre-act-tags-stack::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
 
 /* Scrollbar arrow buttons */
-.tag-stack::-webkit-scrollbar-button {
+.pre-act-tags-stack::-webkit-scrollbar-button {
     display: none;
     height: 0;
     width: 0;

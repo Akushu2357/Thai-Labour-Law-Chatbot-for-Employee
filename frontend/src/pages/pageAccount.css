@@ -7,6 +7,7 @@
     /* background: linear-gradient(180deg, #fff 0%, #f6f2ef 100%); */
     padding: 24px;
     margin: 20px;
+    box-sizing: border-box;
 }
 
 .account-title {
@@ -43,6 +44,22 @@
     border-radius: 4px;
     color: #111;
     margin-bottom: 0;
+    box-sizing: border-box;
+    background-color: #fff;
+    -webkit-appearance: none;
+    -webkit-border-radius: 4px;
+}
+
+.account-input:disabled {
+    background-color: #fff;
+    color: #111;
+    opacity: 1;
+    -webkit-text-fill-color: #111;
+}
+
+.account-input::placeholder {
+    color: #999;
+    -webkit-text-fill-color: #999;
 }
 
 .account-button {
@@ -55,8 +72,8 @@
     cursor: pointer;
     transition: background 0.3s ease;
     margin-top: 1rem;
-    justify-content: center;
-    align-items: center;
+    box-sizing: border-box;
+    min-height: fit-content;
 }
 
 .account-button:disabled {
@@ -75,8 +92,9 @@
     cursor: pointer;
     transition: background 0.3s ease;
     margin-top: 1rem;
-    justify-content: center;
-    align-items: center;
+    font-size: 1rem;
+    box-sizing: border-box;
+    min-height: fit-content;
 }
 
 .account-button-logout:disabled {
