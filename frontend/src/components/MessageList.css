@@ -36,7 +36,7 @@
     display: flex;
     align-items: flex-end;
     gap: 8px;
-    max-width: 86%;
+    max-width: 100%;
 }
 
 .chat-message.assistant { align-self: flex-start; }
