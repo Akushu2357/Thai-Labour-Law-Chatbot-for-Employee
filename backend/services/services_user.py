@@ -50,6 +50,8 @@ def get_user_by_id(user_id: str):
         result = get_supabase_client().table("users").select("*").eq("id", user_id).limit(1).execute()
         
         if result.data and len(result.data) > 0:
+            result.data[0]["job_description"] = get_supabase_client().table("job").select("description").eq("id", result.data[0].get("job_id")).limit(1).execute().data[0]["description"] if result.data[0].get("job_id") else None
+            result.data[0]["job_type_description"] = get_supabase_client().table("job_type").select("description").eq("id", result.data[0].get("job_type_id")).limit(1).execute().data[0]["description"] if result.data[0].get("job_type_id") else None
             return result.data[0]
         return {"message": "User not found"}
     except Exception as e:
