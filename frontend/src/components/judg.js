@@ -107,9 +107,12 @@ function Jude() {
         const listJudgment = judgment.split('\n').filter(line => line.trim() !== '');
         
         let relatedLaws = [];
-        let contentStartIndex = 3;
+        let contentStartIndex = 1;
         while (contentStartIndex < listJudgment.length) {
-            if (listJudgment[contentStartIndex].startsWith('พระราชบัญญัติ')) {
+            if (listJudgment[contentStartIndex].includes('กฎหมายที่เกี่ยวข้อง')) {
+                const relateTitle = listJudgment[contentStartIndex].trim();
+            } else if (listJudgment[contentStartIndex].startsWith('พระราชบัญญัติ')
+                || listJudgment[contentStartIndex].match(/^พ\.?ร\.?บ\.?/) ) {
                 relatedLaws.push(listJudgment[contentStartIndex]);
             } else {
                 break;
@@ -119,9 +122,12 @@ function Jude() {
         return (
             <div>
                 <span className='text-h1'>{highlightText(listJudgment[0], combinedFilterText)}</span>
-                <div className={`text-h3 ${toggleRelatedLaw ? 'toggle-on' : 'toggle-off'}`}
-                    onClick={() => setToggleRelatedLaw(!toggleRelatedLaw)}>{highlightText(listJudgment[2], combinedFilterText)}</div>
-                {toggleRelatedLaw && relatedLaws.length > 0 && (
+                {relateTitle &&
+                    <div className={`text-h3 ${toggleRelatedLaw ? 'toggle-on' : 'toggle-off'}`}
+                    onClick={() => setToggleRelatedLaw(!toggleRelatedLaw)}>{highlightText(relateTitle, combinedFilterText)}
+                    </div>
+                }
+                {relateTitle && toggleRelatedLaw && relatedLaws.length > 0 && (
                     <div>
                         {relatedLaws.map((law, index) => (
                             <p key={index} className='text-p' style={{ textAlign: "left"}}>{highlightText(law, combinedFilterText)}</p>
