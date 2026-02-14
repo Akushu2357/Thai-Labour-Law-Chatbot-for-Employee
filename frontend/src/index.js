@@ -18,6 +18,7 @@ import RequireAuth from './components/RequireAuth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Laws from './components/laws';
 import PageAccount from './pages/pageAccount';
+import Jude from './components/judg';
 
 const Layout = () => {
   const { isAuthenticated } = useAuth();
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
             ]
           },
         ],
+      },
+      {
+        path: "/library/judgment/:judgment_id",
+        element: <RequireAuth><Jude /></RequireAuth>,
       },
       {
         path: "/account",

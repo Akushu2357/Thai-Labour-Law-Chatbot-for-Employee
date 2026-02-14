@@ -83,6 +83,7 @@ CREATE TABLE public.chat_messages (
   sender text CHECK (sender = ANY (ARRAY['user'::text, 'bot'::text])),
   message text,
   created_at timestamp without time zone DEFAULT now(),
+  metadata jsonb,
   CONSTRAINT chat_messages_pkey PRIMARY KEY (id),
   CONSTRAINT chat_messages_room_id_fkey FOREIGN KEY (room_id) REFERENCES public.chat_rooms(id)
 );
@@ -103,6 +104,18 @@ CREATE TABLE public.citations (
   imported_at timestamp without time zone DEFAULT now(),
   CONSTRAINT citations_pkey PRIMARY KEY (act_id, reference_number),
   CONSTRAINT citations_act_id_fkey FOREIGN KEY (act_id) REFERENCES public.acts(id)
+);
+CREATE TABLE public.job (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  description text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT job_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.job_type (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  description text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT job_type_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.judgment_tags (
   judgment_id integer NOT NULL,
@@ -137,6 +150,12 @@ CREATE TABLE public.users (
   detail text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  date_of_birth date,
+  job_id bigint,
+  start_work_date date,
+  job_type_id bigint,
   CONSTRAINT users_pkey PRIMARY KEY (id),
-  CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+  CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id),
+  CONSTRAINT users_job_id_fkey FOREIGN KEY (job_id) REFERENCES public.job(id),
+  CONSTRAINT users_job_type_id_fkey FOREIGN KEY (job_type_id) REFERENCES public.job_type(id)
 );

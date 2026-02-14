@@ -52,13 +52,14 @@ async def enable_llm_router():
     return {"status": "LLM router enabled"}
 
 print(">>> Including routers...")
-from routers import routers_act, routers_help, routers_section, routers_library, routers_conversation, routers_user
+from routers import routers_act, routers_help, routers_section, routers_library, routers_conversation, routers_user, routers_judgment
 
 # Include routers
 print(">>> Setting up API routers...")
 app.include_router(routers_act.router, prefix="/api", tags=["api"])
 app.include_router(routers_section.router, prefix="/api", tags=["api"])
 app.include_router(routers_library.router, prefix="/api", tags=["api"])
+app.include_router(routers_judgment.router, prefix="/api", tags=["api"])
 app.include_router(routers_conversation.router, prefix="/api", tags=["api"])
 app.include_router(routers_user.router, prefix="/api", tags=["api"])
 app.include_router(routers_help.router, prefix="", tags=["help"])

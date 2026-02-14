@@ -13,3 +13,13 @@
     min-height: 60px;
     height: auto;
 }
+
+.pre-content {
+    padding: 20px;
+    width: calc(100% - 40px);
+    flex: 1;
+    overflow-y: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+}
+.pre-content::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */

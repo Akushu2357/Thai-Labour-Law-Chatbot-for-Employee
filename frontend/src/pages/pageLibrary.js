@@ -3,6 +3,7 @@ import './pageLibrary.css';
 import PreActCard from '../components/preActCard';
 import SearchBox from '../components/SearchBox';
 import { useLibrary } from '../contexts/LibraryContext';
+import PreJudeCard from '../components/preJudeCard';
 
 function PageLibrary() {
     const { fetchTags, tags, selectedTags, addTag, removeTag, searchTerm, setSearchTerm } = useLibrary();
@@ -31,7 +32,10 @@ function PageLibrary() {
                 placeholder="ค้นหากฎหมาย..."
                 onSearchChange={setSearchTerm}
             />
-            <PreActCard searchTerm={searchTerm} selectedTags={selectedTags} />
+            <main className="pre-content">
+                <PreActCard searchTerm={searchTerm} selectedTags={selectedTags} />
+                <PreJudeCard searchTerm={searchTerm} selectedTags={selectedTags} />
+            </main>
         </main>
     );
 }

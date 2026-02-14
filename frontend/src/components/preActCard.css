@@ -1,13 +1,3 @@
-.pre-act-content {
-    padding: 20px;
-    width: calc(100% - 40px);
-    flex: 1;
-    overflow-y: auto;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;     /* Firefox */
-}
-.pre-act-content::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
-
 .card-act {
     margin-bottom: 16px;
     border-radius: 12px;

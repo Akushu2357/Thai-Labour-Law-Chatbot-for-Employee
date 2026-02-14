@@ -45,7 +45,7 @@ function PreActCard({ searchTerm = '', selectedTags = [] }) {
     const filteredActs = filterActs(acts || [], searchTerm || '', selectedTags);
 
     return (
-        <main className="pre-act-content">
+        <>
             {filteredActs.map((act) => (
                 <Card key={act.id} className="card-act" onClick={() => navigate(`./act/${act.id}`)}>
                     <Card.Body>
@@ -60,7 +60,7 @@ function PreActCard({ searchTerm = '', selectedTags = [] }) {
                     </Card.Body>
                 </Card>
             ))}
-        </main>
+        </>
     );
 }
 

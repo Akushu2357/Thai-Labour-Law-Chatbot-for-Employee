@@ -6,6 +6,7 @@ const LibraryContext = createContext(null);
 export function LibraryProvider({ children }) {
   const [tags, setTags] = useState([]);
   const [acts, setActs] = useState([]);
+  const [judgments, setJudgments] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [openTrail, setOpenTrail] = useState(null);
@@ -143,6 +144,35 @@ export function LibraryProvider({ children }) {
     return res.data || [];
   }, true), []);
 
+  const fetchJudgments = useCallback(() => fetchData('judgments', async () => {
+    // ensure tags available
+    const tagsData = (cacheRef.current['tags'] || tags.length > 0) ? (cacheRef.current['tags'] || tags) : await fetchTags();
+    const res = await httpService.get('/api/judgments');
+    const judgmentsData = res.data || [];
+    const mapped = judgmentsData.map(judgment => ({
+      ...judgment,
+      tags: (judgment.tags || []).map(tagObj => getTagName(tagObj, tagsData))
+    }));
+    return mapped;
+  }).then(data => { setJudgments(data); return data; }), [fetchTags, tags]);
+
+  const fetchJudgmentById = useCallback((id) => fetchData(`judgment-${id}`, async () => {
+    // try to find in cached full judgments list first
+    const sid = String(id);
+    const fromFullList = (cacheRef.current['judgments'] || []).find(j => String(j.id) === sid);
+    if (fromFullList) return fromFullList;
+    // call backend endpoint for single judgment
+    const res = await httpService.get(`/api/judgments/${sid}`);
+    const judgmentData = res.data || null;
+    if (judgmentData && judgmentData.id) {
+      // map tags for this judgment using known tags
+      const tagsData = cacheRef.current['tags'] || tags;
+      const mapped = { ...judgmentData, tags: (judgmentData.tags || []).map(t => getTagName(t, tagsData)) };
+      return mapped;
+    }
+    return judgmentData;
+  }), [tags]);
+
   const addTag = (tag) => {
     if (!selectedTags.find(t => t.id === tag.id)) {
       setSelectedTags(prev => [...prev, tag]);
@@ -156,9 +186,12 @@ export function LibraryProvider({ children }) {
   const value = {
     tags,
     acts,
+    judgments,
     fetchTags,
     fetchActs,
     fetchActById,
+    fetchJudgments,
+    fetchJudgmentById,
     fetchBooks,
     fetchGroups,
     fetchSuperSections,
@@ -171,6 +204,7 @@ export function LibraryProvider({ children }) {
     removeTag,
     setTags,
     setActs,
+    setJudgments,
     openTrail,
     setOpenTrail,
     loading,

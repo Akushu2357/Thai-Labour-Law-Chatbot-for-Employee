@@ -35,7 +35,7 @@
     justify-content: center;
     color: #6c757d;
     animation: spin 1s linear infinite;
-    font-size: 16px;
+    font-size: 1rem;
     vertical-align: middle;
 }
 
