@@ -107,7 +107,7 @@ function Jude() {
         const listJudgment = judgment.split('\n').filter(line => line.trim() !== '');
         
         let relatedLaws = [];
-        let contentStartIndex = 1;
+        let contentStartIndex = 2;
         let relateTitle = null;
         while (contentStartIndex < listJudgment.length) {
             if (listJudgment[contentStartIndex].includes('กฎหมายที่เกี่ยวข้อง')) {
