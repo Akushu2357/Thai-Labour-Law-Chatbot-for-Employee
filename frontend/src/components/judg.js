@@ -108,9 +108,10 @@ function Jude() {
         
         let relatedLaws = [];
         let contentStartIndex = 1;
+        let relateTitle = null;
         while (contentStartIndex < listJudgment.length) {
             if (listJudgment[contentStartIndex].includes('กฎหมายที่เกี่ยวข้อง')) {
-                const relateTitle = listJudgment[contentStartIndex].trim();
+                relateTitle = listJudgment[contentStartIndex].trim();
             } else if (listJudgment[contentStartIndex].startsWith('พระราชบัญญัติ')
                 || listJudgment[contentStartIndex].match(/^พ\.?ร\.?บ\.?/) ) {
                 relatedLaws.push(listJudgment[contentStartIndex]);
