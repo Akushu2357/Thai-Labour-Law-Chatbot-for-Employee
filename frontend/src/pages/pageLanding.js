@@ -51,13 +51,13 @@ function PageLanding() {
                 <img src={logo} className="hero-logo" alt="Logo" />
                 <span className="text-h1 hero-title">แชทบอทกฎหมายแรงงานไทย</span>
                 <span className="text-h3 hero-subtitle">
-                    ถามคำถามเกี่ยวกับสิทธิและหน้าที่ของคุณในฐานะพนักงาน
+                    ถามคำถามเกี่ยวกับสิทธิและหน้าที่ตามกฎหมายแรงงานไทยได้ทันที
                 </span>
 
                 <div className="hero-features">
                     <div className="feature-item">
                         <span className="material-symbols-outlined">verified</span>
-                        <span className="text-p">อ้างอิงกฎหมายโดยตรง</span>
+                        <span className="text-p">อ้างอิงกฎหมาย</span>
                     </div>
                     <div className="feature-item">
                         <span className="material-symbols-outlined">chat</span>
@@ -65,7 +65,11 @@ function PageLanding() {
                     </div>
                     <div className="feature-item">
                         <span className="material-symbols-outlined">history</span>
-                        <span className="text-p">บันทึกประวัติการสนทนา</span>
+                        <span className="text-p">บันทึกการสนทนา</span>
+                    </div>
+                    <div className="feature-item">
+                        <span className="material-symbols-outlined">search</span>
+                        <span className="text-p">สืบค้นกฎหมาย</span>
                     </div>
                 </div>
             </div>

@@ -139,7 +139,7 @@ button:focus-visible {
   justify-items: space-between;
   display: grid;
   grid-template-columns: 1fr auto;
-  border: 2px solid #d4a574;
+  border: 2px solid #1b3ca8;
   border-radius: 15px;
   transition: background-color 160ms ease, transform 120ms ease;
   /* background-color: #f5f5f5; */

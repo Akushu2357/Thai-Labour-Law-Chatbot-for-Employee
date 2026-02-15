@@ -36,7 +36,8 @@ function ChatInput({ onSendMessage, isLoading }) {
                 </button>
             </div>
             <div className="input-hint text-small-without-color">
-                กดปุ่ม Enter เพื่อส่งข้อความ
+                กดปุ่ม Enter เพื่อส่งข้อความ <br/>
+                อ้างอิงข้อมูลจากสำนักงานคณะกรรมการกฤษฎีกา
             </div>
         </form>
     );
