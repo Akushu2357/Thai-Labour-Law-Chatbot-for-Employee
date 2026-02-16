@@ -18,6 +18,7 @@ function Laws() {
     const [books, setBooks] = useState([]);
     const [pendingOpenTrail, setPendingOpenTrail] = useState(null);
     const sectionMatchCacheRef = useRef({});
+    const [shouldAutoExpandChild, setShouldAutoExpandChild] = useState(false);
 
     // Combine filterText and filterTags into single search term
     const combinedFilterText = [
@@ -40,7 +41,7 @@ function Laws() {
                 .then((act) => { if (mounted) setActData(act) })
                 .catch((error) => { console.error('Error fetching act:', error); });
             fetchBooks(actId)
-                .then((booksData) => { 
+                .then((booksData) => {
                     if (mounted) {
                         setBooks(booksData || []);
                     }
@@ -65,6 +66,14 @@ function Laws() {
             setPendingOpenTrail(null);
         }
     }, [pendingOpenTrail, books, setOpenTrail]);
+
+    useEffect(() => {
+        if (books.length === 1) {
+            setShouldAutoExpandChild(true);
+        } else {
+            setShouldAutoExpandChild(false);
+        }
+    }, [books]);
 
     const handleAddFilterTag = (tag) => {
         if (typeof tag === 'string') {
@@ -127,6 +136,7 @@ function Laws() {
                                     type="book"
                                     filterText={combinedFilterText}
                                     sectionMatchCache={sectionMatchCacheRef.current}
+                                    autoExpandSingle={shouldAutoExpandChild}
                                 />
                             ))}
                         </div>

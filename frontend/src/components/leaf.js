@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLibrary } from '../contexts/LibraryContext';
 import './leaf.css';
 
-function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, allowedSections = null }) {
+function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, allowedSections = null, autoExpandSingle = false }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [children, setChildren] = useState([]);
     const [isHighlighted, setIsHighlighted] = useState(false);
@@ -75,6 +75,12 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
         setIsExpanded(!isExpanded);
     };
 
+    useEffect(() => {
+        if (!autoExpandSingle || isExpanded || !hasChildren()) return;
+        setIsExpanded(true);
+        fetchChildren();
+    }, [autoExpandSingle, fetchChildren, hasChildren, isExpanded]);
+
     const getDisplayTitle = () => {
         let text = '';
         if (item.title) text = item.title.replaceAll('\\n', ' ');
@@ -106,6 +112,20 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                 <>
                     {text}
                     <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.9em' }}>({matchCount})</span>
+                </>
+            );
+        } else if (filterText && type === 'super_section' && children.length > 0) {
+            return (
+                <>
+                    {text}
+                    <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.9em' }}>(0)</span>
+                </>
+                );
+        } else if (filterText && type === 'super_section') {
+            return (
+                <>
+                    {text}
+                    <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.9em' }}>(ยังไม่ได้โหลดข้อมูล)</span>
                 </>
             );
         }
@@ -294,6 +314,8 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                                     );
                                 }
 
+                                const shouldAutoExpandChild = visibleChildren.length === 1;
+
                                 return visibleChildren.map((child) => (
                                     <Leaf
                                         key={child.id}
@@ -303,6 +325,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                                         filterText={filterText}
                                         sectionMatchCache={sectionMatchCache}
                                         allowedSections={computedAllowedSections}
+                                        autoExpandSingle={shouldAutoExpandChild}
                                     />
                                 ));
                             })()}
