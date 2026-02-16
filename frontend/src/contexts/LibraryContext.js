@@ -18,6 +18,18 @@ export function LibraryProvider({ children }) {
   const loadingCountRef = useRef(0);
   const loadingReferenceCountRef = useRef(0);
 
+  const setLoadingDelta = (delta) => {
+    loadingCountRef.current += delta;
+    if (loadingCountRef.current < 0) loadingCountRef.current = 0;
+    setLoading(loadingCountRef.current > 0);
+  };
+
+  const appendUniqueById = (list, item) => {
+    if (!Array.isArray(list)) return [item];
+    if (list.some(existing => String(existing.id) === String(item.id))) return list;
+    return [...list, item];
+  };
+
   const fetchData = async (key, fetcher, isReference = false) => {
     if (cacheRef.current[key]) {
       return cacheRef.current[key];
@@ -144,6 +156,57 @@ export function LibraryProvider({ children }) {
     return res.data || [];
   }, true), []);
 
+  const streamSections = useCallback(async (super_section_id, onEvent, signal) => {
+    const baseUrl = httpService.defaults.baseURL || '';
+    const url = `${baseUrl}/api/libraries/super_sections/${super_section_id}/sections_stream`;
+    setLoadingDelta(1);
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { Accept: 'application/x-ndjson' },
+        signal,
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error(`Stream error: ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          const evt = JSON.parse(trimmed);
+
+          if (evt.type === 'section') {
+            const key = `super_sections:${super_section_id}:sections`;
+            cacheRef.current[key] = appendUniqueById(cacheRef.current[key] || [], evt.data);
+          }
+
+          if (onEvent) onEvent(evt);
+        }
+      }
+
+      const remaining = buffer.trim();
+      if (remaining) {
+        const evt = JSON.parse(remaining);
+        if (onEvent) onEvent(evt);
+      }
+    } finally {
+      setLoadingDelta(-1);
+    }
+  }, []);
+
   const fetchJudgments = useCallback(() => fetchData('judgments', async () => {
     // ensure tags available
     const tagsData = (cacheRef.current['tags'] || tags.length > 0) ? (cacheRef.current['tags'] || tags) : await fetchTags();
@@ -197,6 +260,7 @@ export function LibraryProvider({ children }) {
     fetchSuperSections,
     fetchSections,
     fetchSectionsByActAndNumber,
+    streamSections,
     selectedTags,
     searchTerm,
     setSearchTerm,

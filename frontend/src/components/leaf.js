@@ -7,8 +7,16 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
     const [children, setChildren] = useState([]);
     const [isHighlighted, setIsHighlighted] = useState(false);
     const [clickLoading, setClickLoading] = useState(null);
+    const [isStreamingSections, setIsStreamingSections] = useState(false);
     const nodeRef = useRef(null);
-    const { fetchGroups, fetchSuperSections, fetchSections, fetchSectionsByActAndNumber, openTrail, setOpenTrail, loadingReference, loading } = useLibrary();
+    const streamControllerRef = useRef(null);
+    const { fetchGroups, fetchSuperSections, fetchSectionsByActAndNumber, streamSections, openTrail, setOpenTrail, loadingReference } = useLibrary();
+
+    const appendUniqueById = (list, item) => {
+        if (!Array.isArray(list)) return [item];
+        if (list.some(existing => String(existing.id) === String(item.id))) return list;
+        return [...list, item];
+    };
 
     const hasChildren = useCallback(() => {
         switch (type) {
@@ -56,9 +64,23 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                     setChildren(childrenData.map(child => ({ ...child, type: 'super_section' })));
                     break;
                 case 'super_section':
-                    childrenData = await fetchSections(item.id);
-                    const sectionsWithType = childrenData.map(child => ({ ...child, type: 'section' }));
-                    setChildren(sectionsWithType);
+                    if (streamControllerRef.current) {
+                        streamControllerRef.current.abort();
+                    }
+                    streamControllerRef.current = new AbortController();
+                    setIsStreamingSections(true);
+                    streamSections(item.id, (evt) => {
+                        if (evt.type === 'section') {
+                            setChildren(prev => appendUniqueById(prev, { ...evt.data, type: 'section' }));
+                        }
+                        if (evt.type === 'done') {
+                            setIsStreamingSections(false);
+                        }
+                    }, streamControllerRef.current.signal).catch((error) => {
+                        if (error?.name === 'AbortError') return;
+                        console.error('Error streaming sections:', error);
+                        setIsStreamingSections(false);
+                    });
                     break;
                 default:
                     break;
@@ -66,7 +88,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
         } catch (error) {
             console.error('Error fetching children:', error);
         }
-    }, [type, item.id, children.length, fetchGroups, fetchSuperSections, fetchSections, hasChildren]);
+    }, [type, item.id, children.length, fetchGroups, fetchSuperSections, hasChildren, streamSections]);
 
     const handleToggle = () => {
         if (!isExpanded) {
@@ -216,10 +238,10 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
     }, [openTrail, fetchChildren, isExpanded, item.id, type]);
 
     useEffect(() => {
-        if (clickLoading && !loadingReference && !loading) {
+        if (clickLoading && !loadingReference) {
             setClickLoading(null);
         }
-    }, [clickLoading, loadingReference, loading]);
+    }, [clickLoading, loadingReference]);
 
     useEffect(() => {
         if (!openTrail) return;
@@ -230,6 +252,14 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             return () => clearTimeout(t);
         }
     }, [openTrail, type, item?.id]);
+
+    useEffect(() => {
+        return () => {
+            if (streamControllerRef.current) {
+                streamControllerRef.current.abort();
+            }
+        };
+    }, []);
 
     // Pre-compute which section_numbers should be shown (for super_section with sections)
     let computedAllowedSections = allowedSections;
@@ -293,9 +323,9 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
 
             </div>
 
-            {isExpanded &&
-                (children.length > 0
-                    ? (
+            {isExpanded && (
+                <>
+                    {children.length > 0 && (
                         <div>
                             {(() => {
                                 const visibleChildren = children.filter(child => {
@@ -330,17 +360,17 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                                 ));
                             })()}
                         </div>
-                    )
-                    : loading && (
+                    )}
+                    {isStreamingSections && (
                         <div className='leaf-loading'>
                             <span className="loading-icon" aria-label="loading">
                                 <span className="material-symbols-outlined">progress_activity</span>
                             </span>
                             <span className="text-p-without-color" style={{ marginLeft: '0.5rem', textAlign: 'left' }}>กำลังโหลด...</span>
                         </div>
-                    )
-                )
-            }
+                    )}
+                </>
+            )}
         </div>
     );
 }

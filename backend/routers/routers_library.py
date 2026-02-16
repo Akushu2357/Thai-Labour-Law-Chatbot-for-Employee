@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from services.services_library import *
 
 router = APIRouter(prefix="/libraries", tags=["libraries"])
@@ -42,3 +43,8 @@ def get_library_sections(super_section_id: int):
 def get_library_sections_by_number(act_id: int, section_number: str):
     sections = get_sections_by_act_and_number(act_id, section_number)
     return sections
+
+
+@router.get("/super_sections/{super_section_id}/sections_stream")
+def stream_library_sections(super_section_id: int):
+    return StreamingResponse(stream_sections_by_super_section(super_section_id), media_type="application/x-ndjson")

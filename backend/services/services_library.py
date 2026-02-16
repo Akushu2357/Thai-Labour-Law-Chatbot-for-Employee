@@ -1,3 +1,4 @@
+import json
 from database.supabase_client import get_supabase_client
 
 def get_tags():
@@ -97,3 +98,21 @@ def get_sections_by_act_and_number(act_id: int, section_number: str):
             sections[idx]["key"] = "section"  # For frontend tree structure
         return sections
     return {"message": "No sections found for the given act_id and section_number"}
+
+
+def stream_sections_by_super_section(super_section_id: int):
+    sections = get_supabase_client().table("act_sections").select(
+        "id, act_id, book_id, group_id, super_id, \
+        section_number, sub_section, paragraph_number, item_order, \
+        title:text_original, cross_references, external_citations"
+    ).eq("super_id", super_section_id).order("id").execute().data or []
+
+    for section in sections:
+        citations = get_supabase_client().table("act_section_tags").select(
+            "tag_id"
+        ).eq("act_section_id", section["id"]).order("tag_id").execute().data
+        section["tags"] = [c["tag_id"] for c in citations]
+        section["key"] = "section"  # For frontend tree structure
+        yield json.dumps({"type": "section", "parentId": super_section_id, "data": section}, ensure_ascii=False) + "\n"
+
+    yield json.dumps({"type": "done"}) + "\n"
