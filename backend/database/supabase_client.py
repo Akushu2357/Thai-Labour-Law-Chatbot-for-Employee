@@ -2,7 +2,7 @@ import os
 from typing import Optional
 from supabase import create_client, Client
 from dotenv import load_dotenv
-from supabase.lib.client_options import ClientOptions
+from supabase.client import ClientOptions
 
 # Lazy-initialized Supabase client. Calling get_supabase_client() will create
 # and cache the client on first use. This avoids failing at import time if
