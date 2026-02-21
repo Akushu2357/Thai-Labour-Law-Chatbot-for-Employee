@@ -256,7 +256,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                 clearTimeout(t);
             };
         }
-    }, [openTrail, type, item?.id]);
+    }, [openTrail, type, item?.id, setOpenTrail]);
 
     useEffect(() => {
         return () => {
