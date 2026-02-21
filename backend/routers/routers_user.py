@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 from pydantic import BaseModel
 from typing import Optional
 from services.services_user import *
@@ -23,22 +23,23 @@ class UpdateUserRequest(BaseModel):
 # ===================== User Profile =====================
 
 @router.post("/")
-def create_user(request: CreateUserRequest):
+def create_user(request: CreateUserRequest, authorization: Optional[str] = Header(None, alias="Authorization")):
     """สร้างหรืออัพเดท user profile"""
     return create_or_update_user(
         user_id=request.user_id,
         email=request.email,
         display_name=request.display_name,
-        avatar_url=request.avatar_url
+        avatar_url=request.avatar_url,
+        auth_token=authorization,
     )
 
 @router.get("/{user_id}")
-def get_user(user_id: str):
+def get_user(user_id: str, authorization: Optional[str] = Header(None, alias="Authorization")):
     """ดึงข้อมูล user ตาม ID"""
-    return get_user_by_id(user_id)
+    return get_user_by_id(user_id, auth_token=authorization)
 
 @router.put("/{user_id}")
-def update_user(user_id: str, request: UpdateUserRequest):
+def update_user(user_id: str, request: UpdateUserRequest, authorization: Optional[str] = Header(None, alias="Authorization")):
     """อัพเดทข้อมูล user profile"""
     return update_user_profile(
         user_id=user_id,
@@ -48,13 +49,14 @@ def update_user(user_id: str, request: UpdateUserRequest):
         date_of_birth=request.date_of_birth,
         job_description=request.job_description,
         start_work_date=request.start_work_date,
-        job_type_description=request.job_type_description
+        job_type_description=request.job_type_description,
+        auth_token=authorization,
     )
 
 @router.delete("/{user_id}")
-def delete_user_profile(user_id: str):
+def delete_user_profile(user_id: str, authorization: Optional[str] = Header(None, alias="Authorization")):
     """ลบ user profile"""
-    return delete_user(user_id)
+    return delete_user(user_id, auth_token=authorization)
 
 # ===================== Job & Job Type Options =====================
 

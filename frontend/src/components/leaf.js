@@ -248,8 +248,13 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
         if (type === 'section' && openTrail.sectionId === item.id) {
             nodeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setIsHighlighted(true);
-            const t = setTimeout(() => setIsHighlighted(false), 2000);
-            return () => clearTimeout(t);
+            const t = setTimeout(() => {
+                setIsHighlighted(false);
+                setOpenTrail(null);
+            }, 2000);
+            return () => {
+                clearTimeout(t);
+            };
         }
     }, [openTrail, type, item?.id]);
 

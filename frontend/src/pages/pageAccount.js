@@ -4,7 +4,7 @@ import userService from "../services/userService";
 import "./pageAccount.css";
 
 function PageAccount() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [email, setEmail] = useState(user?.email || '');
     const [birthdate, setBirthdate] = useState(user?.date_of_birth || '');
     const [status, setStatus] = useState(user?.job_description || '');
@@ -15,7 +15,6 @@ function PageAccount() {
     const [jobTypes, setJobTypes] = useState(['loading...']);
     const [optionsLoading, setOptionsLoading] = useState(true);
     const [userLoading, setUserLoading] = useState(true);
-    const { logout } = useAuth();
 
     // Keep email in sync with auth user
     useEffect(() => {

@@ -190,11 +190,29 @@ button.menu-item:active {
   cursor: pointer;
 }
 
-.menu-subitem .material-symbols-outlined {
+.history-delete-btn {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.history-delete-btn .material-symbols-outlined {
+  color: #c24d2c;
+  font-size: 1.2rem;
+}
+
+.history-delete-btn:hover .material-symbols-outlined {
+  color: #ff5a2d;
+}
+
+.menu-subitem .material-symbols-outlined.rotate {
   rotate: 90deg;
 }
 
-.menu-subitem:hover .material-symbols-outlined {
+.menu-subitem:hover .material-symbols-outlined.rotate {
   rotate: 0deg;
 }
 

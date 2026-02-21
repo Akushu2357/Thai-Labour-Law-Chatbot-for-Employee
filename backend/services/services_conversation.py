@@ -1,9 +1,13 @@
+from typing import Optional
+
 from database.supabase_client import get_supabase_client
+from utils.supabase_auth import get_user_client
 from datetime import datetime
 
-def create_chat_room(user_id: str = None, title: str = "การสนทนาใหม่"):
+def create_chat_room(user_id: str = None, title: str = "การสนทนาใหม่", auth_token: Optional[str] = None):
     """สร้างห้องสนทนาใหม่"""
     try:
+        user_client = get_user_client(auth_token)
         room_data = {
             "title": title,
             "is_archive": False,
@@ -15,7 +19,7 @@ def create_chat_room(user_id: str = None, title: str = "การสนทนา
         if user_id:
             room_data["user_id"] = user_id
         
-        result = get_supabase_client().table("chat_rooms").insert(room_data).execute()
+        result = user_client.table("chat_rooms").insert(room_data).execute()
         
         if result.data and len(result.data) > 0:
             return result.data[0]
@@ -24,10 +28,11 @@ def create_chat_room(user_id: str = None, title: str = "การสนทนา
         print(f"Error creating chat room: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def get_chat_rooms(user_id: str = None, include_archived: bool = False):
+def get_chat_rooms(user_id: str = None, include_archived: bool = False, auth_token: Optional[str] = None):
     """ดึงรายการห้องสนทนาทั้งหมด"""
     try:
-        query = get_supabase_client().table("chat_rooms").select("*")
+        user_client = get_user_client(auth_token)
+        query = user_client.table("chat_rooms").select("*")
         
         # กรองตาม user_id ถ้ามี
         if user_id:
@@ -46,10 +51,11 @@ def get_chat_rooms(user_id: str = None, include_archived: bool = False):
         print(f"Error getting chat rooms: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def get_chat_room_by_id(room_id: int):
+def get_chat_room_by_id(room_id: int, auth_token: Optional[str] = None):
     """ดึงข้อมูลห้องสนทนาตาม ID"""
     try:
-        result = get_supabase_client().table("chat_rooms").select("*").eq("id", room_id).limit(1).execute()
+        user_client = get_user_client(auth_token)
+        result = user_client.table("chat_rooms").select("*").eq("id", room_id).limit(1).execute()
         
         if result.data and len(result.data) > 0:
             return result.data[0]
@@ -58,9 +64,10 @@ def get_chat_room_by_id(room_id: int):
         print(f"Error getting chat room: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def update_chat_room(room_id: int, title: str = None, is_archive: bool = None):
+def update_chat_room(room_id: int, title: str = None, is_archive: bool = None, auth_token: Optional[str] = None):
     """อัพเดทข้อมูลห้องสนทนา"""
     try:
+        user_client = get_user_client(auth_token)
         update_data = {"updated_at": datetime.now().isoformat()}
         
         if title is not None:
@@ -69,7 +76,7 @@ def update_chat_room(room_id: int, title: str = None, is_archive: bool = None):
         if is_archive is not None:
             update_data["is_archive"] = is_archive
         
-        result = get_supabase_client().table("chat_rooms").update(update_data).eq("id", room_id).execute()
+        result = user_client.table("chat_rooms").update(update_data).eq("id", room_id).execute()
         
         if result.data and len(result.data) > 0:
             return result.data[0]
@@ -78,23 +85,48 @@ def update_chat_room(room_id: int, title: str = None, is_archive: bool = None):
         print(f"Error updating chat room: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def delete_chat_room(room_id: int):
+def delete_chat_room(room_id: int, auth_token: Optional[str] = None):
     """ลบห้องสนทนา (และข้อความทั้งหมดในห้อง)"""
     try:
+        user_client = get_user_client(auth_token)
         # ลบข้อความทั้งหมดในห้องก่อน
-        get_supabase_client().table("chat_messages").delete().eq("room_id", room_id).execute()
+        user_client.table("chat_messages").delete().eq("room_id", room_id).execute()
         
         # ลบห้องสนทนา
-        result = get_supabase_client().table("chat_rooms").delete().eq("id", room_id).execute()
+        result = user_client.table("chat_rooms").delete().eq("id", room_id).execute()
         
         return {"message": "Chat room deleted successfully"}
     except Exception as e:
         print(f"Error deleting chat room: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def add_message(room_id: int, sender: str, message: str, metadata: dict = None):
+def delete_chat_rooms_by_user(user_id: str, auth_token: Optional[str] = None):
+    """ลบห้องสนทนาทั้งหมดของผู้ใช้ (และข้อความทั้งหมดในห้อง)"""
+    try:
+        user_client = get_user_client(auth_token)
+        rooms = user_client.table("chat_rooms").select("id").eq("user_id", user_id).execute()
+        room_ids = [room["id"] for room in (rooms.data or [])]
+
+        for room_id in room_ids:
+            user_client.table("chat_messages").delete().eq("room_id", room_id).execute()
+
+        user_client.table("chat_rooms").delete().eq("user_id", user_id).execute()
+
+        return {"message": "User chat rooms deleted successfully", "deleted_room_count": len(room_ids)}
+    except Exception as e:
+        print(f"Error deleting user chat rooms: {e}")
+        return {"message": f"Error: {str(e)}"}
+
+def add_message(
+    room_id: int,
+    sender: str,
+    message: str,
+    metadata: dict = None,
+    auth_token: Optional[str] = None,
+):
     """เพิ่มข้อความในห้องสนทนา"""
     try:
+        user_client = get_user_client(auth_token)
         # เพิ่มข้อความ
         print(f"Adding message to room {room_id}: sender={sender}, message={message}, metadata={metadata}")
         message_data = {
@@ -105,10 +137,10 @@ def add_message(room_id: int, sender: str, message: str, metadata: dict = None):
             "created_at": datetime.now().isoformat()
         }
         
-        result = get_supabase_client().table("chat_messages").insert(message_data).execute()
+        result = user_client.table("chat_messages").insert(message_data).execute()
         
         # อัพเดท updated_at ของห้องสนทนา
-        get_supabase_client().table("chat_rooms").update({
+        user_client.table("chat_rooms").update({
             "updated_at": datetime.now().isoformat()
         }).eq("id", room_id).execute()
         
@@ -119,10 +151,11 @@ def add_message(room_id: int, sender: str, message: str, metadata: dict = None):
         print(f"Error adding message: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def get_messages(room_id: int, limit: int = 100):
+def get_messages(room_id: int, limit: int = 100, auth_token: Optional[str] = None):
     """ดึงข้อความทั้งหมดในห้องสนทนา"""
     try:
-        result = get_supabase_client().table("chat_messages").select("*").eq(
+        user_client = get_user_client(auth_token)
+        result = user_client.table("chat_messages").select("*").eq(
             "room_id", room_id
         ).order("created_at", desc=False).limit(limit).execute()
         
@@ -133,10 +166,10 @@ def get_messages(room_id: int, limit: int = 100):
         print(f"Error getting messages: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def get_chat_history(room_id: int):
+def get_chat_history(room_id: int, auth_token: Optional[str] = None):
     """ดึงประวัติการสนทนาทั้งหมดในรูปแบบที่พร้อมใช้กับ LLM"""
     try:
-        messages = get_messages(room_id)
+        messages = get_messages(room_id, auth_token=auth_token)
         
         if isinstance(messages, list):
             # แปลงเป็นรูปแบบที่ LLM ใช้

@@ -1,11 +1,21 @@
+from typing import Optional
+
 from database.supabase_client import get_supabase_client
+from utils.supabase_auth import get_user_client
 from datetime import datetime
 
-def create_or_update_user(user_id: str, email: str = None, display_name: str = None, avatar_url: str = None):
+def create_or_update_user(
+    user_id: str,
+    email: str = None,
+    display_name: str = None,
+    avatar_url: str = None,
+    auth_token: Optional[str] = None,
+):
     """สร้างหรืออัพเดท user profile"""
     try:
+        user_client = get_user_client(auth_token)
         # ตรวจสอบว่ามี user อยู่แล้วหรือไม่
-        existing_user = get_supabase_client().table("users").select("*").eq("id", user_id).limit(1).execute()
+        existing_user = user_client.table("users").select("*").eq("id", user_id).limit(1).execute()
         
         if existing_user.data and len(existing_user.data) > 0:
             # อัพเดท user ที่มีอยู่แล้ว
@@ -19,7 +29,7 @@ def create_or_update_user(user_id: str, email: str = None, display_name: str = N
             if avatar_url is not None:
                 update_data["avatar_url"] = avatar_url
             
-            result = get_supabase_client().table("users").update(update_data).eq("id", user_id).execute()
+            result = user_client.table("users").update(update_data).eq("id", user_id).execute()
             
             if result.data and len(result.data) > 0:
                 return result.data[0]
@@ -35,7 +45,7 @@ def create_or_update_user(user_id: str, email: str = None, display_name: str = N
                 "updated_at": datetime.now().isoformat()
             }
             
-            result = get_supabase_client().table("users").insert(user_data).execute()
+            result = user_client.table("users").insert(user_data).execute()
             
             if result.data and len(result.data) > 0:
                 return result.data[0]
@@ -44,10 +54,11 @@ def create_or_update_user(user_id: str, email: str = None, display_name: str = N
         print(f"Error creating/updating user: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def get_user_by_id(user_id: str):
+def get_user_by_id(user_id: str, auth_token: Optional[str] = None):
     """ดึงข้อมูล user ตาม ID"""
     try:
-        result = get_supabase_client().table("users").select("*").eq("id", user_id).limit(1).execute()
+        user_client = get_user_client(auth_token)
+        result = user_client.table("users").select("*").eq("id", user_id).limit(1).execute()
         
         if result.data and len(result.data) > 0:
             result.data[0]["job_description"] = get_supabase_client().table("job").select("description").eq("id", result.data[0].get("job_id")).limit(1).execute().data[0]["description"] if result.data[0].get("job_id") else None
@@ -110,11 +121,20 @@ def get_or_create_job_type(description: str):
         print(f"Error getting/creating job_type: {e}")
         return None
 
-def update_user_profile(user_id: str, display_name: str = None, avatar_url: str = None, detail: str = None, 
-                       date_of_birth: str = None, job_description: str = None, start_work_date: str = None, 
-                       job_type_description: str = None):
+def update_user_profile(
+    user_id: str,
+    display_name: str = None,
+    avatar_url: str = None,
+    detail: str = None,
+    date_of_birth: str = None,
+    job_description: str = None,
+    start_work_date: str = None,
+    job_type_description: str = None,
+    auth_token: Optional[str] = None,
+):
     """อัพเดทข้อมูล user profile"""
     try:
+        user_client = get_user_client(auth_token)
         update_data = {
             "updated_at": datetime.now().isoformat()
         }
@@ -146,7 +166,7 @@ def update_user_profile(user_id: str, display_name: str = None, avatar_url: str 
             if job_type_id is not None:
                 update_data["job_type_id"] = job_type_id
         
-        result = get_supabase_client().table("users").update(update_data).eq("id", user_id).execute()
+        result = user_client.table("users").update(update_data).eq("id", user_id).execute()
         
         if result.data and len(result.data) > 0:
             return result.data[0]
@@ -155,10 +175,11 @@ def update_user_profile(user_id: str, display_name: str = None, avatar_url: str 
         print(f"Error updating user profile: {e}")
         return {"message": f"Error: {str(e)}"}
 
-def delete_user(user_id: str):
+def delete_user(user_id: str, auth_token: Optional[str] = None):
     """ลบ user (ควรใช้อย่างระมัดระวัง)"""
     try:
-        result = get_supabase_client().table("users").delete().eq("id", user_id).execute()
+        user_client = get_user_client(auth_token)
+        result = user_client.table("users").delete().eq("id", user_id).execute()
         return {"message": "User deleted successfully"}
     except Exception as e:
         print(f"Error deleting user: {e}")

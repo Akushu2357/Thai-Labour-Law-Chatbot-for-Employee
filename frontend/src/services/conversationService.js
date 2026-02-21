@@ -120,6 +120,21 @@ const conversationService = {
         }
     },
 
+    /**
+     * ลบห้องสนทนาทั้งหมดของผู้ใช้
+     * @param {string} userId - ID ของผู้ใช้
+     * @returns {Promise}
+     */
+    deleteUserRooms: async (userId) => {
+        try {
+            const response = await httpService.delete(`/api/conversations/rooms/by-user/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting user rooms:', error);
+            throw error;
+        }
+    },
+
     // ===================== Messages =====================
 
     /**

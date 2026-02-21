@@ -75,6 +75,19 @@ function NavBar() {
     }
   };
 
+  const handleDeleteHistory = async (roomId, e) => {
+    e.stopPropagation();
+    const confirmed = window.confirm('ยืนยันการลบประวัติการสนทนานี้?');
+    if (!confirmed) return;
+    try {
+      await conversationService.deleteRoom(roomId);
+      setHistorys((prev) => prev.filter((room) => room.id !== roomId));
+    } catch (error) {
+      console.error('Error deleting chat history:', error);
+      alert('ไม่สามารถลบประวัติการสนทนาได้');
+    }
+  };
+
   const menuComponent = (
     <>
       <div className='menu-header'>
@@ -134,19 +147,26 @@ function NavBar() {
                   className='menu-subitem'
                   onClick={() => handleClick(`/chat/${history.id}`)}
                 >
-                  <span className="material-symbols-outlined">
+                  <span className="material-symbols-outlined rotate">
                     arrow_right
                   </span>
                   <span className="text-p">{history.title || 'ห้องสนทนาไม่มีชื่อ'}</span>
+                  <button
+                    type="button"
+                    className="history-delete-btn"
+                    onClick={(e) => handleDeleteHistory(history.id, e)}
+                    aria-label="ลบประวัติการสนทนา"
+                  >
+                    <span className="material-symbols-outlined" aria-hidden>
+                      delete
+                    </span>
+                  </button>
                 </div>
               ))}
             </div>
           )}
         </div>
       </nav>
-      {/* <div className='menu-footer'>
-        <span className="text-p brand" aria-hidden onClick={() => handleClick('/account')}>จัดการบัญชี</span>
-      </div> */}
       <div style={{ padding: '15px', display: 'flex', justifyContent: 'center' }} >
         <button
           className="menu-item"
