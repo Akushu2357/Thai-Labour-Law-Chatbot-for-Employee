@@ -63,40 +63,31 @@ function MessageList({ messages }) {
 
     // ฟังก์ชันแปลงข้อความให้มีลิงก์มาตรา
     const renderMessageWithSectionLinks = (text, metadata) => {
-        if (!metadata || !metadata.sections || metadata.sections.length === 0) {
-            return <ReactMarkdown>{text}</ReactMarkdown>;
-        }
-
-        // สร้าง Set ของเลขมาตราที่มีอยู่ใน metadata
-        const availableSections = new Set(
-            metadata.sections.map(s => String(typeof s === 'object' ? s.section_number : s))
-        );
-
-        // รองรับทั้ง format เก่า (number) และใหม่ (tuple)
-        let actId = null;
-        if (metadata.acts && metadata.acts.length > 0) {
-            const firstAct = metadata.acts[0];
-            actId = Array.isArray(firstAct) ? firstAct[0] : firstAct;
-        }
-
-        if (!actId) {
-            return <ReactMarkdown>{text}</ReactMarkdown>;
-        }
-
-        // แทนที่ "มาตรา X" ด้วย markdown link พร้อม icon
-        const textWithLinks = text.replace(/มาตรา\s*(\d+[ก-ฮ]?)/g, (match, sectionNumber) => {
-            if (availableSections.has(String(sectionNumber))) {
-                return `[📜 ${match}](#section-${sectionNumber})`;
+        let processedText = text.replace(
+            /\[([^\]]+)\]\{act_id=([^,}]+),\s*sec_num=([^}]+)\}/g,
+            (match, textContent, actIdRaw, secNumRaw) => {
+                const actId = actIdRaw.trim();
+                const secNum = secNumRaw.trim();
+                if (!/^\d+$/.test(actId) || !/^\d+$/.test(secNum)) {
+                    return textContent;
+                }
+                return `[${textContent}](#section-${secNum}-${actId})`;
             }
-            return match;
-        });
+        );
+        // เพิ่ม metadata fallback
+        if (!metadata || !metadata.sections || metadata.sections.length === 0) {
+            return <ReactMarkdown>{processedText}</ReactMarkdown>;
+        }
+        
 
         // Custom components สำหรับ ReactMarkdown
         const components = {
             a: ({ node, href, children, ...props }) => {
-                const sectionMatch = href?.match(/#section-(\d+[ก-ฮ]?)/);
-                if (sectionMatch) {
-                    const sectionNumber = sectionMatch[1];
+                // ตรวจสอบรูปแบบใหม่ [text](#section-Y-X)
+                const newFormatMatch = href?.match(/#section-(\d+[ก-ฮ]?)-(\d+)/);
+                if (newFormatMatch) {
+                    const sectionNumber = newFormatMatch[1];
+                    const actId = newFormatMatch[2];
                     return (
                         <button
                             onClick={(e) => {
@@ -115,7 +106,7 @@ function MessageList({ messages }) {
             }
         };
 
-        return <ReactMarkdown components={components}>{textWithLinks}</ReactMarkdown>;
+        return <ReactMarkdown components={components}>{processedText}</ReactMarkdown>;
     };
 
     return (

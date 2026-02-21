@@ -91,16 +91,17 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
         sec_num = doc.get('section_number', '?')
         text = doc.get('text_original', '')
         act_id = doc.get('act_id')
+        sec_id = doc.get('id')
         
         # Debug: ดูว่าแต่ละ doc มีอะไรบ้าง
-        print(f"    Document: section_number={sec_num}, act_id={act_id}")
+        print(f"    Document: section_number={sec_num}, act_id={act_id}, sec_id={sec_id}")
         
-        context_text += f"- มาตรา {sec_num}: {text}\n\n"
+        context_text += f"- act_id={act_id} sec_num={sec_num}: {text}\n"
         
         # เก็บเลขมาตราและ act_id
         if sec_num and sec_num != '?':
             sections_list.append({ 
-                "id": doc.get('id'), 
+                "id": sec_id, 
                 "act_id": act_id, 
                 "section_number": sec_num, 
                 "paragraph_number": doc.get('paragraph_number')
