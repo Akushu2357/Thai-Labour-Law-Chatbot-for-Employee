@@ -61,6 +61,7 @@
     background-position: 0 100%;
     background-repeat: no-repeat;
     transition: background-size 400ms;
+    padding: 0;
 }
 
 .reference:hover, .reference:focus {
