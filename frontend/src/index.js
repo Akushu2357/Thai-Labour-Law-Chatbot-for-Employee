@@ -5,7 +5,7 @@ import {
   RouterProvider,
   Outlet,
 } from "react-router-dom";
-import './styles/responsive.css';
+// import './styles/responsive.css';
 import './index.css';
 import NavBar from './components/navBar';
 import PageLanding from './pages/pageLanding';

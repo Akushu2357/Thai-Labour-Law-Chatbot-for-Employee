@@ -159,7 +159,8 @@ button:focus-visible {
 } */
 
 .menu-item:hover {
-  background-color:#00a7e1;
+  /* background-color: rgba(0, 134, 175, 0.25); */
+  background-color: rgba(0, 200, 255, 0.25);
   color: #fff;
 }
 

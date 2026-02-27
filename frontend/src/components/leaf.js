@@ -176,7 +176,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             }
 
             elements.push(
-                <button key={ref} className='button-link reference' onClick={() => { handleReferenceClick(item.cross_references[ref]); setClickLoading(ref); }}>
+                <button key={ref} className='button-link-reference' onClick={() => { handleReferenceClick(item.cross_references[ref]); setClickLoading(ref); }}>
                     {item.cross_references[ref].original_text}
                 </button>
             );
