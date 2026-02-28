@@ -94,7 +94,7 @@ function MessageList({ messages }) {
                                 e.preventDefault();
                                 handleSectionClick(sectionNumber, actId);
                             }}
-                            className="section-link button-link"
+                            className="button-link-section"
                             title={`ไปที่มาตรา ${sectionNumber}`}
                             {...props}
                         >
