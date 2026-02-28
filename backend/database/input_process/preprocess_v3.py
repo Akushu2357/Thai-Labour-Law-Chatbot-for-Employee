@@ -22,53 +22,87 @@ def find_references_in_text(text, key):
     # - มาตรา 41
     # - มาตรา 100/1
     # - มาตรา 47 ทวิ
-    # - วรรคสาม (or วรรค 3)
-    # - (2) or (ก)
+    # - มาตรา 50 วรรค 2
+    # - มาตรา 50 วรรค 2 (1)
+    # - วรรคสาม
+    # - วรรค 3
+    # - (2)
+    # - (ก)
     text = text[1:]
-    ord_inner = ordinal_suffixes[1:-1] if ordinal_suffixes.startswith("(") and ordinal_suffixes.endswith(")") else ordinal_suffixes
-    thai_nums_inner = thai_number_words[1:-1] if thai_number_words.startswith("(") and thai_number_words.endswith(")") else thai_number_words
-
-    patterns = []
-    # section with optional sub and optional ordinal suffix (capture suffix)
-    patterns.append(("section", re.compile(rf"มาตรา\s+([0-9]+)(?:/([0-9]+))?(?:\s*({ord_inner}))?")))
-    # paragraph: วรรค + thai-word or arabic number
-    patterns.append(("paragraph", re.compile(rf"วรรค\s*({thai_nums_inner}|\d+)", flags=re.IGNORECASE)))
-    # parenthesized reference like (2) or (ก)
-    patterns.append(("parenthesis", re.compile(r'\(\s*([0-9]+|[ก-ฮ])\s*\)')))
+    
+    # Combined pattern for all reference types
+    pattern = re.compile(
+        r"""
+        (                                                           # Group 1: Section + optional paragraph + item
+            มาตรา\s*(\d+)(?:/(\d+))?                    # Section and optional sub-section
+            (?:\s*(ทวิ|ตรี|จัตวา|เบญจ|ฉ|สัปต|อัฏฐ|นพ|ทศ))?       # Optional ordinal suffix
+            (?:\s*วรรค\s*(\d+|[ก-ฮ]+|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ))?  # Optional paragraph
+            (?:\s*([^)]*\([^)]+\)))?                    # Optional item reference
+        )
+        |
+        (วรรค\s*(\d+|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ))  # Group 2: Standalone paragraph
+        |
+        (\([^)]+\))                                                 # Group 3: Standalone item
+        """,
+        re.VERBOSE
+    )
 
     finds = []
-    for typ, pat in patterns:
-        for m in pat.finditer(text):
-            # ignore a leading parenthesis that marks the start-of-line item (we don't want to treat that as an inline reference)
-            if typ == "parenthesis" and m.start() == 0:
-                continue
-            info = {"type": typ, "pos": m.start(), "match": m.group(0)}
-            if typ == "section":
-                sec = m.group(1)
-                sub = m.group(2)
-                suffix = m.group(3) if m.lastindex and m.lastindex >= 3 else None
-                ref = f"{sec}" + (f"/{sub}" if sub else "") + (f" {suffix}" if suffix else "")
-                info["ref"] = ref
-                info["section"] = int(sec)
-                if sub:
-                    info["sub_section"] = sub
-                if suffix:
-                    info["suffix"] = suffix
-            elif typ == "paragraph":
-                grp = m.group(1)
+    for m in pattern.finditer(text):
+        # ignore a leading parenthesis that marks the start-of-line item (we don't want to treat that as an inline reference)
+        if m.group(9) and m.start() == 0:
+            continue
+        
+        info = {"pos": m.start(), "match": m.group(0)}
+        
+        if m.group(1):  # Section-based reference
+            info["type"] = "section"
+            sec = m.group(2)
+            sub = m.group(3)
+            suffix = m.group(4)
+            para = m.group(5)
+            item = m.group(6)
+            
+            ref = f"{sec}" + (f"/{sub}" if sub else "") + (f" {suffix}" if suffix else "")
+            info["ref"] = ref
+            info["section"] = int(sec)
+            if sub:
+                info["sub_section"] = sub
+            if suffix:
+                info["suffix"] = suffix
+            if para:
                 # convert thai word to number if possible
-                if grp.isdigit():
-                    num = int(grp)
+                if para.isdigit():
+                    num = int(para)
                 else:
-                    num = thai_word_map.get(grp, None)
-                info["ref"] = str(num) if num is not None else grp
+                    num = thai_word_map.get(para, None)
                 if num is not None:
                     info["paragraph"] = num
-            else:  # parenthesis
-                val = m.group(1)
-                info["ref"] = val
-                info["item"] = val
-            finds.append(info)
+            if item:
+                info["item_text"] = item
+                
+        elif m.group(7):  # Standalone paragraph reference
+            info["type"] = "paragraph"
+            grp = m.group(8)
+            # convert thai word to number if possible
+            if grp.isdigit():
+                num = int(grp)
+            else:
+                num = thai_word_map.get(grp, None)
+                for i in range(1, 10):
+                    print("group", i, m.group(i))
+                print("grp, num", grp, num)
+            info["ref"] = str(num) if num is not None else grp
+            if num is not None:
+                info["paragraph"] = num
+                
+        elif m.group(9):  # Standalone item reference
+            info["type"] = "parenthesis"
+            val = m.group(9).strip("()")
+            info["ref"] = val
+            info["item"] = val
+            
+        finds.append(info)
 
     if not finds:
         return key
@@ -80,52 +114,24 @@ def find_references_in_text(text, key):
     last_section = None
     while i < len(finds):
         f = finds[i]
-        # section handling: if followed by paragraph(s), merge first paragraph into section
+        
+        # section reference (อาจมี paragraph ในตัวแล้วจาก regex)
         if f["type"] == "section":
             sec = f.get("section")
             last_section = sec
-            # lookahead for paragraph immediately after
-            if i + 1 < len(finds) and finds[i+1]["type"] == "paragraph":
-                p = finds[i+1]
-                pos = f["pos"]
-                orig = f["match"] + " " + p["match"]
-                entry = '{"original_text":"' + orig.replace('"', '\\"') + '"'
-                entry += f',"section_number":{sec}'
-                if "sub_section" in f:
-                    entry += f',"sub_section":"{f["sub_section"]}"'
-                if "suffix" in f:
-                    entry += f',"ordinal_suffix":"{f["suffix"]}"'
-                if "paragraph" in p:
-                    entry += f',"paragraph_number":{p["paragraph"]}'
-                entry += '}'
-                key += f'{pos+1}:{entry},'
-                i += 2
-                # any additional consecutive paragraphs become separate entries inheriting section_number
-                while i < len(finds) and finds[i]["type"] == "paragraph":
-                    p2 = finds[i]
-                    pos2 = p2["pos"]
-                    orig2 = p2["match"]
-                    entry2 = '{"original_text":"' + orig2.replace('"', '\\"') + '"'
-                    entry2 += f',"section_number":{sec}'
-                    if "paragraph" in p2:
-                        entry2 += f',"paragraph_number":{p2["paragraph"]}'
-                    entry2 += '}'
-                    key += f'{pos2+1}:{entry2},'
-                    i += 1
-                continue
-            else:
-                # standalone section
-                pos = f["pos"]
-                entry = '{"original_text":"' + f["match"].replace('"', '\\"') + '"'
-                entry += f',"section_number":{sec}'
-                if "sub_section" in f:
-                    entry += f',"sub_section":"{f["sub_section"]}"'
-                if "suffix" in f:
-                    entry += f',"ordinal_suffix":"{f["suffix"]}"'
-                entry += '}'
-                key += f'{pos+1}:{entry},'
-                i += 1
-                continue
+            pos = f["pos"]
+            entry = '{"original_text":"' + f["match"].replace('"', '\\"') + '"'
+            entry += f',"section_number":{sec}'
+            if "sub_section" in f:
+                entry += f',"sub_section":"{f["sub_section"]}"'
+            if "suffix" in f:
+                entry += f',"ordinal_suffix":"{f["suffix"]}"'
+            if "paragraph" in f:
+                entry += f',"paragraph_number":{f["paragraph"]}'
+            entry += '}'
+            key += f'{pos+1}:{entry},'
+            i += 1
+            continue
 
         # paragraph without preceding section -> standalone paragraph
         if f["type"] == "paragraph":
@@ -293,6 +299,8 @@ for file_name in file_names:
             else:
                 key += current_part
             key += f"\"paragraph\":{paragraph_number},"
+            print(f"Processing line {i}: with key: {key}")
+            print(f"Current line: {act[i]}")
             key = find_citations_in_text(act[i], key)
             key = find_references_in_text(act[i], key)
             key += "};"
@@ -300,8 +308,8 @@ for file_name in file_names:
             paragraph_number += 1
             i+=1
 
-    fn = file_name.replace("act\\act_", "preprocessv2\\preprocess_")
+    fn = file_name.replace("act\\act_", "preprocessv3\\preprocess_")
     print(f"Writing results to {fn}...")
-    with open(fn, "a", encoding="utf-8") as f:
+    with open(fn, "w", encoding="utf-8") as f:
         for line in results:
             f.write(line)

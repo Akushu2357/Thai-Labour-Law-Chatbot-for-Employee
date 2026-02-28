@@ -1,7 +1,9 @@
 import os
 import glob
 import time
-from supabase import create_client, Client
+import sys
+import importlib.util
+from supabase import Client
 from FlagEmbedding import BGEM3FlagModel
 from pathlib import Path
 from dotenv import load_dotenv
@@ -10,16 +12,21 @@ import re
 import ast
 from openai import OpenAI
 
-# Load .env from project root (two levels up from backend/models/upload.py)
-env_path = Path(__file__).resolve().parents[2] / ".env"
+# Load supabase_client directly to avoid package initialization issues
+supabase_client_path = Path(__file__).resolve().parents[1] / "supabase_client.py"
+spec = importlib.util.spec_from_file_location("supabase_client", supabase_client_path)
+supabase_client_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(supabase_client_module)
+_get_supabase_client_direct = supabase_client_module._get_supabase_client_direct
+
+# Load .env from project root
+env_path = Path(__file__).resolve().parents[3] / ".env"
 if env_path.exists():
     load_dotenv(env_path)
 else:
     load_dotenv()  # fallback to default search
 
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
+supabase: Client = _get_supabase_client_direct()
 print("Supabase client created.")
 
 model = BGEM3FlagModel('BAAI/bge-m3', # model embeddig size 1024
@@ -72,7 +79,7 @@ def text_with_cross_references(text: str, self_params: dict, references: dict[in
         else:
             ref = f"\'section\': {ref_data['section_number']}" if ref_data.get('section_number') is not None else f"\'section\': {self_params.get('section')}"
             ref += f", \'sub_section\': \'{ref_data['sub_section']}\'" if ref_data.get('sub_section') is not None else ''
-            ref += f", \'paragraph\': {ref_data.get('paragraph', 1)}"
+            ref += f", \'paragraph\': {ref_data.get('paragraph_number', 1)}"
             ref += f", \'item\': \'{ref_data.get('item', '')}\'" if ref_data.get('item') is not None else ''
         text_cross = next((k for k in act_dict.keys() if k.find(ref) != -1), None)
         referenced_text = act_dict.get(text_cross) if text_cross else None
@@ -88,7 +95,7 @@ def text_with_cross_references(text: str, self_params: dict, references: dict[in
     # print(f"Processed text: {text}")
     return text
 
-for file in glob.glob("../*/backend/database/input_process/preprocessv2/preprocess_*.txt"):
+for file in glob.glob("../*/backend/database/input_process/preprocessv3/preprocess_*.txt"):
     print(file)
     with open(file, "r", encoding="utf-8", errors="ignore") as f:
         act = f.read()
@@ -122,7 +129,7 @@ for file in glob.glob("../*/backend/database/input_process/preprocessv2/preproce
         {"act_id": response_act.data[0]['id'], "book_number": 0, "book_title": "บรรพเริ่มต้น"}
     ]).execute()
     response_act_groups = supabase.table("act_groups").insert([
-        {"act_id": response_act.data[0]['id'], "book_id": response_act_books.data[0]['id'], "group_number": 0, "group_title": "กลุ่มเริ่มต้น"}
+        {"act_id": response_act.data[0]['id'], "book_id": response_act_books.data[0]['id'], "group_number": 0, "group_title": "ลักษณะเริ่มต้น"}
     ]).execute()
     response_act_super_sections = supabase.table("act_super_sections").insert([
         {"act_id": response_act.data[0]['id'], "group_id": response_act_groups.data[0]['id'], "super_number": 0, "super_title": "หมวดเริ่มต้น"}
@@ -175,10 +182,10 @@ for file in glob.glob("../*/backend/database/input_process/preprocessv2/preproce
                 ]
 
                 response_tags = client.chat.completions.create(
-                    model="typhoon-v2.1-12b-instruct",
+                    model="typhoon-v2.5-30b-a3b-instruct",
                     messages=messages,
                     temperature=0,
-                    max_tokens=512
+                    max_tokens=len(prompt) + 1000
                 )
                 list_tags = response_tags.choices[0].message.content
                 relevant_tags = json.loads(list_tags[list_tags.index("{"):list_tags.index("}") + 1]).get("relevant_tags", [])

@@ -9,6 +9,12 @@ from supabase.client import ClientOptions
 # environment variables are not yet available.
 _supabase_client: Optional[Client] = None
 
+def _get_supabase_client_direct() -> Client:
+    load_dotenv()
+
+    url: Optional[str] = os.environ.get("SUPABASE_URL")
+    key: Optional[str] = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    return create_client(url, key)
 
 def get_supabase_client() -> Client:
     global _supabase_client
