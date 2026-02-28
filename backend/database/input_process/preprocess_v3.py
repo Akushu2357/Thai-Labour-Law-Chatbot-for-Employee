@@ -34,15 +34,15 @@ def find_references_in_text(text, key):
     pattern = re.compile(
         r"""
         (                                                           # Group 1: Section + optional paragraph + item
-            มาตรา\s*(\d+)(?:/(\d+))?                    # Section and optional sub-section
+            มาตรา\s*(\d+)(?:/(\d+))?                    # Section and optional sub-section (multi-digit allowed)
             (?:\s*(ทวิ|ตรี|จัตวา|เบญจ|ฉ|สัปต|อัฏฐ|นพ|ทศ))?       # Optional ordinal suffix
-            (?:\s*วรรค\s*(\d+|[ก-ฮ]+|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ))?  # Optional paragraph
-            (?:\s*([^)]*\([^)]+\)))?                    # Optional item reference
+            (?:\s*วรรค\s*(\d+|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ))?  # Optional paragraph (Thai-letter limited to one)
+            (?:\s*(\((?:[ก-ฮ]|\d+)\)))?                             # Optional item reference (parenthesis content restricted)
         )
         |
-        (วรรค\s*(\d+|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ))  # Group 2: Standalone paragraph
+        (วรรค\s*(\d+|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ))  # Group 2: Standalone paragraph (Thai-letter single)
         |
-        (\([^)]+\))                                                 # Group 3: Standalone item
+        (\((?:[ก-ฮ]|\d+)\))                                                 # Group 3: Standalone item (single Thai letter or multi-digit number)
         """,
         re.VERBOSE
     )
