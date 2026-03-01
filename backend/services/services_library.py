@@ -99,7 +99,6 @@ def get_sections_by_act_and_number(act_id: int, section_number: str):
         return sections
     return {"message": "No sections found for the given act_id and section_number"}
 
-
 def stream_sections_by_super_section(super_section_id: int):
     sections = get_supabase_client().table("act_sections").select(
         "id, act_id, book_id, group_id, super_id, \

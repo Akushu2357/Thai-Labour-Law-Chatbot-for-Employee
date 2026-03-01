@@ -39,7 +39,7 @@ def retrieve_data(question: str):
     
     # 2. ยิงไปถาม Supabase (ใช้ฟังก์ชัน match_sections_v2 ที่เราสร้างใน SQL)
     supabase = get_supabase_client()
-    response = supabase.rpc(
+    response_act = supabase.rpc(
         "match_sections_v2",
         {
             "query_embedding": query_vector,
@@ -47,8 +47,19 @@ def retrieve_data(question: str):
             "match_count": 5        # เอามา 5 อันดับแรก
         }
     ).execute()
+    response_judg = supabase.rpc(
+        "match_judgments_v2",
+        {
+            "query_embedding": query_vector,
+            "match_threshold": 0.5, # ความเหมือนขั้นต่ำ 50%
+            "match_count": 1        # เอามา 5 อันดับแรก
+        }
+    ).execute()
     
-    return response.data
+    return {
+        "sections": response_act.data,
+        "judgments": response_judg.data
+    }
 
 def get_act_name(act_id: int) -> str:
     """ฟังก์ชันดึงชื่อตรากฎหมายจาก act_id"""

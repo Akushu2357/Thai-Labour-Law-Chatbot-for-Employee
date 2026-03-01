@@ -61,9 +61,29 @@ function MessageList({ messages }) {
         }
     };
 
+    // ฟังก์ชันสำหรับจัดการคลิกลิงก์คำพิพากษา
+    const handleJudgmentClick = (judgmentId) => {
+        try {
+            navigate(`/library/judgment/${judgmentId}`);
+        } catch (error) {
+            console.error('Error navigating to judgment:', error);
+        }
+    };
+
     // ฟังก์ชันแปลงข้อความให้มีลิงก์มาตรา
     const renderMessageWithSectionLinks = (text, metadata) => {
         let processedText = text.replace(
+            /\[([^\]]+)\]\{judgment_id=([^}]+)\}/g,
+            (match, textContent, judgmentIdRaw) => {
+                const judgmentId = judgmentIdRaw.trim();
+                if (!/^\d+$/.test(judgmentId)) {
+                    return textContent;
+                }
+                return `[${textContent}](#judgment-${judgmentId})`;
+            }
+        );
+
+        processedText = processedText.replace(
             /\[([^\]]+)\]\{act_id=([^,}]+),\s*sec_num=([^}]+)\}/g,
             (match, textContent, actIdRaw, secNumRaw) => {
                 const actId = actIdRaw.trim();
@@ -83,6 +103,25 @@ function MessageList({ messages }) {
         // Custom components สำหรับ ReactMarkdown
         const components = {
             a: ({ node, href, children, ...props }) => {
+                // ตรวจสอบรูปแบบคำพิพากษา [text](#judgment-9876)
+                const judgmentMatch = href?.match(/#judgment-(\d+)/);
+                if (judgmentMatch) {
+                    const judgmentId = judgmentMatch[1];
+                    return (
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleJudgmentClick(judgmentId);
+                            }}
+                            className="button-link-section"
+                            title={`ดูคำพิพากษา ${judgmentId}`}
+                            {...props}
+                        >
+                            {children}
+                        </button>
+                    );
+                }
+
                 // ตรวจสอบรูปแบบใหม่ [text](#section-Y-X)
                 const newFormatMatch = href?.match(/#section-(\d+[ก-ฮ]?)-(\d+)/);
                 if (newFormatMatch) {
@@ -102,6 +141,7 @@ function MessageList({ messages }) {
                         </button>
                     );
                 }
+
                 return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
             }
         };
@@ -185,6 +225,31 @@ function MessageList({ messages }) {
                                                                             title="คลิกเพื่อดูรายละเอียด"
                                                                         >
                                                                             มาตรา {sectionNum}
+                                                                        </span>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {msg.metadata.judgments && msg.metadata.judgments.length > 0 && (
+                                                    <div className="metadata-section">
+                                                        <div className="metadata-header">
+                                                            <span className="material-symbols-outlined">gavel</span>
+                                                            <span className='text-small-without-color'><strong>คำพิพากษาที่เกี่ยวข้อง</strong></span>
+                                                        </div>
+                                                        <div className="metadata-content">
+                                                            <div className="sections-list">
+                                                                {msg.metadata.judgments.map((judgment, idx) => {
+                                                                    const judgmentId = judgment.id;
+                                                                    return (
+                                                                        <span
+                                                                            key={idx}
+                                                                            className="small section-badge"
+                                                                            onClick={() => handleJudgmentClick(judgmentId)}
+                                                                            title="คลิกเพื่อดูรายละเอียด"
+                                                                        >
+                                                                            {judgment.title}
                                                                         </span>
                                                                     );
                                                                 })}

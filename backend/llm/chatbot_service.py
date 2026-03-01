@@ -70,15 +70,15 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
     
     # Step 2: Retrieval (ค้นหาข้อมูล)
     retrieved_docs = retrieve_data(search_query)
-    print(f"    Retrieved {len(retrieved_docs)} documents from database.")
+    print(f"    Retrieved {len(retrieved_docs['sections'])}+{len(retrieved_docs['judgments'])} documents from database.")
 
     # เตรียม Context และ Metadata
-    context_text = ""
+    context_text_section = ""
     sections_list = []  # เก็บเลขมาตรา
     acts_set = set()    # เก็บ act_id
     
     # ถ้าหาข้อมูลไม่เจอเลย
-    if not retrieved_docs:
+    if not retrieved_docs["sections"] and not retrieved_docs["judgments"]:
         async def empty_generator():
             yield json.dumps({
                 "type": "error", 
@@ -87,7 +87,7 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
         return StreamingResponse(empty_generator(), media_type="application/x-ndjson")
 
     # จัดการข้อมูลที่เจอ (Context Building)
-    for doc in retrieved_docs:
+    for doc in retrieved_docs["sections"]:
         sec_num = doc.get('section_number', '?')
         text = doc.get('text_original', '')
         act_id = doc.get('act_id')
@@ -96,7 +96,7 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
         # Debug: ดูว่าแต่ละ doc มีอะไรบ้าง
         print(f"    Document: section_number={sec_num}, act_id={act_id}, sec_id={sec_id}")
         
-        context_text += f"- act_id={act_id} sec_num={sec_num}: {text}\n"
+        context_text_section += f"- act_id={act_id} sec_num={sec_num}: {text}\n"
         
         # เก็บเลขมาตราและ act_id
         if sec_num and sec_num != '?':
@@ -118,9 +118,42 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
     for a in acts_set:
         acts[a] = get_act_name(a)
     
+    # เตรียม Context และ Metadata
+    context_text_judgment = ""
+    judgments_list = []
+    
+    for doc in retrieved_docs["judgments"]:
+        judgment_id = doc.get('id')
+        judgment_title = doc.get('title', '')
+        judgment_case_number = doc.get('case_number', '')
+        judgment_summary = doc.get('summary', '')
+        
+        # Debug: ดูว่าแต่ละ doc มีอะไรบ้าง
+        print(f"    Document: judgment_id={judgment_id}, title={judgment_title}, case_number={judgment_case_number}")
+        
+        context_text_judgment += f"- judgment_id={judgment_id} title={judgment_title} : {judgment_summary}\n"
+        
+        # เก็บเลขมาตราและ act_id
+        if sec_num and sec_num != '?':
+            judgments_list.append({ 
+                "id": judgment_id, 
+                "case_number": judgment_case_number, 
+                "title": judgment_title,
+                "summary": judgment_summary,
+            })
+            
+    # Debug: ดู metadata ที่เตรียมจะส่ง
+    print(f"    Judgments collected: {judgments_list}")
+    
+    # ดึงชื่อพระราชบัญญัติ
+    acts = {}
+    for a in acts_set:
+        acts[a] = get_act_name(a)
+    
     # สร้าง metadata
     metadata = {
         "sections": sorted(sections_list, key=lambda x: x["id"]),
+        "judgments": sorted(judgments_list, key=lambda x: x["id"]),
         "acts": sorted(acts.items(), key=lambda x: x[0])  # เรียงตาม act_id
     }
     
@@ -140,7 +173,7 @@ def chat_stream_service(request: ChatRequest) -> StreamingResponse:
 
         # 3.2 สั่ง AI ตอบแบบ Stream (ทีละคำ)
         # ใช้ .astream แทน .invoke เพื่อรับข้อมูลทีละชิ้น
-        async for chunk in chain.astream({"context": context_text, "question": search_query}):
+        async for chunk in chain.astream({"context": context_text_section, "question": search_query}):
             # ส่งเนื้อหาทีละนิดไปให้ Frontend
             yield json.dumps({
                 "type": "content", 
