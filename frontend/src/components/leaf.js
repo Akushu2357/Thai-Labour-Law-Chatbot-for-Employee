@@ -61,6 +61,7 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                     break;
                 case 'group':
                     childrenData = await fetchSuperSections(item.id);
+                    console.log('Fetched super sections for group', item.id, childrenData);
                     setChildren(childrenData.map(child => ({ ...child, type: 'super_section' })));
                     break;
                 case 'super_section':
@@ -203,12 +204,45 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             const act_id = item.act_id;
             const section_number = item_ref.section_number || item.section_number;
             const sections = await fetchSectionsByActAndNumber(act_id, section_number);
+            // console.log('Fetched sections for reference:', sections);
+
+            // Default target is the first returned section (or the single object)
             let target = Array.isArray(sections) ? sections[0] : sections;
-            // If paragraph_number is specified in the reference, try to locate that exact paragraph
-            const paragraphNumber = item_ref.paragraph_number;
-            if (Array.isArray(sections) && paragraphNumber != null) {
-                const found = sections.find(s => Number(s.paragraph_number || 1) === Number(paragraphNumber));
-                if (found) target = found;
+            // console.log('Item reference:', item_ref);
+
+            // Support matching by paragraph_number, sub_section, and ordinal_suffix (any may be null)
+            const paragraphNumber = item_ref.paragraph_number ?? 1;
+            const subSection = item_ref.sub_section ?? item_ref.ordinal_suffix ?? null;
+            const itemOrder = item_ref.item_order ?? null;
+
+            // console.log('Reference details for matching:', { paragraphNumber, subSection, itemOrder });
+
+            if (Array.isArray(sections) && sections.length > 0) {
+                // Score candidates by how many fields match; prefer paragraph -> sub_section -> ordinal
+                let best = null;
+                let bestScore = -1;
+                // console.log('Scoring sections for reference matching:', { paragraphNumber, subSection, itemOrder });
+                for (const s of sections) {
+                    let score = 0;
+                    console.log(String(s.item_order ?? null), String(itemOrder), String(s.item_order ?? null) === String(itemOrder));
+                    if (Number(s.paragraph_number ?? 1) === Number(paragraphNumber)) score += 1;
+                    if (String(s.sub_section ?? null) === String(subSection)) score += 1;
+                    if (String(s.item_order ?? null) === String(itemOrder)) score += 1;
+                    console.log(`Matching section ${s.id}: paragraph ${s.paragraph_number}, sub_section ${s.sub_section}, item_order ${s.item_order} => score ${score}`);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = s;
+                    }
+                }
+
+                if (best && bestScore > 0) {
+                    target = best;
+                } else if (paragraphNumber != null) {
+                    // Fallback: try paragraph lookup if present
+                    const found = sections.find(s => Number(s.paragraph_number ?? 1) === Number(paragraphNumber));
+                    if (found) target = found;
+                }
+                // console.log('Selected target section after scoring:', target);
             }
             if (!target || !target.id) return;
             setOpenTrail({
