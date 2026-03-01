@@ -112,6 +112,7 @@ def find_references_in_text(text, key):
     key += "\"references\":{"
     i = 0
     last_section = None
+    last_index = 0
     while i < len(finds):
         f = finds[i]
         
@@ -120,7 +121,8 @@ def find_references_in_text(text, key):
             sec = f.get("section")
             last_section = sec
             pos = f["pos"]
-            entry = '{"original_text":"' + f["match"].replace('"', '\\"') + '"'
+            text = f["match"].replace('"', '\\"')
+            entry = '{"original_text":"' + text + '"'
             entry += f',"section_number":{sec}'
             if "sub_section" in f:
                 entry += f',"sub_section":"{f["sub_section"]}"'
@@ -130,6 +132,7 @@ def find_references_in_text(text, key):
                 entry += f',"paragraph_number":{f["paragraph"]}'
             entry += '}'
             key += f'{pos+1}:{entry},'
+            last_index = pos + len(text)
             i += 1
             continue
 
@@ -138,6 +141,8 @@ def find_references_in_text(text, key):
             pos = f["pos"]
             orig = f["match"]
             entry = '{"original_text":"' + orig.replace('"', '\\"') + '"'
+            if (last_section is not None) and (pos - last_index < 8):  # only inherit section if it's not too close (to avoid capturing the starting parenthesis of a section item)
+                entry += f',"section_number":{last_section}'
             if "paragraph" in f:
                 entry += f',"paragraph_number":{f["paragraph"]}'
             entry += '}'
@@ -181,20 +186,22 @@ def find_citations_in_text(text, key):
     return key
 
 def parse_book_key(text, key):
-    global current_part, i_book
+    global current_part, i_book, i_group, i_super
     m = re.match(r"บรรพ\s+([0-9]+)", text)
     book = m.group(1)
     key += f"\"book\":{book},"
     i_book = book
+    i_group, i_super = 0, 0
     current_part = f"\"book\":{book},"
     return key
 
 def parse_group_key(text, key):
-    global current_part, i_book, i_group
+    global current_part, i_book, i_group, i_super
     m = re.match(r"ลักษณะ\s+([0-9]+)", text)
     group = m.group(1)
     key += f"\"book\":{i_book},\"group\":{group},"
     i_group = group
+    i_super = 0
     current_part = f"\"book\":{i_book},\"group\":{group},"
     return key
 
