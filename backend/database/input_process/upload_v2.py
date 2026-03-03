@@ -151,6 +151,26 @@ for file in glob.glob("../*/backend/database/input_process/preprocessv3/preproce
                     text_processed = text_with_cross_references(text, params_dict, params_dict.get("references"))
                 else:
                     text_processed = text
+                if (params_dict.get("group") == 0) and \
+                    (0 != response_act_groups.data[0]["group_number"]):
+                        response_act_groups = supabase.table("act_groups").insert([
+                            {
+                                "act_id": response_act.data[0]['id'],
+                                "book_id": response_act_books.data[0]['id'],
+                                "group_number": 0,
+                                "group_title": "ลักษณะเริ่มต้น"
+                            },
+                        ]).execute()
+                if (params_dict.get("super_section") == 0) and \
+                    (0 != response_act_super_sections.data[0]["super_number"]):
+                        response_act_super_sections = supabase.table("act_super_sections").insert([
+                            {
+                                "act_id": response_act.data[0]['id'],
+                                "group_id": response_act_groups.data[0]['id'],
+                                "super_number": 0,
+                                "super_title": "หมวดเริ่มต้น"
+                            },
+                        ]).execute()
                 response_act_sections = supabase.table("act_sections").insert([
                     {
                         "act_id": response_act.data[0]['id'],
@@ -210,6 +230,7 @@ for file in glob.glob("../*/backend/database/input_process/preprocessv3/preproce
                     },
                 ]).execute()
             elif params_dict.get("group"):
+                response_act_super_sections.data[0]["super_number"] = None
                 response_act_groups = supabase.table("act_groups").insert([
                     {
                         "act_id": response_act.data[0]['id'],
@@ -219,6 +240,8 @@ for file in glob.glob("../*/backend/database/input_process/preprocessv3/preproce
                     },
                 ]).execute()
             elif params_dict.get("book"):
+                response_act_groups.data[0]["group_number"] = None
+                response_act_super_sections.data[0]["super_number"] = None
                 response_act_books = supabase.table("act_books").insert([
                     {
                         "act_id": response_act.data[0]['id'],

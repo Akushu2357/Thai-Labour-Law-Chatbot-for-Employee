@@ -1,3 +1,4 @@
+import importlib
 import os
 import glob
 import time
@@ -9,16 +10,21 @@ import json
 import re
 from openai import OpenAI
 
-# Load .env from project root (two levels up from backend/models/upload.py)
-env_path = Path(__file__).resolve().parents[2] / ".env"
+# Load supabase_client directly to avoid package initialization issues
+supabase_client_path = Path(__file__).resolve().parents[2] / "supabase_client.py"
+spec = importlib.util.spec_from_file_location("supabase_client", supabase_client_path)
+supabase_client_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(supabase_client_module)
+_get_supabase_client_direct = supabase_client_module._get_supabase_client_direct
+
+# Load .env from project root
+env_path = Path(__file__).resolve().parents[3] / ".env"
 if env_path.exists():
     load_dotenv(env_path)
 else:
     load_dotenv()  # fallback to default search
 
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
+supabase: Client = _get_supabase_client_direct()
 print("Supabase client created.")
 
 model = BGEM3FlagModel('BAAI/bge-m3', # model embeddig size 1024
@@ -75,7 +81,7 @@ for file in glob.glob("../*/backend/database/input_process/judgments/text/*.txt"
         response_judgments = supabase.table("judgments").insert([
             {
                 "title": clean_text(judg[0]),
-                "case_number": case_number,
+                "case_number": clean_text(case_number),
                 "summary": judg_summary,
                 "summary_embedding": model.encode(judg_summary, batch_size=1)['dense_vecs'].tolist(),
                 "detail": judg_detail,
