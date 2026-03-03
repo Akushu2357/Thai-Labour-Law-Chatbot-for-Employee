@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLibrary } from '../contexts/LibraryContext';
 import './leaf.css';
 
-function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, allowedSections = null, autoExpandSingle = false }) {
+function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, allowedSections = null, autoExpandSingle = false, autoExpandConsumer = null }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [children, setChildren] = useState([]);
     const [isHighlighted, setIsHighlighted] = useState(false);
@@ -99,10 +99,27 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
     };
 
     useEffect(() => {
-        if (!autoExpandSingle || isExpanded || !hasChildren()) return;
+        // Determine whether we should auto-expand: prefer a consumer function if provided,
+        // otherwise fall back to the boolean prop.
+        let shouldAuto = false;
+        try {
+            if (typeof autoExpandConsumer === 'function') {
+                shouldAuto = !!autoExpandConsumer();
+            } else {
+                shouldAuto = !!autoExpandSingle;
+            }
+        } catch (e) {
+            console.error('autoExpandConsumer error:', e);
+            shouldAuto = !!autoExpandSingle;
+        }
+
+        // Never auto-expand super_section nodes automatically
+        if (type === 'super_section') return;
+
+        if (!shouldAuto || isExpanded || !hasChildren()) return;
         setIsExpanded(true);
         fetchChildren();
-    }, [autoExpandSingle, fetchChildren, hasChildren, isExpanded]);
+    }, [autoExpandSingle, autoExpandConsumer, type, fetchChildren, hasChildren, isExpanded]);
 
     const getDisplayTitle = () => {
         let text = '';
@@ -157,6 +174,8 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
     };
 
     const getDisplaySection = () => {
+        if (!item) return null;
+
         const elements = [];
 
         // Add match indicator if current section matches
@@ -166,9 +185,18 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
             );
         }
 
+        const title = item.title ?? item.content ?? '';
+        const crossRefs = item.cross_references ?? {};
+
+        // If there's no title/content, return any indicators we have
+        if (!title) return elements.length > 0 ? elements : '';
+
         let start = 0;
-        for (const ref in item.cross_references) {
-            const textPart = item.title.slice(start, parseInt(ref));
+        const refKeys = Object.keys(crossRefs).filter(k => !Number.isNaN(parseInt(k))).sort((a, b) => Number(a) - Number(b));
+
+        for (const ref of refKeys) {
+            const idx = parseInt(ref);
+            const textPart = title.slice(start, idx);
             // Highlight matching text
             if (filterText && currentMatches) {
                 elements.push(<span key={`text-${start}`}>{highlightText(textPart, filterText)}</span>);
@@ -176,9 +204,10 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                 elements.push(textPart);
             }
 
+            const cref = crossRefs[ref] ?? {};
             elements.push(
-                <button key={ref} className='button-link-reference' onClick={() => { handleReferenceClick(item.cross_references[ref]); setClickLoading(ref); }}>
-                    {item.cross_references[ref].original_text}
+                <button key={ref} className='button-link-reference' onClick={() => { handleReferenceClick(cref); setClickLoading(ref); }}>
+                    {cref.original_text ?? ''}
                 </button>
             );
             elements.push(clickLoading === ref && loadingReference && (
@@ -186,10 +215,10 @@ function Leaf({ depth = 0, item, type, filterText = '', sectionMatchCache = {}, 
                     <span className="material-symbols-outlined">progress_activity</span>
                 </span>
             ));
-            start = parseInt(ref) + item.cross_references[ref].original_text.length;
+            start = idx + (cref.original_text ? cref.original_text.length : 0);
         }
 
-        const lastPart = item.title.slice(start);
+        const lastPart = title.slice(start);
         if (filterText && currentMatches) {
             elements.push(<span key={`text-${start}`}>{highlightText(lastPart, filterText)}</span>);
         } else {

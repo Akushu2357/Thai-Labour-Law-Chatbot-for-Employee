@@ -18,7 +18,7 @@ function Laws() {
     const [books, setBooks] = useState([]);
     const [pendingOpenTrail, setPendingOpenTrail] = useState(null);
     const sectionMatchCacheRef = useRef({});
-    const [shouldAutoExpandChild, setShouldAutoExpandChild] = useState(false);
+    const autoExpandUsedRef = useRef(false);
 
     // Combine filterText and filterTags into single search term
     const combinedFilterText = [
@@ -67,13 +67,19 @@ function Laws() {
         }
     }, [pendingOpenTrail, books, setOpenTrail]);
 
-    useEffect(() => {
-        if (books.length === 1) {
-            setShouldAutoExpandChild(true);
-        } else {
-            setShouldAutoExpandChild(false);
+    // one-time auto-expand consumer for top-level books
+    const consumeAutoExpand = () => {
+        if (books.length === 1 && !autoExpandUsedRef.current) {
+            autoExpandUsedRef.current = true;
+            return true;
         }
-    }, [books]);
+        return false;
+    };
+
+    // reset one-time auto-expand when switching acts
+    useEffect(() => {
+        autoExpandUsedRef.current = false;
+    }, [actId]);
 
     const handleAddFilterTag = (tag) => {
         if (typeof tag === 'string') {
@@ -136,7 +142,7 @@ function Laws() {
                                     type="book"
                                     filterText={combinedFilterText}
                                     sectionMatchCache={sectionMatchCacheRef.current}
-                                    autoExpandSingle={shouldAutoExpandChild}
+                                    autoExpandConsumer={consumeAutoExpand}
                                 />
                             ))}
                         </div>
