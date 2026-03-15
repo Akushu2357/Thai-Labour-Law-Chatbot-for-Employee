@@ -1,23 +1,21 @@
-# FastAPI Project Example
+# FastAPI Backend
 
-## Project Overview
-This project is a **FastAPI-based web application** that demonstrates a clean project structure by separating models, schemas, routers, services, and utilities.
+## Overview
+This folder contains the FastAPI backend for the Thai Labour Law Chatbot. It exposes REST endpoints, integrates with the LLM layer, and handles database interactions.
 
-## Structure
-llm/           -> Contains all logic related to Large Language Models, including model connectors, prompt templates, and processing pipelines.
-database/       -> Defines request and response schemas
-routers/       -> Handles API routes
-services/      -> Business logic and database interactions
-utils/         -> Utility functions (e.g., hashing, validation)
-dependencies.py -> Shared dependencies for routes
-main.py         -> Application entry point
-README.md       -> Project documentation
+## Layout (short)
+- `llm/` — model connectors, prompt templates, embedding and response helpers
+- `database/` — DB schema, migrations, and Supabase client
+- `routers/` — API route definitions
+- `services/` — business logic and data access
+- `utils/` — helper utilities and auth
+- `main.py` — FastAPI app entrypoint
 
 ## Requirements
-See `requirements.txt` for the exact Python packages required to run the backend.
+Install Python dependencies from `requirements.txt` in this folder.
 
-## Install & run (local development)
-1. Create a virtual environment and activate it:
+## Local development — Quick start
+1. Create and activate a virtual environment:
 
 ```powershell
 python -m venv .venv
@@ -30,19 +28,22 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-3. Run the app with auto-reload:
+3. Configure environment variables:
+- Create a `.env` file at the project root or set env vars in your environment. Typical variables include Supabase URL/KEY and any LLM/API keys used by the `llm/` module. Check `database/supabase_client.py` and `llm/` code for exact names.
+
+4. Run the app (from the `backend` folder):
 
 ```powershell
+cd backend
 uvicorn main:app --reload
 ```
 
-The API will be served at http://127.0.0.1:8000. The root endpoint `/` returns a welcome message. Routers are mounted under `/acts` (e.g. `/acts/sections/{section_id}`).
+The API will be available at http://127.0.0.1:8000. Routers are mounted under their prefixes (see `routers/`).
 
-## Health check
-Add a simple health or readiness endpoint to `main.py` (recommended) to let orchestrators detect service availability.
+## Tips
+- Add a `/health` endpoint in `main.py` for readiness checks used by deploy platforms.
+- To run unit tests (not included by default), add `pytest` and create a `tests/` folder.
 
-## Next steps (suggested)
-- Add `requirements.txt` (done)
-- Add `.env.example` (showing variable names only)
-- Add simple tests (pytest) and a basic GitHub Action to run lint/tests on PRs
-- Add `pre-commit` hooks (black, ruff/isort)
+## See also
+- Project root README: [README.md](../README.md)
+- Frontend README: [frontend/README.md](../frontend/README.md)
