@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from services.services_user import *
@@ -25,23 +25,29 @@ class UpdateUserRequest(BaseModel):
 @router.post("/")
 def create_user(request: CreateUserRequest, authorization: Optional[str] = Header(None, alias="Authorization")):
     """สร้างหรืออัพเดท user profile"""
-    return create_or_update_user(
+    result = create_or_update_user(
         user_id=request.user_id,
         email=request.email,
         display_name=request.display_name,
         avatar_url=request.avatar_url,
         auth_token=authorization,
     )
+    if isinstance(result, dict) and result.get("id"):
+        return result
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to create/update user"))
 
 @router.get("/{user_id}")
 def get_user(user_id: str, authorization: Optional[str] = Header(None, alias="Authorization")):
     """ดึงข้อมูล user ตาม ID"""
-    return get_user_by_id(user_id, auth_token=authorization)
+    result = get_user_by_id(user_id, auth_token=authorization)
+    if isinstance(result, dict) and result.get("id"):
+        return result
+    raise HTTPException(status_code=404, detail=result.get("message", "User not found"))
 
 @router.put("/{user_id}")
 def update_user(user_id: str, request: UpdateUserRequest, authorization: Optional[str] = Header(None, alias="Authorization")):
     """อัพเดทข้อมูล user profile"""
-    return update_user_profile(
+    result = update_user_profile(
         user_id=user_id,
         display_name=request.display_name,
         avatar_url=request.avatar_url,
@@ -52,11 +58,17 @@ def update_user(user_id: str, request: UpdateUserRequest, authorization: Optiona
         job_type_description=request.job_type_description,
         auth_token=authorization,
     )
+    if isinstance(result, dict) and result.get("id"):
+        return result
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to update user profile"))
 
 @router.delete("/{user_id}")
 def delete_user_profile(user_id: str, authorization: Optional[str] = Header(None, alias="Authorization")):
     """ลบ user profile"""
-    return delete_user(user_id, auth_token=authorization)
+    result = delete_user(user_id, auth_token=authorization)
+    if isinstance(result, dict) and result.get("message") and "deleted" in result.get("message").lower():
+        return {"detail": result.get("message")}
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to delete user"))
 
 # ===================== Job & Job Type Options =====================
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header, Query
+from fastapi import APIRouter, Header, Query, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from services.services_conversation import *
@@ -22,7 +22,10 @@ class AddMessageRequest(BaseModel):
 @router.post("/rooms")
 def create_room(request: CreateRoomRequest, authorization: Optional[str] = Header(None, alias="Authorization")):
     """สร้างห้องสนทนาใหม่"""
-    return create_chat_room(user_id=request.user_id, title=request.title, auth_token=authorization)
+    result = create_chat_room(user_id=request.user_id, title=request.title, auth_token=authorization)
+    if isinstance(result, dict) and result.get("id"):
+        return result
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to create chat room"))
 
 @router.get("/rooms")
 def get_rooms(
@@ -31,27 +34,46 @@ def get_rooms(
     authorization: Optional[str] = Header(None, alias="Authorization"),
 ):
     """ดึงรายการห้องสนทนาทั้งหมด"""
-    return get_chat_rooms(user_id=user_id, include_archived=include_archived, auth_token=authorization)
+    result = get_chat_rooms(user_id=user_id, include_archived=include_archived, auth_token=authorization)
+    if isinstance(result, list):
+        return result
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to fetch chat rooms"))
 
 @router.get("/rooms/{room_id}")
 def get_room(room_id: int, authorization: Optional[str] = Header(None, alias="Authorization")):
     """ดึงข้อมูลห้องสนทนาตาม ID"""
-    return get_chat_room_by_id(room_id, auth_token=authorization)
+    result = get_chat_room_by_id(room_id, auth_token=authorization)
+    if isinstance(result, dict) and result.get("id"):
+        return result
+    # If service returns an error message, map it to 404 when appropriate
+    message = result.get("message") if isinstance(result, dict) else None
+    if message and "not found" in message.lower():
+        raise HTTPException(status_code=404, detail=message)
+    raise HTTPException(status_code=500, detail=message or "Failed to fetch chat room")
 
 @router.put("/rooms/{room_id}")
 def update_room(room_id: int, request: UpdateRoomRequest, authorization: Optional[str] = Header(None, alias="Authorization")):
     """อัพเดทข้อมูลห้องสนทนา"""
-    return update_chat_room(room_id=room_id, title=request.title, is_archive=request.is_archive, auth_token=authorization)
+    result = update_chat_room(room_id=room_id, title=request.title, is_archive=request.is_archive, auth_token=authorization)
+    if isinstance(result, dict) and result.get("id"):
+        return result
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to update chat room"))
 
 @router.delete("/rooms/{room_id}")
 def delete_room(room_id: int, authorization: Optional[str] = Header(None, alias="Authorization")):
     """ลบห้องสนทนา"""
-    return delete_chat_room(room_id, auth_token=authorization)
+    result = delete_chat_room(room_id, auth_token=authorization)
+    if isinstance(result, dict) and result.get("message") and "deleted" in result.get("message").lower():
+        return {"detail": result.get("message")}
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to delete chat room"))
 
 @router.delete("/rooms/by-user/{user_id}")
 def delete_rooms_by_user(user_id: str, authorization: Optional[str] = Header(None, alias="Authorization")):
     """ลบห้องสนทนาทั้งหมดของผู้ใช้"""
-    return delete_chat_rooms_by_user(user_id, auth_token=authorization)
+    result = delete_chat_rooms_by_user(user_id, auth_token=authorization)
+    if isinstance(result, dict) and result.get("message") and ("deleted" in result.get("message").lower() or result.get("deleted_room_count") is not None):
+        return result
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to delete user chat rooms"))
 
 # ===================== Messages =====================
 
@@ -62,13 +84,17 @@ def add_message_to_room(
     authorization: Optional[str] = Header(None, alias="Authorization"),
 ):
     """เพิ่มข้อความในห้องสนทนา"""
-    return add_message(
+    result = add_message(
         room_id=room_id,
         sender=request.sender,
         message=request.message,
         metadata=request.metadata,
         auth_token=authorization,
     )
+    # inserted message should have an `id`
+    if isinstance(result, dict) and result.get("id"):
+        return result
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to add message"))
 
 @router.get("/rooms/{room_id}/messages")
 def get_room_messages(
@@ -77,9 +103,15 @@ def get_room_messages(
     authorization: Optional[str] = Header(None, alias="Authorization"),
 ):
     """ดึงข้อความทั้งหมดในห้องสนทนา"""
-    return get_messages(room_id=room_id, limit=limit, auth_token=authorization)
+    result = get_messages(room_id=room_id, limit=limit, auth_token=authorization)
+    if isinstance(result, list):
+        return result
+    raise HTTPException(status_code=500, detail=result.get("message", "Failed to fetch messages"))
 
 @router.get("/rooms/{room_id}/history")
 def get_room_history(room_id: int, authorization: Optional[str] = Header(None, alias="Authorization")):
     """ดึงประวัติการสนทนาในรูปแบบที่พร้อมใช้กับ LLM"""
-    return get_chat_history(room_id, auth_token=authorization)
+    result = get_chat_history(room_id, auth_token=authorization)
+    if isinstance(result, list):
+        return result
+    raise HTTPException(status_code=500, detail="Failed to fetch chat history")
