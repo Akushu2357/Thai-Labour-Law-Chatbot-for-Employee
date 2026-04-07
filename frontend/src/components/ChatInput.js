@@ -16,7 +16,7 @@ function ChatInput({ onSendMessage, isLoading }) {
     };
 
     return (
-        <form className="chat-input-form" onSubmit={handleSubmit}>
+        <form className="chat-input-form" onSubmit={handleSubmit} data-testid="chat-input-form">
             <div className="input-wrapper">
                 <input
                     type="text"
@@ -25,12 +25,14 @@ function ChatInput({ onSendMessage, isLoading }) {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     disabled={isLoading}
+                    data-testid="chat-input-field"
                 />
                 <button
                     type="submit"
                     className="send-button"
                     disabled={isLoading || !inputValue.trim()}
                     title="ส่งข้อความ (Enter)"
+                    data-testid="chat-send-button"
                 >
                     <span className="material-symbols-outlined">send</span>
                 </button>

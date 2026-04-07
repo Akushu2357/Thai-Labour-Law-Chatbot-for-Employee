@@ -47,7 +47,7 @@ function PreActCard({ searchTerm = '', selectedTags = [] }) {
     return (
         <>
             {filteredActs.map((act) => (
-                <Card key={act.id} className="card-act" onClick={() => navigate(`./act/${act.id}`)}>
+                <Card key={act.id} className="card-act" onClick={() => navigate(`./act/${act.id}`)} data-testid={`law-card-act-${act.id}`}>
                     <Card.Body>
                         <Card.Title><span className='text-p'>{act.title}</span></Card.Title>
                         <Stack direction='horizontal' gap={2} className="pre-act-tags-stack">

@@ -91,7 +91,7 @@ function NavBar() {
   const menuComponent = (
     <>
       <div className='menu-header'>
-        <button className='close-btn' onClick={handleMenuClick} aria-label="Close menu">
+        <button className='close-btn' onClick={handleMenuClick} aria-label="Close menu" data-testid="menu-close-button">
           <span className="material-symbols-outlined" aria-hidden>
             arrow_back
           </span>
@@ -103,7 +103,7 @@ function NavBar() {
       </div>
 
       <nav className='menu-list' aria-label="Menu list">
-        <button className="menu-item" onClick={() => handleClick('/')}>
+        <button className="menu-item" onClick={() => handleClick('/')} data-testid="menu-new-chat-button">
           <span className='text-p'>แชตใหม่</span>
           <span className="material-symbols-outlined" aria-hidden>
             add_circle
@@ -116,6 +116,7 @@ function NavBar() {
           onKeyDown={(e) => handleKeyToggle(1, e)}
           aria-expanded={indexFocus === 1}
           aria-controls="library-panel"
+          data-testid="menu-library-button"
         >
           <span className='text-p'>ห้องสมุดกฎหมาย</span>
           <span className="material-symbols-outlined" aria-hidden>
@@ -132,6 +133,7 @@ function NavBar() {
             aria-expanded={indexFocus === 2}
             aria-controls="history-panel"
             aria-disabled="true"
+            data-testid="menu-history-button"
           >
             <span className='text-p'>ประวัติการสนทนา</span>
             <span className="material-symbols-outlined" aria-hidden>
@@ -146,6 +148,7 @@ function NavBar() {
                   key={history.id}
                   className='menu-subitem'
                   onClick={() => handleClick(`/chat/${history.id}`)}
+                  data-testid={`history-item-${history.id}`}
                 >
                   <span className="material-symbols-outlined rotate">
                     arrow_right
@@ -156,6 +159,7 @@ function NavBar() {
                     className="history-delete-btn"
                     onClick={(e) => handleDeleteHistory(history.id, e)}
                     aria-label="ลบประวัติการสนทนา"
+                    data-testid={`history-delete-${history.id}`}
                   >
                     <span className="material-symbols-outlined" aria-hidden>
                       delete
@@ -171,6 +175,7 @@ function NavBar() {
         <button
           className="menu-item"
           onClick={() => handleClick('/account')}
+          data-testid="menu-account-button"
         >
           <span className='text-p'>จัดการบัญชี</span>
         </button>
@@ -182,7 +187,7 @@ function NavBar() {
     <>
       {/* Mobile navbar */}
       <div className='navbar-container'>
-        <button className='menu-btn' onClick={handleMenuClick} aria-label="Open menu">
+        <button className='menu-btn' onClick={handleMenuClick} aria-label="Open menu" data-testid="menu-open-button">
           <span className="material-symbols-outlined" aria-hidden>
             menu
           </span>
@@ -192,7 +197,7 @@ function NavBar() {
       </div>
 
       {(isMenuOpen || isClosing) && (
-        <aside className={`menu-panel ${isClosing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="Main menu">
+        <aside className={`menu-panel ${isClosing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="Main menu" data-testid="menu-panel">
           {menuComponent}
         </aside>
       )}

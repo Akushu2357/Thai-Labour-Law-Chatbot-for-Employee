@@ -45,11 +45,11 @@ function PageLanding() {
     };
 
     return (
-        <div className="landing-container">
+        <div className="landing-container" data-testid="landing-page">
             <div className="landing-hero">
                 {/* <div className="hero-icon">⚖️</div> */}
                 <img src={logo} className="hero-logo" alt="Logo" />
-                <span className="text-h1 hero-title">แชทบอทกฎหมายแรงงานไทย</span>
+                <span className="text-h1 hero-title" data-testid="landing-chatbot-title">แชทบอทกฎหมายแรงงานไทย</span>
                 <span className="text-h3 hero-subtitle">
                     ถามคำถามเกี่ยวกับสิทธิและหน้าที่ตามกฎหมายแรงงานไทยได้ทันที
                 </span>

@@ -12,3 +12,4 @@ langchain-core==0.1.32
 langchain-openai==0.1.5
 huggingface-hub==0.35.3
 sqlalchemy==2.0.25
+numpy==2.4.4

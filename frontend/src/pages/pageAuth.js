@@ -41,14 +41,14 @@ function PageAuth() {
     };
 
     return (
-        <div className="page-auth">
+        <div className="page-auth" data-testid="auth-page">
             <div className="auth-card">
                 <div className="auth-inner">
                     <img src={logo} alt="logo" className="auth-logo" />
                     <span className="h1 auth-title">{isSignUp ? 'ลงทะเบียน' : 'ลงชื่อเข้าใช้'}</span>
                     <span className="p auth-sub">{isSignUp ? 'ลงทะเบียนสำหรับสร้างบัญชี' : 'ลงชื่อเพื่อเข้าใช้งานก่อนนะ !'}</span>
 
-                    <button type="button" className="gsi-material-button google-btn" onClick={handleGoogle} disabled={loading}>
+                    <button type="button" className="gsi-material-button google-btn" onClick={handleGoogle} disabled={loading} data-testid="auth-google-button">
                         <div className="gsi-material-button-state"></div>
                         <div className="gsi-material-button-content-wrapper">
                             <div className="gsi-material-button-icon">
@@ -67,7 +67,7 @@ function PageAuth() {
 
                     <hr className="divider" />
 
-                    <form className="auth-form" onSubmit={handleSubmit}>
+                    <form className="auth-form" onSubmit={handleSubmit} data-testid="auth-form">
                         <label className="p input-label">อีเมล</label>
                         <div className="p input-pill">
                             <input
@@ -76,6 +76,7 @@ function PageAuth() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="p text-input"
                                 placeholder="example@email.com"
+                                data-testid="auth-email-input"
                             />
                         </div>
 
@@ -87,12 +88,14 @@ function PageAuth() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="p text-input"
                                 placeholder="•••••••"
+                                data-testid="auth-password-input"
                             />
                             <button
                                 type="button"
                                 className="eye-btn material-symbols-outlined"
                                 onClick={() => setShowPassword(!showPassword)}
                                 aria-label="Toggle password visibility"
+                                data-testid="auth-toggle-password"
                             >
                                 {showPassword ? 'visibility' : 'visibility_off'}
                             </button>
@@ -100,22 +103,22 @@ function PageAuth() {
 
                         {!isSignUp && (
                             <div className="form-row">
-                                <span onClick={() => setIsSignUp(true)} className="small register-account" style={{ cursor: 'pointer' }}>สร้างบัญชีใหม่</span>
+                                <span onClick={() => setIsSignUp(true)} className="small register-account" style={{ cursor: 'pointer' }} data-testid="auth-switch-to-signup">สร้างบัญชีใหม่</span>
                                 <a href="/" className="small forgot-link" style={{ cursor: 'pointer' }}>ลืมรหัสผ่าน?</a>
                             </div>
                         )}
                         {isSignUp && (
                             <div className="form-row">
-                                <span onClick={() => setIsSignUp(false)} className="small create-account" style={{ cursor: 'pointer' }}>มีบัญชีอยู่แล้ว?</span>
+                                <span onClick={() => setIsSignUp(false)} className="small create-account" style={{ cursor: 'pointer' }} data-testid="auth-switch-to-signin">มีบัญชีอยู่แล้ว?</span>
                             </div>
                         )}
 
-                        <button className="p submit-btn" type="submit" disabled={loading}>
+                        <button className="p submit-btn" type="submit" disabled={loading} data-testid="auth-submit-button">
                             {loading ? <span className='material-symbols-outlined'>hourglass_top</span> :
                                 isSignUp ? 'ลงทะเบียน' : 'เข้าสู่ระบบ'}
                         </button>
 
-                        {authError && <div className="auth-error">{authError}</div>}
+                        {authError && <div className="auth-error" data-testid="auth-error">{authError}</div>}
                     </form>
                 </div>
             </div>

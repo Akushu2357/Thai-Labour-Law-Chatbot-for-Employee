@@ -215,9 +215,9 @@ function PageChat() {
     };
 
     return (
-        <div className="chat-container">
-            <div className="chat-header">
-                <span className="text-h2">{roomInfo?.title || 'กำลังโหลด...'}</span>
+        <div className="chat-container" data-testid="chat-page">
+            <div className="chat-header" data-testid="chat-header">
+                <span className="text-h2" data-testid="chat-room-title">{roomInfo?.title || 'กำลังโหลด...'}</span>
                 <span className="p chat-subtitle">ถามคำถามเกี่ยวกับกฎหมายแรงงานไทย</span>
             </div>
 

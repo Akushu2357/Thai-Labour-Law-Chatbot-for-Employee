@@ -53,6 +53,16 @@ Follow these steps to run the project locally.
 ## Documentation
 - Backend-specific notes: [backend/README.md](backend/README.md)
 - Frontend-specific notes: [frontend/README.md](frontend/README.md)
+- Centralized test assets: [testing/README.md](testing/README.md)
+- Backend testing docs: [testing/backend/TESTING.md](testing/backend/TESTING.md)
+- Frontend testing docs: [testing/frontend/TESTING.md](testing/frontend/TESTING.md)
+
+## Testing Structure
+- `backend/tests/` — Python unit and integration-like tests (pytest)
+- `frontend/src/**/*.test.js` — Frontend component/page tests (Jest)
+- `testing/api/postman/` — Postman API collections
+- `testing/api/robot/` — Robot API smoke suites
+- `testing/ui/robot/` — Robot UI end-to-end suites
 
 ## Contributing
 Feel free to open issues or PRs. For local development, run backend and frontend concurrently and follow each subproject's README for details.

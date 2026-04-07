@@ -34,8 +34,9 @@ The production-ready files will be in the `build/` folder.
 
 ## Notes
 - If the frontend cannot reach the backend, confirm the backend is running and CORS settings allow the origin. See `backend/main.py` for CORS config.
-- For environment-specific variables, check `package.json` scripts or create a `.env` file following CRA conventions (e.g., `REACT_APP_API_URL=http://127.0.0.1:8000`).
+- For environment-specific variables, check `package.json` scripts or create a `.env` file following CRA conventions (e.g., `REACT_APP_BASE_API_URL=http://127.0.0.1:8000`). Use [frontend/.env.example](.env.example) as the template.
 
 ## See also
 - Root README: [README.md](../README.md)
 - Backend README: [backend/README.md](../backend/README.md)
+- Frontend testing guide: [testing/frontend/TESTING.md](../testing/frontend/TESTING.md)

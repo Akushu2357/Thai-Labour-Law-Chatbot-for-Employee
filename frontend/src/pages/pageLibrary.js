@@ -19,8 +19,8 @@ function PageLibrary() {
 
 
     return (
-        <main className="library-content">
-            <div className='text-h1'>
+        <main className="library-content" data-testid="library-page">
+            <div className='text-h1' data-testid="library-page-title">
                 ยินดีต้อนรับสู่ห้องสมุดกฎหมาย
             </div>
             <SearchBox

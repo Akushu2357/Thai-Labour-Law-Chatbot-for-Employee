@@ -11,8 +11,8 @@ function PageAccount() {
     const [startDate, setStartDate] = useState(user?.start_work_date || '');
     const [jobType, setJobType] = useState(user?.job_type_description || '');
     const [loading, setLoading] = useState(false);
-    const [jobs, setJobs] = useState(['loading...']);
-    const [jobTypes, setJobTypes] = useState(['loading...']);
+    const [jobs, setJobs] = useState([]);
+    const [jobTypes, setJobTypes] = useState([]);
     const [optionsLoading, setOptionsLoading] = useState(true);
     const [userLoading, setUserLoading] = useState(true);
 
@@ -91,21 +91,21 @@ function PageAccount() {
     };
 
     return (
-        <div className="page-account">
-            <div className="account-title"><span className="text-h1"><strong>จัดการบัญชี</strong></span></div>
-            <form className="account-form" onSubmit={handleSubmit}>
+        <div className="page-account" data-testid="account-page">
+            <div className="account-title" data-testid="account-page-title"><span className="text-h1"><strong>จัดการบัญชี</strong></span></div>
+            <form className="account-form" onSubmit={handleSubmit} data-testid="account-form">
                 <div>
                     <label className="text-small account-label">อีเมล:</label>
-                    <input className="text-small account-input" type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled />
+                    <input className="text-small account-input" type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled data-testid="account-email-input" />
                 </div>
                 <div>
                     <label className="text-small account-label">วัน/เดือน/ปีเกิด:</label>
-                    <input className="text-small account-input" type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} disabled={userLoading || loading} />
+                    <input className="text-small account-input" type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} disabled={userLoading || loading} data-testid="account-birthdate-input" />
                 </div>
                 <div>
                     {/* Job */}
                     <label className="text-small account-label">สถานะของคุณ:</label>
-                    <select className="text-small account-input" value={status} onChange={(e) => setStatus(e.target.value)} disabled={optionsLoading || userLoading || loading}>
+                    <select className="text-small account-input" value={status} onChange={(e) => setStatus(e.target.value)} disabled={optionsLoading || userLoading || loading} data-testid="account-job-select">
                         <option value="" disabled>-- โปรดเลือกสถานะ --</option>
                         {jobs.map((job) => (
                             <option key={job.id} value={job.description}>{job.description}</option>
@@ -114,22 +114,22 @@ function PageAccount() {
                 </div>
                 <div>
                     <label className="text-small account-label">วัน/เดือน/ปีที่เริ่มงาน:</label>
-                    <input className="text-small account-input" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={userLoading || loading} />
+                    <input className="text-small account-input" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={userLoading || loading} data-testid="account-startdate-input" />
                 </div>
                 <div>
                     {/* Job Type Selection */}
                     <label className="text-small account-label">ลักษณะงาน:</label>
-                    <select className="text-small account-input" value={jobType} onChange={(e) => setJobType(e.target.value)} disabled={optionsLoading || userLoading || loading}>
+                    <select className="text-small account-input" value={jobType} onChange={(e) => setJobType(e.target.value)} disabled={optionsLoading || userLoading || loading} data-testid="account-jobtype-select">
                         <option value="" disabled>-- โปรดเลือกลักษณะงาน --</option>
                         {jobTypes.map((jt) => (
                             <option key={jt.id} value={jt.description}>{jt.description}</option>
                         ))}
                     </select>
                 </div>
-                <button type="submit" className="text-small account-button" disabled={loading || optionsLoading || userLoading}>
+                <button type="submit" className="text-small account-button" disabled={loading || optionsLoading || userLoading} data-testid="account-save-button">
                     <span className="text-small-without-color">{loading ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}</span>
                 </button>
-                <button type="button" className="text-small account-button-logout" onClick={() => logout()}>
+                <button type="button" className="text-small account-button-logout" onClick={() => logout()} data-testid="account-logout-button">
                     <span className="text-small-without-color">ออกจากระบบ</span>
                 </button>
             </form>

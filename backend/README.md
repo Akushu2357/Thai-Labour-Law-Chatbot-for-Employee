@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ```
 
 3. Configure environment variables:
-- Create a `.env` file at the project root or set env vars in your environment. Typical variables include Supabase URL/KEY and any LLM/API keys used by the `llm/` module. Check `database/supabase_client.py` and `llm/` code for exact names.
+- Copy [backend/.env.example](.env.example) to `.env`, then fill in your Supabase and API keys. Check `database/supabase_client.py` and `llm/` code for exact names.
 
 4. Run the app (from the `backend` folder):
 
@@ -42,7 +42,27 @@ The API will be available at http://127.0.0.1:8000. Routers are mounted under th
 
 ## Tips
 - Add a `/health` endpoint in `main.py` for readiness checks used by deploy platforms.
-- To run unit tests (not included by default), add `pytest` and create a `tests/` folder.
+
+## Testing
+This backend now includes a starter testing setup focused on conversation flow.
+
+1. Install test dependencies:
+
+```powershell
+pip install -r requirements-test.txt
+```
+
+2. Run all backend tests:
+
+```powershell
+pytest
+```
+
+3. Read the full testing guide:
+- `../testing/backend/TESTING.md`
+- `../testing/api/postman/ThaiLabourBackend.postman_collection.json`
+- `../testing/api/robot/conversation_api.robot`
+- `../testing/ui/robot/e2e_user_journey_ui.robot`
 
 ## See also
 - Project root README: [README.md](../README.md)

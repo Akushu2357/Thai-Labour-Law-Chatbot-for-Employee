@@ -75,14 +75,20 @@ export function AuthProvider({ children }) {
             const { data, error } = await supabase.auth.signUp({ email, password });
             if (error) throw error;
 
-            // สร้าง user profile ในฐานข้อมูล
-            if (data?.user) {
+            // สร้าง user profile เฉพาะกรณีที่มี session แล้วเท่านั้น
+            // (บางโปรเจกต์ Supabase ต้องยืนยันอีเมลก่อน จึงยังไม่มี token ณ จุดนี้)
+            if (data?.session) {
+                setSession(data.session);
+                setUser(data.session.user);
+                setIsAuthenticated(true);
+                localStorage.setItem('auth_user', JSON.stringify({ user: data.session.user, token: data.session.access_token }));
+
                 try {
                     await userService.createOrUpdateUser({
-                        user_id: data.user.id,
-                        email: data.user.email,
-                        display_name: data.user.user_metadata?.display_name || data.user.email?.split('@')[0],
-                        avatar_url: data.user.user_metadata?.avatar_url
+                        user_id: data.session.user.id,
+                        email: data.session.user.email,
+                        display_name: data.session.user.user_metadata?.display_name || data.session.user.email?.split('@')[0],
+                        avatar_url: data.session.user.user_metadata?.avatar_url
                     });
                 } catch (userError) {
                     console.error('Failed to create user profile:', userError);

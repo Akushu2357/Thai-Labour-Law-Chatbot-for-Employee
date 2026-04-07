@@ -42,8 +42,7 @@ def get_supabase_client_with_auth(token: str) -> Client:
     url: Optional[str] = os.environ.get("SUPABASE_URL")
     key: Optional[str] = os.environ.get("SUPABASE_KEY")
     
-    return create_client(url, key,
-        options=ClientOptions(
-            headers={"Authorization": f"Bearer {token}"}
-        )
-    )
+    client = create_client(url, key, options=ClientOptions())
+    # supabase-py requires binding JWT to PostgREST session explicitly for RLS.
+    client.postgrest.auth(token)
+    return client
