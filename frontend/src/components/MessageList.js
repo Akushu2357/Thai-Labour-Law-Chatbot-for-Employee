@@ -160,6 +160,20 @@ function MessageList({ messages }) {
             ) : (
                 messages.map(msg => {
                     const isMetadataOpen = openMetadataId === msg.id;
+                    const actId = msg.metadata?.acts?.[0];
+                    const actIdNum = Array.isArray(actId) ? actId[0] : actId;
+                    const uniqueSections = Array.isArray(msg.metadata?.sections)
+                        ? Array.from(
+                            new Map(
+                                msg.metadata.sections.map((section) => {
+                                    const sectionNum = typeof section === 'object' ? section.section_number : section;
+                                    const paragraphValue = typeof section === 'object' ? section.paragraph_number : '';
+                                    const uniqueKey = `${String(sectionNum ?? '').trim()}-${String(paragraphValue ?? '').trim()}`;
+                                    return [uniqueKey, { sectionNum, paragraphValue }];
+                                })
+                            ).values()
+                        ).filter(({ sectionNum }) => sectionNum !== undefined && sectionNum !== null && String(sectionNum).trim() !== '')
+                        : [];
                     return (
                         <div key={msg.id} className={`chat-message ${msg.type}`}>
                             <div className="message-bubble">
@@ -205,7 +219,7 @@ function MessageList({ messages }) {
                                                         </div>
                                                     </div>
                                                 )}
-                                                {msg.metadata.sections && msg.metadata.sections.length > 0 && (
+                                                {uniqueSections.length > 0 && (
                                                     <div className="metadata-section">
                                                         <div className="metadata-header">
                                                             <span className="material-symbols-outlined">gavel</span>
@@ -213,10 +227,8 @@ function MessageList({ messages }) {
                                                         </div>
                                                         <div className="metadata-content">
                                                             <div className="sections-list">
-                                                                {msg.metadata.sections.map((section, idx) => {
-                                                                    const sectionNum = typeof section === 'object' ? section.section_number : section;
-                                                                    const actId = msg.metadata.acts?.[0];
-                                                                    const actIdNum = Array.isArray(actId) ? actId[0] : actId;
+                                                                {uniqueSections.map(({ sectionNum, paragraphValue }, idx) => {
+                                                                    const paragraphNum = paragraphValue ? `วรรค ${paragraphValue}` : '';
                                                                     return (
                                                                         <span
                                                                             key={idx}
@@ -224,7 +236,7 @@ function MessageList({ messages }) {
                                                                             onClick={() => handleSectionClick(String(sectionNum), actIdNum)}
                                                                             title="คลิกเพื่อดูรายละเอียด"
                                                                         >
-                                                                            มาตรา {sectionNum}
+                                                                            มาตรา {sectionNum} {paragraphNum}
                                                                         </span>
                                                                     );
                                                                 })}
