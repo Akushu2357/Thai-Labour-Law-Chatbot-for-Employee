@@ -104,11 +104,30 @@
   text-decoration: none
 }
 
+.forgot-link-button {
+  font-size: 12px;
+  color: #9aa3b2;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
 .register-account,
 .create-account {
   font-size: 12px;
   color: #9aa3b2;
   text-decoration: none;
+}
+
+.auth-success {
+  margin-top: 8px;
+  color: #0b7a3b;
+  background: #e9f9ef;
+  border: 1px solid #b6ebca;
+  border-radius: 12px;
+  padding: 8px 10px;
 }
 
 .submit-btn {

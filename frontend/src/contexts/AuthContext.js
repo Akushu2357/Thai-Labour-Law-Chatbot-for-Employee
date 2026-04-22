@@ -179,8 +179,46 @@ export function AuthProvider({ children }) {
         setIsAuthenticated(false);
     };
 
+    // Check user login via email/password or OAuth
+    const isEmailPasswordUser = () => {
+        if (!user?.app_metadata?.providers) return false;
+        return user.app_metadata.providers.includes('email');
+    };
+
+    // Send password reset link to email
+    const resetPassword = async (email) => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`
+            });
+            if (error) throw error;
+            return data;
+        } catch (err) {
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Update password
+    const updatePassword = async (newPassword) => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase.auth.updateUser({
+                password: newPassword
+            });
+            if (error) throw error;
+            return data;
+        } catch (err) {
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, session, loading, signUp, signIn, signInWithGoogle, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, session, loading, signUp, signIn, signInWithGoogle, logout, resetPassword, updatePassword, isEmailPasswordUser }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../contexts/AuthContext";
 import userService from "../services/userService";
 import "./pageAccount.css";
 
 function PageAccount() {
-    const { user, logout } = useAuth();
+    const { user, logout, resetPassword } = useAuth();
     const [email, setEmail] = useState(user?.email || '');
     const [birthdate, setBirthdate] = useState(user?.date_of_birth || '');
     const [status, setStatus] = useState(user?.job_description || '');
@@ -15,6 +16,12 @@ function PageAccount() {
     const [jobTypes, setJobTypes] = useState([]);
     const [optionsLoading, setOptionsLoading] = useState(true);
     const [userLoading, setUserLoading] = useState(true);
+    
+    // Reset password modal states
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetMessage, setResetMessage] = useState('');
+    const [resetError, setResetError] = useState('');
 
     // Keep email in sync with auth user
     useEffect(() => {
@@ -90,6 +97,28 @@ function PageAccount() {
         }
     };
 
+    const handleResetPasswordClick = async () => {
+        setShowResetModal(true);
+        setResetMessage('');
+        setResetError('');
+    };
+
+    const handleSendResetEmail = async () => {
+        setResetLoading(true);
+        setResetError('');
+        setResetMessage('');
+
+        try {
+            await resetPassword(user.email);
+            setResetMessage('ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปยังอีเมลของคุณแล้ว โปรดตรวจสอบ');
+        } catch (error) {
+            setResetError('ไม่สามารถส่งลิงค์รีเซ็ตได้: ' + error.message);
+            console.error('Reset password error:', error);
+        } finally {
+            setResetLoading(false);
+        }
+    };
+
     return (
         <div className="page-account" data-testid="account-page">
             <div className="account-title" data-testid="account-page-title"><span className="text-h1"><strong>จัดการบัญชี</strong></span></div>
@@ -129,10 +158,75 @@ function PageAccount() {
                 <button type="submit" className="text-small account-button" disabled={loading || optionsLoading || userLoading} data-testid="account-save-button">
                     <span className="text-small-without-color">{loading ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}</span>
                 </button>
+                <button type="button" className="text-small account-button-reset" onClick={handleResetPasswordClick} disabled={loading} data-testid="account-reset-password-button">
+                    <span className="text-small-without-color">เปลี่ยนรหัสผ่าน</span>
+                </button>
                 <button type="button" className="text-small account-button-logout" onClick={() => logout()} data-testid="account-logout-button">
                     <span className="text-small-without-color">ออกจากระบบ</span>
                 </button>
             </form>
+
+            {/* Reset Password Modal */}
+            {showResetModal && createPortal(
+                <div
+                    className="reset-password-modal-overlay"
+                    onClick={() => {
+                        setShowResetModal(false);
+                        setResetMessage('');
+                        setResetError('');
+                    }}
+                    data-testid="reset-password-modal-overlay"
+                >
+                    <div className="reset-password-modal" onClick={(e) => e.stopPropagation()} data-testid="reset-password-modal">
+                        <div className="reset-password-modal-header">
+                            <h2 className="text-small">เปลี่ยนรหัสผ่าน</h2>
+                            <button
+                                type="button"
+                                className="reset-password-modal-close"
+                                onClick={() => {
+                                    setShowResetModal(false);
+                                    setResetMessage('');
+                                    setResetError('');
+                                }}
+                                data-testid="reset-password-modal-close"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="reset-password-modal-body">
+                            {resetError && (
+                                <div className="reset-password-error" data-testid="reset-password-error">
+                                    {resetError}
+                                </div>
+                            )}
+                            {resetMessage && (
+                                <div className="reset-password-success" data-testid="reset-password-success">
+                                    {resetMessage}
+                                </div>
+                            )}
+
+                            <div className="reset-password-form-group">
+                                <p className="text-small reset-password-description">
+                                    ระบบจะส่งลิงค์สำหรับรีเซ็ตรหัสผ่านไปยังอีเมลของคุณ
+                                </p>
+                                <button
+                                    type="button"
+                                    className="text-small account-button reset-password-option-button"
+                                    onClick={handleSendResetEmail}
+                                    disabled={resetLoading}
+                                    data-testid="reset-password-email-button"
+                                >
+                                    <span className="text-small-without-color">
+                                        {resetLoading ? 'กำลังส่ง...' : 'ส่งลิงค์รีเซ็ตไปยังอีเมล'}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 }

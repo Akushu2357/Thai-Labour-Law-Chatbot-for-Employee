@@ -12,6 +12,7 @@ import PageLanding from './pages/pageLanding';
 import PageLibrary from './pages/pageLibrary';
 import PageChat from './pages/pageChat';
 import PageAuth from './pages/pageAuth';
+import PageResetPassword from './pages/pageResetPassword';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LibraryProvider } from './contexts/LibraryContext';
 import RequireAuth from './components/RequireAuth';
@@ -35,6 +36,10 @@ const Layout = () => {
 }
 
 const router = createBrowserRouter([
+  {
+    path: "/reset-password",
+    element: <PageResetPassword />,
+  },
   {
     path: "/",
     element: <Layout />,

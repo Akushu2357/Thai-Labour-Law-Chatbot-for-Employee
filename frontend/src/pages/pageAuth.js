@@ -8,12 +8,14 @@ function PageAuth() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [authError, setAuthError] = useState(null);
+    const [authMessage, setAuthMessage] = useState(null);
     const [isSignUp, setIsSignUp] = useState(true);
-    const { signUp, signInWithGoogle, signIn, loading } = useAuth();
+    const { signUp, signInWithGoogle, signIn, resetPassword, loading } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setAuthError(null);
+        setAuthMessage(null);
         if (!email || !password) {
             setAuthError('โปรดกรอกอีเมลและรหัสผ่าน');
             return;
@@ -33,8 +35,26 @@ function PageAuth() {
 
     const handleGoogle = async () => {
         setAuthError(null);
+        setAuthMessage(null);
         try {
             await signInWithGoogle();
+        } catch (err) {
+            setAuthError(err.message || String(err));
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        setAuthError(null);
+        setAuthMessage(null);
+
+        if (!email) {
+            setAuthError('โปรดกรอกอีเมลก่อนกดลืมรหัสผ่าน');
+            return;
+        }
+
+        try {
+            await resetPassword(email);
+            setAuthMessage('ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว กรุณาตรวจสอบอีเมล');
         } catch (err) {
             setAuthError(err.message || String(err));
         }
@@ -104,7 +124,7 @@ function PageAuth() {
                         {!isSignUp && (
                             <div className="form-row">
                                 <span onClick={() => setIsSignUp(true)} className="small register-account" style={{ cursor: 'pointer' }} data-testid="auth-switch-to-signup">สร้างบัญชีใหม่</span>
-                                <a href="/" className="small forgot-link" style={{ cursor: 'pointer' }}>ลืมรหัสผ่าน?</a>
+                                <button type="button" className="small forgot-link-button" onClick={handleForgotPassword} data-testid="auth-forgot-password-button">ลืมรหัสผ่าน?</button>
                             </div>
                         )}
                         {isSignUp && (
@@ -119,6 +139,7 @@ function PageAuth() {
                         </button>
 
                         {authError && <div className="auth-error" data-testid="auth-error">{authError}</div>}
+                        {authMessage && <div className="auth-success" data-testid="auth-success">{authMessage}</div>}
                     </form>
                 </div>
             </div>
