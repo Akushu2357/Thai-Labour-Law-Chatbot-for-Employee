@@ -142,9 +142,9 @@
     -webkit-appearance: none; */
 }
 
-a,
-a:hover,
-a:visited {
+._blank,
+._blank:hover,
+._blank:visited {
     color: #fff;
     text-decoration: none;
     font-weight: inherit;
