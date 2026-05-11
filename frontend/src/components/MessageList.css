@@ -145,7 +145,7 @@
 a,
 a:hover,
 a:visited {
-    color: inherit;
+    color: #fff;
     text-decoration: none;
     font-weight: inherit;
     font: inherit;
