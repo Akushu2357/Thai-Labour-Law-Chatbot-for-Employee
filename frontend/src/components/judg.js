@@ -159,13 +159,13 @@ function Jude() {
                         <span className='laws-title text-h1'>{judgmentData.title}</span>
                         <br></br>
                         <span className='text-h3-without-color'>คดีหมายเลข: {judgmentData.case_number}</span>
-                        <Stack direction="horizontal" gap={1} className="tags-stack">
+                        {/* <Stack direction="horizontal" gap={1} className="tags-stack">
                             {judgmentData.tags.map(tag => (
                                 <Badge pill bg="info" key={tag.id} className="tag-badge bg-0474ba">
                                     <span className="text-small-without-color">{tag}</span>
                                 </Badge>
                             ))}
-                        </Stack>
+                        </Stack> */}
                     </div>
 
                     <SearchBox

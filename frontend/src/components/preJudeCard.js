@@ -59,13 +59,13 @@ function PreJudeCard({ searchTerm = '', selectedTags = [] }) {
                                 <span className='text-small-without-color'>คดีหมายเลข: {judgment.case_number}</span>
                             </Card.Subtitle>
                         )}
-                        <Stack direction='horizontal' gap={2} className="pre-act-tags-stack">
+                        {/* <Stack direction='horizontal' gap={2} className="pre-act-tags-stack">
                             {judgment.tags && judgment.tags.map((tag, index) => (
                                 <Badge pill key={index} bg="primary" className="badge-tag">
                                     <span className='text-small-without-color'>{tag}</span>
                                 </Badge>
                             ))}
-                        </Stack>
+                        </Stack> */}
                     </Card.Body>
                 </Card>
             ))}

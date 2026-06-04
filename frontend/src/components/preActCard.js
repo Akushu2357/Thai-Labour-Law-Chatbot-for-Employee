@@ -50,13 +50,13 @@ function PreActCard({ searchTerm = '', selectedTags = [] }) {
                 <Card key={act.id} className="card-act" onClick={() => navigate(`./act/${act.id}`)} data-testid={`law-card-act-${act.id}`}>
                     <Card.Body>
                         <Card.Title><span className='text-p'>{act.title}</span></Card.Title>
-                        <Stack direction='horizontal' gap={2} className="pre-act-tags-stack">
+                        {/* <Stack direction='horizontal' gap={2} className="pre-act-tags-stack">
                             {act.tags.map((tag, index) => (
                                 <Badge pill key={index} bg="primary" className="badge-tag">
                                     <span className='text-small-without-color'>{tag}</span>
                                 </Badge>
                             ))}
-                        </Stack>
+                        </Stack> */}
                     </Card.Body>
                 </Card>
             ))}

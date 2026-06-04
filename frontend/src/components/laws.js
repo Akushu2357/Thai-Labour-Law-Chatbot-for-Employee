@@ -113,13 +113,13 @@ function Laws() {
                 <section>
                     <div className='laws-header'>
                         <span className='laws-title text-h1'>{actData.title}</span>
-                        <Stack direction="horizontal" gap={1} className="tags-stack">
+                        {/* <Stack direction="horizontal" gap={1} className="tags-stack">
                             {actData.tags.map(tag => (
                                 <Badge pill bg="info" key={tag.id} className="tag-badge bg-0474ba">
                                     <span className="text-small-without-color">{tag}</span>
                                 </Badge>
                             ))}
-                        </Stack>
+                        </Stack> */}
                     </div>
 
                     <SearchBox
