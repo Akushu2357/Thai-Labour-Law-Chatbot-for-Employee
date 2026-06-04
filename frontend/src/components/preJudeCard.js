@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useLibrary } from '../contexts/LibraryContext';
-import Badge from 'react-bootstrap/Badge';
+// import Badge from 'react-bootstrap/Badge';
 import Card from 'react-bootstrap/Card';
-import Stack from 'react-bootstrap/Stack';
+// import Stack from 'react-bootstrap/Stack';
 import './preActCard.css'; // Reuse existing styles
 import { useNavigate } from 'react-router-dom';
 

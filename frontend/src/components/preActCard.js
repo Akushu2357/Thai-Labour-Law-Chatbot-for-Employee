@@ -2,9 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useLibrary } from '../contexts/LibraryContext';
 import './preActCard.css';
-import Badge from 'react-bootstrap/Badge';
+// import Badge from 'react-bootstrap/Badge';
 import Card from 'react-bootstrap/Card';
-import Stack from 'react-bootstrap/Stack';
+// import Stack from 'react-bootstrap/Stack';
 
 function PreActCard({ searchTerm = '', selectedTags = [] }) {
     const navigate = useNavigate();

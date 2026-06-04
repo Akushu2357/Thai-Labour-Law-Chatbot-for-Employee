@@ -1,8 +1,8 @@
 import { useParams, useLocation } from 'react-router-dom';
 import { useLibrary } from '../contexts/LibraryContext';
 import { useEffect, useRef, useState } from 'react';
-import Badge from 'react-bootstrap/Badge';
-import Stack from 'react-bootstrap/esm/Stack';
+// import Badge from 'react-bootstrap/Badge';
+// import Stack from 'react-bootstrap/esm/Stack';
 import Leaf from './leaf';
 import SearchBox from './SearchBox';
 import './laws.css';
