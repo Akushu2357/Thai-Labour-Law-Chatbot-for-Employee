@@ -1,84 +1,42 @@
-# React Frontend Project
+# React Frontend
 
 ## Overview
-This is the frontend of the project, built with **React.js**.  
-It is designed with a clean and modular structure for scalability and maintainability.
+This is the frontend of the Thai Labour Law Chatbot, built with React (Create React App). It communicates with the FastAPI backend and provides the chat UI and library pages.
 
-## Folder Structure
-- public/ → Static files (HTML template, favicon, manifest)  
-- src/ → Application source code  
-  - assets/ → Static images and icons  
-  - components/ → Reusable UI components (Navbar, Footer, Buttons, etc.)  
-  - context/ → Global state management with React Context API  
-  - hooks/ → Custom React hooks  
-  - pages/ → Page-level components (Home, Login, Dashboard)  
-  - services/ → API calls and backend integration  
-  - utils/ → Utility functions and helpers  
-  - styles/ → Global CSS or SCSS files
+## Folder structure (short)
+- `public/` — static HTML and manifest
+- `src/` — app source
+  - `components/` — UI components
+  - `pages/` — page-level components
+  - `services/` — API client utilities
+  - `contexts/` — React contexts for auth and library
+  - `styles/` — global CSS
 
-## Available Scripts
+## Local development
+1. Install dependencies and start dev server:
 
-In the project directory, you can run:
+```bash
+cd frontend
+npm install
+npm start
+```
 
-### `npm start`
+2. Open http://localhost:3000 in your browser. The frontend expects the backend API to be running (default: http://127.0.0.1:8000).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Build for production
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+cd frontend
+npm run build
+```
 
-### `npm test`
+The production-ready files will be in the `build/` folder.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Notes
+- If the frontend cannot reach the backend, confirm the backend is running and CORS settings allow the origin. See `backend/main.py` for CORS config.
+- For environment-specific variables, check `package.json` scripts or create a `.env` file following CRA conventions (e.g., `REACT_APP_BASE_API_URL=http://127.0.0.1:8000`). Use [frontend/.env.example](.env.example) as the template.
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## See also
+- Root README: [README.md](../README.md)
+- Backend README: [backend/README.md](../backend/README.md)
+- Frontend testing guide: [testing/frontend/TESTING.md](../testing/frontend/TESTING.md)
