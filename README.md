@@ -52,6 +52,7 @@ Follow these steps to run the project locally.
 
 ## Documentation
 - Backend-specific notes: [backend/README.md](backend/README.md)
+- Database module: [backend/database/README.md](backend/database/README.md)
 - Frontend-specific notes: [frontend/README.md](frontend/README.md)
 - Centralized test assets: [testing/README.md](testing/README.md)
 - Backend testing docs: [testing/backend/TESTING.md](testing/backend/TESTING.md)
